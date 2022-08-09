@@ -1,7 +1,7 @@
 package com.whyrano.global.config
 
-import com.whyrano.domain.member.Role.ADMIN
-import com.whyrano.domain.member.Role.BASIC
+import com.whyrano.domain.member.entity.Role.ADMIN
+import com.whyrano.domain.member.entity.Role.BASIC
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy

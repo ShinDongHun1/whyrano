@@ -1,6 +1,6 @@
 package com.whyrano.domain.common
 
-import com.whyrano.domain.member.Member
+import com.whyrano.domain.member.entity.Member
 import org.springframework.data.annotation.CreatedBy
 import javax.persistence.FetchType.LAZY
 import javax.persistence.JoinColumn

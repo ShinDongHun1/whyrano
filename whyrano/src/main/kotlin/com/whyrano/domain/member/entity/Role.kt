@@ -1,4 +1,4 @@
-package com.whyrano.domain.member
+package com.whyrano.domain.member.entity
 
 /**
  * Created by ShinD on 2022/08/09.
