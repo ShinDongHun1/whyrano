@@ -31,7 +31,15 @@ class MemberService(
             ?: throw IllegalStateException("존재하지 않음") // 존재하지 않는 경우 예외 발생
     }
 
+    fun delete(id: Long, password: String) {
+        val findMember = memberRepository.findByIdOrNull(id)
+            ?: throw IllegalStateException("존재하지 않음") // 존재하지 않는 경우 예외 발생
 
+        if (passwordEncoder.matches(password, findMember.password)) {
+            memberRepository.delete(findMember)
+        }
+        else throw IllegalStateException("비밀번호가 일치하지 않습니다.")
+    }
 
 
 }
