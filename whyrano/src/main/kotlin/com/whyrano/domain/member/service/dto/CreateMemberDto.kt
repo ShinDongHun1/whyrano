@@ -7,7 +7,7 @@ import javax.persistence.Column
 /**
  * Created by ShinD on 2022/08/09.
  */
-class CreateMemberDto(
+data class CreateMemberDto(
     var authority: Role = Role.BASIC,
     var email: String,
     var password: String,
