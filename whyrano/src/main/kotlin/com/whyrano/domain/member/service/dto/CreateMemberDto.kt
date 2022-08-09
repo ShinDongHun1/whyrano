@@ -2,6 +2,7 @@ package com.whyrano.domain.member.service.dto
 
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.Role
+import org.springframework.security.crypto.password.PasswordEncoder
 import javax.persistence.Column
 
 /**
@@ -14,11 +15,11 @@ data class CreateMemberDto(
     var nickname: String,
     var profileImagePath: String,
 ) {
-    fun toEntity(): Member {
+    fun toEntity(passwordEncoder: PasswordEncoder): Member {
         return Member(
             authority = authority,
             email = email,
-            password = password,
+            password = passwordEncoder.encode(password),
             nickname = nickname,
             profileImagePath = profileImagePath,
         )
