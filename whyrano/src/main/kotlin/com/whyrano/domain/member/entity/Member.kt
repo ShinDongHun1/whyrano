@@ -15,30 +15,30 @@ class Member(
 
     @Id @Column(name = "member_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long? = null,
+    val id: Long? = null, // PK
 
     @Column(length = 10, nullable = false)
-    var authority: Role,
+    var authority: Role, // 권한
 
     @Column(name = "email", length = 50, nullable = false)
-    var email: String,
+    var email: String, // 이메일
 
     @Column(nullable = false)
-    var password: String,
+    var password: String, // 비밀번호(암호화)
 
     @Column(nullable = false)
-    var nickname: String,
+    var nickname: String, // 닉네임
 
-    var point: Int = 0,
-
-    @Column(nullable = true)
-    var profileImagePath: String,
+    var point: Int = 0, // 포인트
 
     @Column(nullable = true)
-    var accessToken: String? = null,
+    var profileImagePath: String, // 프로필 사진 경로 (https://~~)
 
     @Column(nullable = true)
-    var refreshToken: String? = null,
+    var accessToken: String? = null, // access token 내용 (JWT)
+
+    @Column(nullable = true)
+    var refreshToken: String? = null, // refresh token 내용 (JWT)
 
     ) : BaseTimeEntity() {
 }
