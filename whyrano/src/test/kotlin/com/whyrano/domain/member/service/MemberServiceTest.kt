@@ -1,5 +1,6 @@
 package com.whyrano.domain.member.service
 
+import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.EMAIL
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberDto
 import com.whyrano.domain.member.repository.MemberRepository
@@ -46,9 +47,10 @@ internal class MemberServiceTest{
         assertThat(findMember!!.nickname).isEqualTo(createMemberDto.nickname)
     }
 
+
     @Test
     @DisplayName("회원 가입 실패 : 아이디 중복")
-    fun test_signup_fail_by_duplicated_email() {
+    fun test_signup_fail_cause_duplicated_email() {
         //given
         val createMemberDto = createMemberDto(email = EMAIL)
         memberService.signUp(createMemberDto)
@@ -56,5 +58,39 @@ internal class MemberServiceTest{
         //when, then
         assertThrows(IllegalStateException::class.java) { memberService.signUp(createMemberDto) }
     }
+
+
+    @Test
+    @DisplayName("회원 수정 성공")
+    fun test_update_success() {
+        //given
+        val createMemberDto = createMemberDto()
+        memberService.signUp(createMemberDto)
+        val member = memberRepository.findByEmail(createMemberDto.email)!!
+
+
+        //when
+        val updateMemberDto = MemberFixture.updateMemberDto()
+        memberService.update(member.id!!, updateMemberDto)
+
+
+        //then
+        val findMember = memberRepository.findByEmail(createMemberDto.email)
+        assertThat(findMember!!.nickname).isEqualTo(updateMemberDto.nickname)
+        assertThat(findMember.profileImagePath).isEqualTo(updateMemberDto.profileImagePath)
+        assertThat(findMember.password).isEqualTo(updateMemberDto.password)
+    }
+
+    @Test
+    @DisplayName("회원 수정 실패 - 없는 회원")
+    fun test_update_fail_cause_no_exist_member() {
+        //given
+        val updateMemberDto = MemberFixture.updateMemberDto()
+        val noExistId = 1L
+
+        //when
+        assertThrows(IllegalStateException::class.java) { memberService.update(noExistId, updateMemberDto) }
+    }
+
 }
 
