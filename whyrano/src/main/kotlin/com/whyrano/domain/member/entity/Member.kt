@@ -3,7 +3,6 @@ package com.whyrano.domain.member.entity
 /**
  * Created by ShinD on 2022/08/09.
  */
-
 import com.whyrano.domain.common.BaseTimeEntity
 import javax.persistence.*
 
@@ -36,10 +35,10 @@ class Member(
     var profileImagePath: String,
 
     @Column(nullable = true)
-    var accessToken: String,
+    var accessToken: String? = null,
 
     @Column(nullable = true)
-    var refreshToken: String,
+    var refreshToken: String? = null,
 
     ) : BaseTimeEntity() {
 }
