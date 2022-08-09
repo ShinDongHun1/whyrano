@@ -5,6 +5,7 @@ package com.whyrano.domain.member
  */
 
 import com.whyrano.domain.common.BaseEntity
+import com.whyrano.domain.common.BaseTimeEntity
 import javax.persistence.*
 
 @Entity
@@ -38,5 +39,5 @@ class Member(
     @Column(nullable = true)
     var refreshToken: String,
 
-    ) : BaseEntity() {
+    ) : BaseTimeEntity() {
 }
