@@ -11,6 +11,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
+import org.springframework.security.crypto.factory.PasswordEncoderFactories
 
 /**
  * Created by ShinD on 2022/08/09.
@@ -23,11 +24,12 @@ internal class MemberServiceTest{
 
     private lateinit var memberService: MemberService
 
+    private val passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
 
 
     @BeforeEach
     fun setUp() {
-        memberService = MemberService(memberRepository)
+        memberService = MemberService(memberRepository, passwordEncoder)
     }
 
 
@@ -45,6 +47,22 @@ internal class MemberServiceTest{
         val findMember = memberRepository.findByEmail(createMemberDto.email)
         assertThat(findMember?.id).isNotNull
         assertThat(findMember!!.nickname).isEqualTo(createMemberDto.nickname)
+    }
+
+
+    @Test
+    @DisplayName("회원 가입 시 비밀번호 인코딩 성공")
+    fun test_signUp_password_encoding() {
+        //given
+        val createMemberDto = createMemberDto()
+
+        //when
+        memberService.signUp(createMemberDto)
+
+        //then
+        val findMember = memberRepository.findByEmail(createMemberDto.email)
+        assertThat(findMember!!.password).isNotEqualTo(createMemberDto.password)
+        assertThat( passwordEncoder.matches(createMemberDto.password, findMember.password) ).isTrue
     }
 
 
@@ -78,8 +96,32 @@ internal class MemberServiceTest{
         val findMember = memberRepository.findByEmail(createMemberDto.email)
         assertThat(findMember!!.nickname).isEqualTo(updateMemberDto.nickname)
         assertThat(findMember.profileImagePath).isEqualTo(updateMemberDto.profileImagePath)
-        assertThat(findMember.password).isEqualTo(updateMemberDto.password)
+
+        assertThat( passwordEncoder.matches(createMemberDto.password, findMember.password) ).isFalse
+        assertThat( passwordEncoder.matches(updateMemberDto.password, findMember.password) ).isTrue
     }
+
+    @Test
+    @DisplayName("회원 수정시 비밀번호 인코딩")
+    fun test_update_encode_password() {
+        //given
+        val createMemberDto = createMemberDto()
+        memberService.signUp(createMemberDto)
+        val member = memberRepository.findByEmail(createMemberDto.email)!!
+
+
+        //when
+        val updateMemberDto = MemberFixture.updateMemberDto(password = "UPDATE!!!!!")
+        memberService.update(member.id!!, updateMemberDto)
+
+
+        //then
+        val findMember = memberRepository.findByEmail(createMemberDto.email)!!
+
+        assertThat( passwordEncoder.matches(createMemberDto.password, findMember.password) ).isFalse
+        assertThat( passwordEncoder.matches(updateMemberDto.password, findMember.password) ).isTrue
+    }
+
 
     @Test
     @DisplayName("회원 수정 실패 - 없는 회원")
