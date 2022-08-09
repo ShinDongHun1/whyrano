@@ -41,4 +41,11 @@ class Member(
     var refreshToken: String? = null, // refresh token 내용 (JWT)
 
     ) : BaseTimeEntity() {
+
+
+    fun update(nickname: String?, password: String?, profileImagePath: String?) {
+        nickname?.let { this.nickname = it }
+        password?.let { this.password = it }
+        profileImagePath?.let { this.profileImagePath = it }
+    }
 }
