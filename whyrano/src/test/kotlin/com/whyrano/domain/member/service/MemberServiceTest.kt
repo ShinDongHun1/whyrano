@@ -1,9 +1,11 @@
 package com.whyrano.domain.member.service
 
+import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.EMAIL
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberDto
 import com.whyrano.domain.member.repository.MemberRepository
+import com.whyrano.domain.member.service.dto.CreateMemberDto
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -51,7 +53,7 @@ internal class MemberServiceTest{
 
 
     @Test
-    @DisplayName("회원 가입 시 비밀번호 인코딩 성공")
+    @DisplayName("회원 가입 시 비밀번호 암호화 성공")
     fun test_signUp_password_encoding() {
         //given
         val createMemberDto = createMemberDto()
@@ -83,8 +85,7 @@ internal class MemberServiceTest{
     fun test_update_success() {
         //given
         val createMemberDto = createMemberDto()
-        memberService.signUp(createMemberDto)
-        val member = memberRepository.findByEmail(createMemberDto.email)!!
+        val member = createMember(createMemberDto)
 
 
         //when
@@ -102,12 +103,11 @@ internal class MemberServiceTest{
     }
 
     @Test
-    @DisplayName("회원 수정시 비밀번호 인코딩")
+    @DisplayName("회원 수정시 비밀번호 암호화")
     fun test_update_encode_password() {
         //given
         val createMemberDto = createMemberDto()
-        memberService.signUp(createMemberDto)
-        val member = memberRepository.findByEmail(createMemberDto.email)!!
+        val member = createMember(createMemberDto)
 
 
         //when
@@ -122,6 +122,10 @@ internal class MemberServiceTest{
         assertThat( passwordEncoder.matches(updateMemberDto.password, findMember.password) ).isTrue
     }
 
+    private fun createMember(createMemberDto: CreateMemberDto): Member {
+        memberService.signUp(createMemberDto)
+        return memberRepository.findByEmail(createMemberDto.email)!!
+    }
 
     @Test
     @DisplayName("회원 수정 실패 - 없는 회원")
@@ -134,5 +138,30 @@ internal class MemberServiceTest{
         assertThrows(IllegalStateException::class.java) { memberService.update(noExistId, updateMemberDto) }
     }
 
+    @Test
+    @DisplayName("회원 삭제 성공")
+    fun test_delete_success() {
+        //given
+        val createMemberDto = createMemberDto()
+        val member = createMember(createMemberDto)
+
+        //when
+        memberService.delete(member.id!!, createMemberDto.password)
+
+        //then
+        assertThat(memberRepository.findByEmail(member.email)).isNull()
+
+    }
+
+    @Test
+    @DisplayName("회원 삭제 실패 - 비밀번호 불일치")
+    fun test_delete_fail_cause_unMatchPassword() {
+        //given
+        val createMemberDto = createMemberDto()
+        val member = createMember(createMemberDto)
+
+        //when, then
+        assertThrows(IllegalStateException::class.java) { memberService.delete(member.id!!, createMemberDto.password+"!!!!!") }
+    }
 }
 
