@@ -23,14 +23,6 @@ class SecurityConfigTest {
 
 
 
-    @Test
-    @DisplayName("로그인 권한 없이 가능")
-    fun test_login_permitAll() {
-        mockMvc
-            .perform(get("/login"))
-            .andExpect(status().isNotFound)
-    }
-
 
     @Test
     @DisplayName("회원가입 권한 없이 가능")
