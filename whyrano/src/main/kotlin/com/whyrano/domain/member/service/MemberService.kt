@@ -4,6 +4,10 @@ import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.dto.CreateMemberDto
 import com.whyrano.domain.member.service.dto.UpdateMemberDto
 import org.springframework.data.repository.findByIdOrNull
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
+import org.springframework.security.core.userdetails.UserDetailsService
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class MemberService(
     private val memberRepository: MemberRepository,
     private val passwordEncoder: PasswordEncoder,
-) {
+) : UserDetailsService {
 
     fun signUp(createMemberDto: CreateMemberDto) {
         memberRepository.findByEmail(createMemberDto.email)
@@ -39,6 +43,18 @@ class MemberService(
             memberRepository.delete(findMember)
         }
         else throw IllegalStateException("비밀번호가 일치하지 않습니다.")
+    }
+
+
+    override fun loadUserByUsername(username: String): UserDetails {
+        val member = memberRepository.findByEmail(username) ?: throw UsernameNotFoundException("회원을 찾을 수 없습니다.")
+
+        return User.builder()
+            .username(username)
+            .password(member.password)
+            .roles(member.role.name)
+            .build()
+
     }
 
 

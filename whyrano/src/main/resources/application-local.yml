@@ -27,3 +27,8 @@ spring:
     web:
       pageable:
         default-page-size: 20
+
+jwt:
+  secretKey: "SECCC"
+  accessTokenExpirationPeriodDay: 30
+  refreshTokenExpirationPeriodDay: 300
