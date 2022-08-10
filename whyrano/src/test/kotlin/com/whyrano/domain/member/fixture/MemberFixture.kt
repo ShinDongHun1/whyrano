@@ -1,6 +1,8 @@
 package com.whyrano.domain.member.fixture
 
+import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.Member
+import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.service.dto.CreateMemberDto
 import com.whyrano.domain.member.service.dto.UpdateMemberDto
@@ -38,8 +40,8 @@ object MemberFixture {
         nickname: String = NICKNAME,
         point: Int = 0,
         profileImagePath: String = PROFILE_IMAGE_PATH,
-        accessToken: String? = null,
-        refreshToken: String? = null,
+        accessToken: AccessToken? = null,
+        refreshToken: RefreshToken? = null,
     ) =
         Member(id, authority, email, password, nickname, point, profileImagePath, accessToken, refreshToken)
 

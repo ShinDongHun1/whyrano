@@ -18,7 +18,7 @@ class Member(
     val id: Long? = null, // PK
 
     @Column(length = 10, nullable = false)
-    var authority: Role, // 권한
+    var role: Role, // 권한
 
     @Column(name = "email", length = 50, nullable = false)
     var email: String, // 이메일
@@ -34,11 +34,13 @@ class Member(
     @Column(nullable = true)
     var profileImagePath: String, // 프로필 사진 경로 (https://~~)
 
+    @Embedded
     @Column(nullable = true)
-    var accessToken: String? = null, // access token 내용 (JWT)
+    var accessToken: AccessToken? = null, // access token 내용 (JWT)
 
+    @Embedded
     @Column(nullable = true)
-    var refreshToken: String? = null, // refresh token 내용 (JWT)
+    var refreshToken: RefreshToken? = null, // refresh token 내용 (JWT)
 
     ) : BaseTimeEntity() {
 
@@ -47,5 +49,10 @@ class Member(
         nickname?.let { this.nickname = it }
         password?.let { this.password = it }
         profileImagePath?.let { this.profileImagePath = it }
+    }
+
+    fun updateToken(accessToken: AccessToken, refreshToken: RefreshToken) {
+        this.accessToken = accessToken
+        this.refreshToken = refreshToken
     }
 }

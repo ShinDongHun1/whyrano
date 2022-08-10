@@ -2,6 +2,10 @@ package com.whyrano.global.config
 
 import com.whyrano.domain.member.entity.Role.ADMIN
 import com.whyrano.domain.member.entity.Role.BASIC
+import com.whyrano.domain.member.service.MemberService
+import com.whyrano.global.auth.filter.JsonLoginProcessingFilter
+import com.whyrano.global.auth.handler.JsonLoginSuccessHandler
+import com.whyrano.global.auth.jwt.JwtService
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
@@ -30,7 +34,7 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeRequests()
-            .antMatchers("/login", "/signup", "/h2-console/**").permitAll()
+            .antMatchers(LOGIN_URL, "/signup", "/h2-console/**").permitAll()
             .antMatchers("/admin/**").hasRole(ADMIN.name)
             .anyRequest().hasRole(BASIC.name)
 
