@@ -74,15 +74,14 @@ class SecurityConfig {
         return jsonLoginProcessingFilter
     }
 
-    /**
-     * https://velog.io/@gkdud583/HttpSecurity-WebSecurity%EC%9D%98-%EC%B0%A8%EC%9D%B4
-     * WebSecurity - 인증,인가 모두 처리 X
-     * HttpSecurity - antMatchers에 있는 endpoint에 대한 '인증'을 무시한다.
-     */
     @Bean
-    fun webSecurityCustomizer(): WebSecurityCustomizer {
-        return WebSecurityCustomizer { it.ignoring().antMatchers("/images/**", "/js/**", "/webjars/**") }
-    }
+    fun jsonLoginSuccessHandler(jwtService: JwtService? = null): JsonLoginSuccessHandler?
+        = jwtService?.let { JsonLoginSuccessHandler(it) }
+
+
+
+
+
 
     /**
      * https://www.javafixing.com/2022/01/fixed-spring-security-role-hierarchy.html
