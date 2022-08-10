@@ -6,6 +6,7 @@ import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Token
 import com.whyrano.domain.member.repository.MemberRepository
+import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_NAME
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_PREFIX
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
@@ -76,12 +77,19 @@ class JwtServiceImpl(
      * Http Request 정보로부터 토큰이 있다면 추출
      */
     override fun extractToken(request: HttpServletRequest): TokenDto? {
-        val accessToken =
-            request.getHeader(JwtService.ACCESS_TOKEN_HEADER_NAME)
-                    ?.replace(ACCESS_TOKEN_HEADER_PREFIX, "")
-                    ?.trim()
-            ?: return null
 
+        //ACCESS_TOKEN_HEADER_NAME(Authorization) 이 없는 경우 Null
+        val accessTokenValue = request.getHeader(ACCESS_TOKEN_HEADER_NAME) ?: return null
+
+        //ACCESS_TOKEN_HEADER_PREFIX(Bearer )로 시작하지 않는 경우 Null
+        if (!accessTokenValue.startsWith(ACCESS_TOKEN_HEADER_PREFIX)) {
+            return null
+        }
+
+        //accessToken 추출 (Bearer 제거)
+        val accessToken = accessTokenValue.replace(ACCESS_TOKEN_HEADER_PREFIX, "").trim()
+
+        //refreshToken 추출
         val refreshToken = request.getHeader(JwtService.REFRESH_TOKEN_HEADER_NAME) ?: return null
 
         return TokenDto(accessToken, refreshToken)
