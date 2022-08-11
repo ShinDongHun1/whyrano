@@ -38,7 +38,8 @@ class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProces
             throw AuthenticationServiceException("Authentication request-body is null")
         }
 
-        val accountDto = objectMapper.readValue(request.reader, AccountDto::class.java)
+
+        val accountDto = extractAccount(request)
 
         if (usernameIsBlank(accountDto) || passwordIsBlank(accountDto) ) {
             throw AuthenticationServiceException("Username or Password is empty")
@@ -47,7 +48,13 @@ class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProces
         return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(accountDto.username, accountDto.password));
     }
 
-
+    private fun extractAccount(request: HttpServletRequest): AccountDto {
+        try {
+            return objectMapper.readValue(request.reader, AccountDto::class.java)
+        }catch (e: Exception) {
+            throw AuthenticationServiceException("요청 오류")
+        }
+    }
 
 
     private fun usernameIsBlank(accountDto: AccountDto) =
