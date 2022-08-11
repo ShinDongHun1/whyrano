@@ -20,6 +20,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
+import java.util.Objects
 
 /**
  * Created by ShinD on 2022/08/09.
@@ -70,6 +71,9 @@ class SecurityConfig {
             passwordEncoder: PasswordEncoder? = null,
             JsonLoginSuccessHandler: JsonLoginSuccessHandler? = null,
     ): JsonLoginProcessingFilter {
+        Objects.requireNonNull(memberService, "memberService is null !")
+        Objects.requireNonNull(passwordEncoder, "passwordEncoder is null !")
+        Objects.requireNonNull(JsonLoginSuccessHandler, "JsonLoginSuccessHandler is null !")
 
         val daoAuthenticationProvider = DaoAuthenticationProvider()
         daoAuthenticationProvider.setUserDetailsService(memberService)
@@ -78,18 +82,23 @@ class SecurityConfig {
 
         val jsonLoginProcessingFilter = JsonLoginProcessingFilter(LOGIN_URL)
         jsonLoginProcessingFilter.setAuthenticationManager(ProviderManager(daoAuthenticationProvider))
-        JsonLoginSuccessHandler?.let { jsonLoginProcessingFilter.setAuthenticationSuccessHandler(it) }
+        jsonLoginProcessingFilter.setAuthenticationSuccessHandler(JsonLoginSuccessHandler)
         return jsonLoginProcessingFilter
     }
 
     @Bean
-    fun jsonLoginSuccessHandler(jwtService: JwtService? = null)
-        = jwtService?.let { JsonLoginSuccessHandler(it) }
+    fun jsonLoginSuccessHandler(jwtService: JwtService? = null): JsonLoginSuccessHandler{
+        Objects.requireNonNull(jwtService, "jwtService is null !")
+        return JsonLoginSuccessHandler(jwtService!!)
+    }
 
 
     @Bean
-    fun jwtAuthenticationFilter(jwtService: JwtService? = null) =
-        jwtService?.let { JwtAuthenticationFilter(NO_CHECK_URLS, it) }
+    fun jwtAuthenticationFilter(jwtService: JwtService? = null): JwtAuthenticationFilter{
+        Objects.requireNonNull(jwtService, "jwtService is null !")
+        return JwtAuthenticationFilter(NO_CHECK_URLS, jwtService!!)
+    }
+
 
 
 
