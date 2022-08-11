@@ -19,7 +19,7 @@ interface JwtService {
 
     fun createAccessAndRefreshToken(userDetails: UserDetails): TokenDto
 
-    fun extractMemberEmail(accessToken: AccessToken): String
+    fun extractUserDetail(accessToken: AccessToken): UserDetails?
 
     fun extractToken(request: HttpServletRequest): TokenDto?
 

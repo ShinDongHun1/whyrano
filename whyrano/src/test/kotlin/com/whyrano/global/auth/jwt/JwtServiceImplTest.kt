@@ -88,7 +88,7 @@ internal class JwtServiceImplTest{
 
 
     @Test
-    @DisplayName("AccessToken으로부터 email 추출 성공")
+    @DisplayName("AccessToken으로부터 userDetail 추출 성공")
     fun test_extractMemberEmail_success() {
         //given
         val member = MemberFixture.member()
@@ -102,7 +102,8 @@ internal class JwtServiceImplTest{
 
 
         //when, then
-        assertThat(jwtService.extractMemberEmail(accessToken)).isEqualTo(member.email)
+        assertThat(jwtService.extractUserDetail(accessToken)!!.username).isEqualTo(userDetails.username)
+        assertThat(jwtService.extractUserDetail(accessToken)!!.authorities).isEqualTo(userDetails.authorities)
     }
 
 

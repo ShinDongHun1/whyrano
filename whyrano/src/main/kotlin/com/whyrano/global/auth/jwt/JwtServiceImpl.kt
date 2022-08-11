@@ -70,8 +70,8 @@ class JwtServiceImpl(
     /**
      * AccessToken으로부터 이메일 추출
      */
-    override fun extractMemberEmail(accessToken: AccessToken) =
-        accessToken.getEmail(algorithm)
+    override fun extractUserDetail(accessToken: AccessToken) =
+        accessToken.getUserDetails(algorithm)
 
 
     /**

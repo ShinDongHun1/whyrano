@@ -2,6 +2,9 @@ package com.whyrano.domain.member.entity
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.auth0.jwt.exceptions.JWTVerificationException
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 import java.util.*
 import java.util.concurrent.TimeUnit
 import javax.persistence.Embeddable
@@ -48,8 +51,22 @@ class AccessToken (
         }
         catch (e: Exception) { false }
 
-    fun getEmail(algorithm: Algorithm) =
-        JWT.require(algorithm).build().verify(accessToken).getClaim(MEMBER_EMAIL_CLAIM).toString()
-            .replace("\"", "") // ""hui@na.com"" 이런 식으로 반환되어 이를 제거함
+    fun getUserDetails(algorithm: Algorithm): UserDetails? {
+        return try {
+
+            val jwt = JWT.require(algorithm).build().verify(accessToken)
+
+            val email = jwt.getClaim(MEMBER_EMAIL_CLAIM).toString()
+                .replace("\"", "") // ""hui@na.com"" 이런 식으로 반환되어 이를 제거함
+
+            val authority = jwt.getClaim(MEMBER_AUTHORITY_CLAIM).toString().replace("\"", "")
+
+            User.builder().username(email).password("SECRET").authorities(authority).build()
+        }
+        //토큰이 유효하지 않는 등의 예외 발생 시 -> null 반환
+        catch (ex: JWTVerificationException) {
+            null
+        }
+    }
 
 }
