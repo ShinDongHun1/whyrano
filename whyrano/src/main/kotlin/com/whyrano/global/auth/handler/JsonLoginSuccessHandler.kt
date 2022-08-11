@@ -22,7 +22,7 @@ class JsonLoginSuccessHandler(
 
     // ObjectMapper는 쓰레드에 안전하긴 하지만, 속도를 생각하면 직접 작성해두는 것이 더 낫다고 판단
     companion object {
-        private const val TOKEN_BODY_FORMAT = """
+        const val TOKEN_BODY_FORMAT = """
             {"accessToken" :"%s", "refreshToken" : "%s"}
         """
     }

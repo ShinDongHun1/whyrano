@@ -1,6 +1,8 @@
 package com.whyrano.global.auth.jwt
 
 import com.whyrano.domain.member.entity.AccessToken
+import com.whyrano.domain.member.entity.Member
+import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Token
 import org.springframework.security.core.userdetails.UserDetails
 import javax.servlet.http.HttpServletRequest
@@ -24,4 +26,7 @@ interface JwtService {
     fun extractToken(request: HttpServletRequest): TokenDto?
 
     fun isValid(token: Token): Boolean
+
+    fun isValidMoreThanMinute(accessToken: AccessToken, minute: Long): Boolean
+    fun findMemberByTokens(accessToken: AccessToken, refreshToken: RefreshToken): Member?
 }

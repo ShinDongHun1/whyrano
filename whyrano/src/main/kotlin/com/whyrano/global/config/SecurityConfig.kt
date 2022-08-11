@@ -56,7 +56,7 @@ class SecurityConfig {
 
         http
             .addFilterBefore(jsonLoginProcessingFilter(), UsernamePasswordAuthenticationFilter::class.java)
-           // .addFilterBefore(jwtAuthenticationFilter(NO_CHECK_URLS), JsonLoginProcessingFilter::class.java)
+            .addFilterBefore(jwtAuthenticationFilter(), JsonLoginProcessingFilter::class.java)
 
         return http.build()
     }
@@ -83,14 +83,14 @@ class SecurityConfig {
     }
 
     @Bean
-    fun jsonLoginSuccessHandler(jwtService: JwtService? = null): JsonLoginSuccessHandler?
+    fun jsonLoginSuccessHandler(jwtService: JwtService? = null)
         = jwtService?.let { JsonLoginSuccessHandler(it) }
 
 
     @Bean
-    fun jwtAuthenticationFilter(NO_CHECK_URLS: List<String>): JwtAuthenticationFilter {
-        return JwtAuthenticationFilter(NO_CHECK_URLS)
-    }
+    fun jwtAuthenticationFilter(jwtService: JwtService? = null) =
+        jwtService?.let { JwtAuthenticationFilter(NO_CHECK_URLS, it) }
+
 
 
 

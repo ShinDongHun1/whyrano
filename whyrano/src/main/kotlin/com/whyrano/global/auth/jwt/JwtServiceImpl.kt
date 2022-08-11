@@ -11,6 +11,8 @@ import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_PREF
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.LocalDateTime
+import java.time.ZoneId
 import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 
@@ -96,9 +98,32 @@ class JwtServiceImpl(
         return TokenDto(accessToken, refreshToken)
     }
 
+
+
     /**
      * AccessToken 혹은 RefreshToken이 유효한 상태인지 확인
      */
     override fun isValid(token: Token) =
         token.isValid(algorithm)
+
+    /**
+     * AccessToken의 유효기간이 특정 시간보다 길게 남았는지 검사
+     */
+    override fun isValidMoreThanMinute(accessToken: AccessToken, minute: Long): Boolean {
+        return try {
+            val expiredDate = accessToken.getExpiredDate(algorithm)
+
+            val expiredDateTime = expiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
+            val now = LocalDateTime.now().plusMinutes(minute)
+
+
+            now.isBefore(expiredDateTime)
+        }catch (e: Exception){
+            false
+        }
+    }
+
+    override fun findMemberByTokens(accessToken: AccessToken, refreshToken: RefreshToken) =
+        memberRepository.findByAccessTokenAndRefreshToken(accessToken, refreshToken)
+
 }

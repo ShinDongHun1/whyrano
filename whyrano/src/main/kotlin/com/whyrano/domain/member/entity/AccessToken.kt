@@ -69,4 +69,7 @@ class AccessToken (
         }
     }
 
+    fun getExpiredDate(algorithm: Algorithm): Date =
+        JWT.require(algorithm).build().verify(accessToken).expiresAt
+
 }
