@@ -20,7 +20,6 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.SecurityFilterChain
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
-import java.util.Objects
 
 /**
  * Created by ShinD on 2022/08/09.
@@ -71,9 +70,9 @@ class SecurityConfig {
             passwordEncoder: PasswordEncoder? = null,
             JsonLoginSuccessHandler: JsonLoginSuccessHandler? = null,
     ): JsonLoginProcessingFilter {
-        Objects.requireNonNull(memberService, "memberService is null !")
-        Objects.requireNonNull(passwordEncoder, "passwordEncoder is null !")
-        Objects.requireNonNull(JsonLoginSuccessHandler, "JsonLoginSuccessHandler is null !")
+        checkNotNull(memberService) { "memberService is null !" }
+        checkNotNull(passwordEncoder) { "passwordEncoder is null !" }
+        checkNotNull(JsonLoginSuccessHandler) { "JsonLoginSuccessHandler is null !" }
 
         val daoAuthenticationProvider = DaoAuthenticationProvider()
         daoAuthenticationProvider.setUserDetailsService(memberService)
@@ -88,15 +87,15 @@ class SecurityConfig {
 
     @Bean
     fun jsonLoginSuccessHandler(jwtService: JwtService? = null): JsonLoginSuccessHandler{
-        Objects.requireNonNull(jwtService, "jwtService is null !")
-        return JsonLoginSuccessHandler(jwtService!!)
+        checkNotNull(jwtService) { "jwtService is null !" }
+        return JsonLoginSuccessHandler(jwtService)
     }
 
 
     @Bean
     fun jwtAuthenticationFilter(jwtService: JwtService? = null): JwtAuthenticationFilter{
-        Objects.requireNonNull(jwtService, "jwtService is null !")
-        return JwtAuthenticationFilter(NO_CHECK_URLS, jwtService!!)
+        checkNotNull(jwtService) { "jwtService is null !" }
+        return JwtAuthenticationFilter(NO_CHECK_URLS, jwtService)
     }
 
 
