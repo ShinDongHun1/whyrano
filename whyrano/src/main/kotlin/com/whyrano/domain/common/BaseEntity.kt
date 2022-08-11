@@ -16,9 +16,7 @@ abstract class BaseEntity : BaseTimeEntity() {
 
     @CreatedBy
     @ManyToOne(fetch = LAZY)
-    @JoinColumn(name = "created_by")
+    @JoinColumn(name = "created_by", nullable = false)
     var createdBy: Member? = null
 
-
-    //TODO AuditorAware 추가
 }
