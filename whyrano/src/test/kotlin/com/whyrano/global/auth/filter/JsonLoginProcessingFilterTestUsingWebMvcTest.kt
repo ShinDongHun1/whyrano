@@ -3,8 +3,9 @@ package com.whyrano.global.auth.filter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import com.whyrano.domain.member.fixture.MemberFixture
-import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.MemberService
+import com.whyrano.global.auth.jwt.JwtService
+import com.whyrano.global.auth.jwt.TokenDto
 import com.whyrano.global.config.SecurityConfig
 import com.whyrano.global.config.SecurityConfig.Companion.LOGIN_URL
 import io.mockk.every
@@ -17,6 +18,8 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.http.MediaType.APPLICATION_JSON
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -31,7 +34,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * 확실히 얘가 빠르다
  */
 @WebMvcTest
-@Import(SecurityConfig::class, MemberService::class)
+@Import(SecurityConfig::class)
 internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     
     companion object {
@@ -40,10 +43,15 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
 
     @Autowired
     private lateinit var mockMvc: MockMvc
+
     @MockkBean
-    private lateinit var memberRepository: MemberRepository
+    private lateinit var memberService: MemberService
+
     @Autowired
     private lateinit var passwordEncoder: PasswordEncoder
+
+    @MockkBean
+    private lateinit var jwtService: JwtService
 
 
 
@@ -92,7 +100,7 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     fun test_login_fail_notMatchUsername_unauthorized() {
 
         val member = MemberFixture.createMemberDto()
-        every { memberRepository.findByEmail(member.email) } returns null
+        every { memberService.loadUserByUsername(any()) }.throws(UsernameNotFoundException("D"))
 
         val hashMap = usernamePasswordHashMap(member.email, member.password)
         mockMvc
@@ -112,7 +120,7 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     fun test_login_fail_notMatchPassword_unauthorized() {
 
         val member =  MemberFixture.createMemberDto()
-        every { memberRepository.findByEmail(member.email) } returns member.toEntity(passwordEncoder)
+        every { memberService.loadUserByUsername(any()) }.throws(UsernameNotFoundException("D"))
 
         val noMatchPassword = member.password + "12345"
 
@@ -135,11 +143,13 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     @DisplayName("로그인 성공")
     fun test_login_success_notMatchPassword_unauthorized() {
 
-        val member = MemberFixture.createMemberDto()
-        every { memberRepository.findByEmail(member.email) } returns member.toEntity(passwordEncoder)
+        val memberDto = MemberFixture.createMemberDto()
+        val member = memberDto.toEntity(passwordEncoder)
+        every { memberService.loadUserByUsername(member.email) } returns User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto("Access", "ref")
 
 
-        val hashMap = usernamePasswordHashMap(member.email, member.password)
+        val hashMap = usernamePasswordHashMap(memberDto.email, memberDto.password)
 
 
         val result = mockMvc
