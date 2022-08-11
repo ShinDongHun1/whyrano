@@ -34,7 +34,7 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeRequests()
-            .antMatchers(LOGIN_URL, "/signup", "/h2-console/**").permitAll()
+            .antMatchers(LOGIN_URL, "/signup", "/h2-console/**", "/error").permitAll()
             .antMatchers("/admin/**").hasRole(ADMIN.name)
             .anyRequest().hasRole(BASIC.name)
 
