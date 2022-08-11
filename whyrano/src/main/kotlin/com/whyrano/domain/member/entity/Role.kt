@@ -11,6 +11,8 @@ enum class Role {
 
     BLACK, // 블랙리스트
     ;
+    val authority: String =
+        "ROLE_${this.name}"
 }
 
 
