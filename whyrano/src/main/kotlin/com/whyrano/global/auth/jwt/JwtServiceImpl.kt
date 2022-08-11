@@ -48,7 +48,8 @@ class JwtServiceImpl(
 
         // AccessToken 발급
         val accessToken = AccessToken.create(
-            email = email,
+            email = member.email,
+            authority = userDetails.authorities.toList()[0].toString(), // Authority는 반드시 하나임
             accessTokenExpirationPeriodDay = jwtProperties.accessTokenExpirationPeriodDay,
             algorithm = algorithm
         )

@@ -17,9 +17,11 @@ class AccessToken (
     companion object {
         const val ACCESS_TOKEN_SUBJECT = "AccessToken"
         const val MEMBER_EMAIL_CLAIM = "memberEmail"
+        const val MEMBER_AUTHORITY_CLAIM = "memberAuthority"
 
         fun create(
             email: String,
+            authority: String,
             accessTokenExpirationPeriodDay: Long,
             algorithm: Algorithm,
         ): AccessToken =
@@ -27,6 +29,7 @@ class AccessToken (
                 accessToken = JWT.create()
                     .withSubject(ACCESS_TOKEN_SUBJECT)
                     .withClaim(MEMBER_EMAIL_CLAIM, email)
+                    .withClaim(MEMBER_AUTHORITY_CLAIM, authority) // Authority는 반드시 하나임
                     .withExpiresAt(
                         Date(
                             TimeUnit.MILLISECONDS.convert(accessTokenExpirationPeriodDay, TimeUnit.DAYS).plus(

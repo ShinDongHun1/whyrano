@@ -4,6 +4,7 @@ import com.whyrano.domain.member.entity.Role.ADMIN
 import com.whyrano.domain.member.entity.Role.BASIC
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.filter.JsonLoginProcessingFilter
+import com.whyrano.global.auth.filter.JwtAuthenticationFilter
 import com.whyrano.global.auth.handler.JsonLoginSuccessHandler
 import com.whyrano.global.auth.jwt.JwtService
 import org.springframework.context.annotation.Bean
@@ -28,13 +29,19 @@ class SecurityConfig {
 
     companion object {
         const val LOGIN_URL = "/login"
+
+        const val SIGNUP_URL = "/signup"
+        const val H2_URL = "/h2-console/**"
+        const val ERROR_URL = "/error"
+
+        private val NO_CHECK_URLS = listOf(LOGIN_URL, SIGNUP_URL, H2_URL, ERROR_URL)
     }
 
     @Bean
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeRequests()
-            .antMatchers(LOGIN_URL, "/signup", "/h2-console/**", "/error").permitAll()
+            .antMatchers(*NO_CHECK_URLS.toTypedArray()).permitAll()
             .antMatchers("/admin/**").hasRole(ADMIN.name)
             .anyRequest().hasRole(BASIC.name)
 
@@ -49,6 +56,7 @@ class SecurityConfig {
 
         http
             .addFilterBefore(jsonLoginProcessingFilter(), UsernamePasswordAuthenticationFilter::class.java)
+           // .addFilterBefore(jwtAuthenticationFilter(NO_CHECK_URLS), JsonLoginProcessingFilter::class.java)
 
         return http.build()
     }
@@ -79,6 +87,10 @@ class SecurityConfig {
         = jwtService?.let { JsonLoginSuccessHandler(it) }
 
 
+    @Bean
+    fun jwtAuthenticationFilter(NO_CHECK_URLS: List<String>): JwtAuthenticationFilter {
+        return JwtAuthenticationFilter(NO_CHECK_URLS)
+    }
 
 
 
