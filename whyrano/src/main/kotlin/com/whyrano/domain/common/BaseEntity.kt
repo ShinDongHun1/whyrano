@@ -19,6 +19,6 @@ abstract class BaseEntity : BaseTimeEntity() {
     @JoinColumn(name = "created_by")
     var createdBy: Member? = null
 
-    //TODO AuditorAware 추가
 
+    //TODO AuditorAware 추가
 }

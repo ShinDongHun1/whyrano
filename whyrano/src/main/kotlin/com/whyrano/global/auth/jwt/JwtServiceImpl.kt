@@ -46,7 +46,8 @@ class JwtServiceImpl(
         val email = userDetails.username
 
         // 이메일로 회원 찾아오기 -> 영속성 컨텍스트에 회원 저장
-        val member = memberRepository.findByEmail(email) ?: throw TODO("MEmberException 구현!")
+        val member = memberRepository.findByEmail(email)
+            ?: throw TODO("MEmberException 구현!")
 
         // AccessToken 발급
         val accessToken = AccessToken.create(
