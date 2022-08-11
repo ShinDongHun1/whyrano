@@ -33,21 +33,15 @@ class JsonLoginSuccessHandler(
         response: HttpServletResponse,
         authentication: Authentication,
     ) {
+
         // 반환 정보 설정
         setResponse(
             response = response,
             status = OK,
             contentType = APPLICATION_JSON_VALUE,
-            charset = UTF_8
+            charset = UTF_8,
+            content =  tokenToJson(jwtService.createAccessAndRefreshToken(authentication.principal as UserDetails))
         )
-
-        response.writer.println(  // responseBody 에 작성
-
-            tokenToJson( // AccessToken 과 RefreshToken 을 Json 으로 반환
-
-                // UserDetails 로부터 AccessToken과 RefreshToken 생성
-                jwtService.createAccessAndRefreshToken(authentication.principal as UserDetails)
-            ))
     }
 
 
@@ -56,16 +50,15 @@ class JsonLoginSuccessHandler(
         status: HttpStatus,
         contentType: String,
         charset: Charset,
+        content: String,
     ) {
         response.status = status.value()
         response.contentType = contentType
         response.characterEncoding = charset.name()
+        response.writer.println(content)
     }
 
-
     private fun tokenToJson(tokenDto: TokenDto): String
-        = TOKEN_BODY_FORMAT.format(
-            tokenDto.accessToken,
-            tokenDto.refreshToken)
+        = TOKEN_BODY_FORMAT.format(tokenDto.accessToken, tokenDto.refreshToken)
 
 }

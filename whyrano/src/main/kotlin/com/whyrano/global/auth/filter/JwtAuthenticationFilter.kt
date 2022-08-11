@@ -4,7 +4,10 @@ import com.whyrano.global.auth.handler.JsonLoginSuccessHandler
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
 import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatus.FORBIDDEN
+import org.springframework.http.HttpStatus.OK
 import org.springframework.http.MediaType
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
@@ -12,6 +15,7 @@ import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets
+import java.nio.charset.StandardCharsets.UTF_8
 import javax.servlet.Filter
 import javax.servlet.FilterChain
 import javax.servlet.ServletRequest
@@ -51,14 +55,16 @@ class JwtAuthenticationFilter(
         val req = request as HttpServletRequest
         val res = response as HttpServletResponse
 
+
         // permitAll 인 경우에는 토큰을 검사하지 않음
-        if(isUncheckUrl(req.requestURI)) return chain.doFilter(request, response)
-
-
+        if(isUncheckUrl(req.requestURI))
+            return chain.doFilter(request, response)
 
         // 토큰이 하나라도 존재하지 않는 경우 403
         val tokenDto = jwtService.extractToken(req)
-        if (tokenDto?.accessToken == null || tokenDto.refreshToken == null)  return failureAuthentication(res)
+        if (tokenDto?.accessToken == null || tokenDto.refreshToken == null)
+            return failureAuthentication(res)
+
 
 
 
@@ -66,45 +72,52 @@ class JwtAuthenticationFilter(
         val accessToken = tokenDto.accessToken()
         val refreshToken = tokenDto.refreshToken()
 
-        // AccessToken이 만료되지 않은 경우 (5분 이상 남았는지 검사)
+        /**
+         * AccessToken이 만료되지 않은 경우
+         *                               (5분 이상 남았는지 검사)
+         */
         if (jwtService.isValidMoreThanMinute(accessToken = accessToken, minute = 5)){
-            // UserDetails 이 없는 경우 403 토큰의 내용이 잘못된 토큰일 경우
-            val userDetails = jwtService.extractUserDetail(accessToken) ?:  return failureAuthentication(res)
+
+            // UserDetails 이 없는 경우 오류
+            val userDetails = jwtService.extractUserDetail(accessToken)
+                ?:  return failureAuthentication(res)
+
+            // 인증 성공
             successAuthentication(userDetails)
+
+            // chain.doFilter()를 해주어야 해당 정보를 가지고 쭉 진행함, 만약 해당 코드가 없다면 200을 반환할 뿐 요청이 컨트롤러로 전달되지 않음
             return chain.doFilter(request, response)
         }
 
 
-        //== AccessToken이 만료된 경우 ==//
-
-        // refreshToken 도 만료된 경우 403
-        if (!jwtService.isValid(refreshToken)) return failureAuthentication(res)
-
-        // 두 토큰을 가진 회원이 없는 경우 403
-        val member = jwtService.findMemberByTokens(accessToken, refreshToken) ?: return failureAuthentication(res)
 
 
+        /**
+         * AccessToken이 만료된 경우
+         */
+        if (!jwtService.isValid(refreshToken)) // refreshToken 도 만료된 경우 403
+            return failureAuthentication(res)
+
+        val member = jwtService.findMemberByTokens(accessToken, refreshToken)
+            ?: return failureAuthentication(res) // 두 토큰을 가진 회원이 없는 경우 403
 
         // 토큰 재발급
-        val userDetails = User.builder().username(member.email).password("SECRET").authorities(member.role.authority).build()
+        val userDetails = User.builder()
+                                            .username(member.email)
+                                            .password("SECRET")
+                                            .authorities(member.role.authority)
+                                            .build()
 
+        // Http 응답 설정
         setResponse(
             response = response,
-            status = HttpStatus.OK,
-            contentType = MediaType.APPLICATION_JSON_VALUE,
-            charset = StandardCharsets.UTF_8
+            status = OK,
+            contentType = APPLICATION_JSON_VALUE,
+            charset = UTF_8,
+            content = tokenToJson(jwtService.createAccessAndRefreshToken(userDetails = userDetails))
         )
 
-        response.writer.println(  // responseBody 에 작성
-
-            tokenToJson( // AccessToken 과 RefreshToken 을 Json 으로 반환
-
-                // UserDetails 로부터 AccessToken과 RefreshToken 생성
-                jwtService.createAccessAndRefreshToken(userDetails = userDetails)
-            ))
-
     }
-
 
 
 
@@ -112,16 +125,30 @@ class JwtAuthenticationFilter(
         uncheckedUrls.contains(requestURI)
 
 
+
+
     private fun failureAuthentication(res: HttpServletResponse) {
         setResponse(
             response = res,
-            status = HttpStatus.FORBIDDEN,
-            contentType = MediaType.APPLICATION_JSON_VALUE,
-            charset = StandardCharsets.UTF_8
+            status = FORBIDDEN,
+            contentType = APPLICATION_JSON_VALUE,
+            charset = UTF_8,
+            content = "{\"message\":\"인증에 실패하셨습니다. 토큰이 없거나 유효하지 않습니다. 로그인하여 토큰을 재발급받으세요.\"}"
         )
-        res.writer.println("""
-            {"message":"인증에 실패하셨습니다. 토큰이 없거나 유효하지 않습니다. 로그인하여 토큰을 재발급받으세요."}
-        """.trimIndent())
+    }
+
+
+    private fun setResponse(
+        response: HttpServletResponse,
+        status: HttpStatus,
+        contentType: String,
+        charset: Charset,
+        content: String,
+    ) {
+        response.status = status.value()
+        response.contentType = contentType
+        response.characterEncoding = charset.name()
+        response.writer.println(content)
     }
 
 
@@ -132,32 +159,6 @@ class JwtAuthenticationFilter(
     }
 
 
-    private fun sendResponseRequestingReLogin(res: HttpServletResponse) {
-        setResponse(
-            response = res,
-            status = HttpStatus.BAD_REQUEST,
-            contentType = MediaType.APPLICATION_JSON_VALUE,
-            charset = StandardCharsets.UTF_8
-        )
-        res.writer.println("""
-            {"message":"토큰이 만료되었습니다. 로그인을 진행해주세요."}
-        """.trimIndent())
-    }
-
-
-    private fun setResponse(
-        response: HttpServletResponse,
-        status: HttpStatus,
-        contentType: String,
-        charset: Charset,
-    ) {
-        response.status = status.value()
-        response.contentType = contentType
-        response.characterEncoding = charset.name()
-    }
-
     private fun tokenToJson(tokenDto: TokenDto): String
-            = JsonLoginSuccessHandler.TOKEN_BODY_FORMAT.format(
-        tokenDto.accessToken,
-        tokenDto.refreshToken)
+            = JsonLoginSuccessHandler.TOKEN_BODY_FORMAT.format(tokenDto.accessToken, tokenDto.refreshToken)
 }

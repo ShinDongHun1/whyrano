@@ -28,20 +28,21 @@ class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProces
 
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
 
-        if(!isJson(request)) { // Json 이 아닌 경우 로그인 시도하지 않음
+        if(!isJson(request))  // Json 이 아닌 경우 로그인 시도하지 않음
             throw AuthenticationServiceException("Authentication content-type not supported: ${request.contentType}")
-        }
-        if(!isPost(request)) { // 메서드가 Post 가 아닌 경우 로그인 시도하지 않음
+
+        if(!isPost(request))  // 메서드가 Post 가 아닌 경우 로그인 시도하지 않음
             throw AuthenticationServiceException("Authentication method not supported: ${request.method}")
-        }
-        if (request.contentLength == NO_CONTENT) {  // body에 아무것도 작성되지 않았다면 로그인 실패
+
+        if (request.contentLength == NO_CONTENT)   // body에 아무것도 작성되지 않았다면 로그인 실패
             throw AuthenticationServiceException("Authentication request-body is null")
-        }
 
 
+
+        // request로부터 계정 정보 추출
         val accountDto = extractAccount(request)
 
-        if (usernameIsBlank(accountDto) || passwordIsBlank(accountDto) ) {
+        if (usernameIsBlank(accountDto) || passwordIsBlank(accountDto) ) { // 공백이 있다면 처리하지 않음
             throw AuthenticationServiceException("Username or Password is empty")
         }
 
@@ -49,9 +50,10 @@ class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProces
     }
 
     private fun extractAccount(request: HttpServletRequest): AccountDto {
-        try {
-            return objectMapper.readValue(request.reader, AccountDto::class.java)
-        }catch (e: Exception) {
+        return try {
+            objectMapper.readValue(request.reader, AccountDto::class.java) // Json 파싱 중 오류가 발생할 수 있으므로 예외 처리
+        }
+        catch (e: Exception) {
             throw AuthenticationServiceException("요청 오류")
         }
     }

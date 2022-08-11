@@ -2,8 +2,10 @@ package com.whyrano.domain.member.entity
 
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import java.lang.System.*
 import java.util.*
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.*
 import javax.persistence.Embeddable
 
 /**
@@ -23,18 +25,20 @@ class RefreshToken (
             RefreshToken(
                 refreshToken = JWT.create()
                     .withSubject(RefreshToken.REFRESH_TOKEN_SUBJECT)
-                    .withExpiresAt(Date(
-                        TimeUnit.MILLISECONDS.convert(refreshTokenExpirationPeriodDay, TimeUnit.DAYS).plus(
-                            System.currentTimeMillis()
-                        )))
+                    .withExpiresAt(
+                        Date(MILLISECONDS
+                            .convert(refreshTokenExpirationPeriodDay, DAYS)
+                            .plus(currentTimeMillis())
+                        ))
                     .sign(algorithm)
             )
     }
 
 
-    override fun isValid(algorithm: Algorithm)
-            = try {
-        JWT.require(algorithm).build().verify(refreshToken)
-        true
-    } catch (e: Exception) { false }
+    override fun isValid(algorithm: Algorithm) =
+        try {
+            JWT.require(algorithm).build().verify(refreshToken)
+            true
+        }
+        catch (e: Exception) { false }
 }

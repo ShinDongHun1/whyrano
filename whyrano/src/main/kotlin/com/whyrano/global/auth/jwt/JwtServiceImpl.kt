@@ -69,11 +69,17 @@ class JwtServiceImpl(
         return TokenDto(accessToken.accessToken, refreshToken.refreshToken)
     }
 
+
+
+
     /**
      * AccessToken으로부터 이메일 추출
      */
     override fun extractUserDetail(accessToken: AccessToken) =
         accessToken.getUserDetails(algorithm)
+
+
+
 
 
     /**
@@ -82,21 +88,26 @@ class JwtServiceImpl(
     override fun extractToken(request: HttpServletRequest): TokenDto? {
 
         //ACCESS_TOKEN_HEADER_NAME(Authorization) 이 없는 경우 Null
-        val accessTokenValue = request.getHeader(ACCESS_TOKEN_HEADER_NAME) ?: return null
+        val accessTokenValue = request.getHeader(ACCESS_TOKEN_HEADER_NAME)
+            ?: return null
 
         //ACCESS_TOKEN_HEADER_PREFIX(Bearer )로 시작하지 않는 경우 Null
-        if (!accessTokenValue.startsWith(ACCESS_TOKEN_HEADER_PREFIX)) {
+        if (!accessTokenValue.startsWith(ACCESS_TOKEN_HEADER_PREFIX))
             return null
-        }
+
 
         //accessToken 추출 (Bearer 제거)
         val accessToken = accessTokenValue.replace(ACCESS_TOKEN_HEADER_PREFIX, "").trim()
 
         //refreshToken 추출
-        val refreshToken = request.getHeader(JwtService.REFRESH_TOKEN_HEADER_NAME) ?: return null
+        val refreshToken = request.getHeader(JwtService.REFRESH_TOKEN_HEADER_NAME)
+            ?: return null
 
         return TokenDto(accessToken, refreshToken)
     }
+
+
+
 
 
 
@@ -116,7 +127,6 @@ class JwtServiceImpl(
             val expiredDateTime = expiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
             val now = LocalDateTime.now().plusMinutes(minute)
 
-
             now.isBefore(expiredDateTime)
         }catch (e: Exception){
             false
@@ -125,5 +135,4 @@ class JwtServiceImpl(
 
     override fun findMemberByTokens(accessToken: AccessToken, refreshToken: RefreshToken) =
         memberRepository.findByAccessTokenAndRefreshToken(accessToken, refreshToken)
-
 }
