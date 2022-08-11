@@ -8,6 +8,7 @@ import com.whyrano.domain.member.fixture.MemberFixture.accessToken
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.repository.MemberRepository
+import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_NAME
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_PREFIX
@@ -41,6 +42,9 @@ internal class JwtAuthenticationFilterTest {
 
     @MockkBean
     private lateinit var memberRepository: MemberRepository
+
+    @MockkBean
+    private lateinit var memberService: MemberService
 
     @Autowired
     private lateinit var jwtService: JwtService
