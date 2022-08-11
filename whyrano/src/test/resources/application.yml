@@ -29,6 +29,6 @@ spring:
         default-page-size: 20
 
 jwt:
-  secretKey: "SE3212321CCC"
+  secretKey: "ZG9uZ2h1bi1zaGFycC1kYnJ1YS13ZWItcHJvamVjdC11c2luZy1qd3Qtc2VjcmV0LURvbmdodW4tc3ByaW5nLWJvb3Qtand0LWJhY2stZW5kLWFuZC1qcy1jb2xsYWJv"
   accessTokenExpirationPeriodDay: 30
   refreshTokenExpirationPeriodDay: 300

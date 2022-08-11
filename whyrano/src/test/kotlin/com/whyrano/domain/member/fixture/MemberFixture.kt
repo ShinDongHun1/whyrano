@@ -1,5 +1,6 @@
 package com.whyrano.domain.member.fixture
 
+import com.auth0.jwt.algorithms.Algorithm
 import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.RefreshToken
@@ -20,6 +21,14 @@ object MemberFixture {
     const val UPDATE_PASSWORD = "update_defaultPassword123@"
     const val UPDATE_NICKNAME = "update_default_nickname"
     const val UPDATE_PROFILE_IMAGE_PATH = "https://update_default_profile_image_path.com"
+
+
+    val ALGORITHM =  Algorithm.HMAC512("ZG9uZ2h1bi1zaGFycC1kYnJ1YS13ZWItcHJvamVjdC11c2luZy1qd3Qtc2VjcmV0LURvbmdodW4tc3ByaW5nLWJvb3Qtand0LWJhY2stZW5kLWFuZC1qcy1jb2xsYWJv")
+    val ACCESS_TOKEN_EXPIRATION_PERIOED_DAY = 30L
+    val REFRESH_TOKEN_EXPIRATION_PERIOED_DAY = 30L
+
+
+
 
 
     fun createMemberDto(
@@ -51,4 +60,17 @@ object MemberFixture {
         profileImagePath: String = UPDATE_PROFILE_IMAGE_PATH,
     )
         = UpdateMemberDto(password, nickname, profileImagePath)
+
+
+    fun accessToken(
+        email: String = EMAIL,
+        role: Role = AUTHORITY,
+        accessTokenExpirationPeriodDay: Long = ACCESS_TOKEN_EXPIRATION_PERIOED_DAY,
+    ) =
+        AccessToken.create(email, role.authority, accessTokenExpirationPeriodDay, ALGORITHM)
+
+    fun refreshToken(
+        refreshTokenExpirationPeriodDay: Long = REFRESH_TOKEN_EXPIRATION_PERIOED_DAY,
+    ) =
+        RefreshToken.create( refreshTokenExpirationPeriodDay, ALGORITHM)
 }

@@ -34,7 +34,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * 확실히 얘가 빠르다
  */
 @WebMvcTest
-@Import(SecurityConfig::class)
+@Import(SecurityConfig::class,)
 internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     
     companion object {
