@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.ZoneId
-import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 
 
@@ -27,13 +26,7 @@ class JwtServiceImpl(
     private val jwtProperties: JwtProperties,
 ) : JwtService{
 
-    private lateinit var algorithm: Algorithm
-
-
-    @PostConstruct
-    private fun setAlgorithm() {
-        algorithm = HMAC512(jwtProperties.secretKey)
-    }
+    private val algorithm: Algorithm = HMAC512(jwtProperties.secretKey)
 
 
     /**
