@@ -34,7 +34,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * Created by ShinD on 2022/08/11.
  */
 @WebMvcTest
-@ExtendWith(MockKExtension::class)
 @Import(SecurityConfig::class)
 @MockkBean(MemberService::class, MemberRepository::class)
 internal class JwtAuthenticationFilterTest {

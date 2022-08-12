@@ -29,7 +29,6 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * Created by ShinD on 2022/08/10.
  */
 @WebMvcTest
-@ExtendWith(MockKExtension::class)
 @Import(SecurityConfig::class)
 internal class JsonLoginSuccessHandlerTest {
     companion object {

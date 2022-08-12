@@ -31,7 +31,6 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 /**
  * Created by ShinD on 2022/08/10.
  */
-@ExtendWith(MockKExtension::class)
 internal class JwtServiceImplTest{
 
 
