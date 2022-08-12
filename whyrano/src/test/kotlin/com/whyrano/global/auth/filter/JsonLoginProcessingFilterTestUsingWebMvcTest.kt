@@ -20,6 +20,7 @@ import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -34,11 +35,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * 확실히 얘가 빠르다
  */
 @WebMvcTest
-@Import(SecurityConfig::class,)
+@Import(SecurityConfig::class)
 internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     
     companion object {
         private val objectMapper = ObjectMapper()
+        private var passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
     }
 
     @Autowired
@@ -46,9 +48,6 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
 
     @MockkBean
     private lateinit var memberService: MemberService
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
 
     @MockkBean
     private lateinit var jwtService: JwtService
