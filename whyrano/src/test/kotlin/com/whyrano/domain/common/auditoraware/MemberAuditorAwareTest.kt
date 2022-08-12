@@ -27,8 +27,6 @@ import javax.persistence.EntityManager
 internal class MemberAuditorAwareTest {
 
     @Autowired
-    private lateinit var memberService: MemberService
-    @Autowired
     private lateinit var memberRepository: MemberRepository
     @Autowired
     private lateinit var postRepository: PostRepository
