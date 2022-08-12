@@ -4,7 +4,6 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.whyrano.domain.member.fixture.MemberFixture
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
-import org.springframework.security.core.userdetails.User
 
 /**
  * Created by ShinD on 2022/08/11.
@@ -17,20 +16,19 @@ internal class AccessTokenTest {
     @Test
     fun `AccessToken 권한, 이메일 생성 성공`() {
 
-        val memberDto = MemberFixture.createMemberDto()
-        val userDetails =
-            User.builder().username(memberDto.email).password(memberDto.password).roles(memberDto.role.name).build()
+        val authMember = MemberFixture.authMember()
 
         val accessToken = AccessToken.create(
-            email = userDetails.username,
-            authority = userDetails.authorities.toList()[0].toString(), // Authority는 반드시 하나임
+            id = authMember.id,
+            email = authMember.username,
+            role = authMember.role,
             accessTokenExpirationPeriodDay = 30,
             algorithm = algorithm
         )
 
-        val extractedUserDetails = accessToken.getUserDetails(algorithm)
+        val extractedUserDetails = accessToken.getAuthMember(algorithm)
 
-        assertThat(extractedUserDetails!!.username).isEqualTo(userDetails.username)
-        assertThat(extractedUserDetails.authorities).containsAll(userDetails.authorities)
+        assertThat(authMember!!.email).isEqualTo(authMember.username)
+        assertThat(authMember.authorities).containsAll(authMember.authorities)
     }
 }

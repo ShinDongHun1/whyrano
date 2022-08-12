@@ -2,12 +2,14 @@ package com.whyrano.domain.member.fixture
 
 import com.auth0.jwt.algorithms.Algorithm
 import com.whyrano.domain.member.controller.dto.request.CreateMemberRequest
+import com.whyrano.domain.member.controller.dto.request.UpdateMemberRequest
 import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.service.dto.CreateMemberDto
 import com.whyrano.domain.member.service.dto.UpdateMemberDto
+import com.whyrano.global.auth.userdetails.AuthMember
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 
@@ -16,6 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails
  */
 object MemberFixture {
     val AUTHORITY = Role.BASIC
+    const val ID = 1L
     const val EMAIL = "default@default.com"
     const val PASSWORD = "defaultPassword123@"
     const val NICKNAME = "default_nickname"
@@ -67,11 +70,12 @@ object MemberFixture {
 
 
     fun accessToken(
+        id: Long = ID,
         email: String = EMAIL,
-        role: Role = AUTHORITY,
+        role: Role = Role.BASIC,
         accessTokenExpirationPeriodDay: Long = ACCESS_TOKEN_EXPIRATION_PERIOED_DAY,
     ) =
-        AccessToken.create(email, role.authority, accessTokenExpirationPeriodDay, ALGORITHM)
+        AccessToken.create(id, email, role, accessTokenExpirationPeriodDay, ALGORITHM)
 
     fun refreshToken(
         refreshTokenExpirationPeriodDay: Long = REFRESH_TOKEN_EXPIRATION_PERIOED_DAY,
@@ -93,4 +97,20 @@ object MemberFixture {
         profileImagePath: String? = PROFILE_IMAGE_PATH
     ) =
         CreateMemberRequest(email, password, nickname, profileImagePath)
+
+
+    fun updateMemberRequest(
+        password: String? = UPDATE_PASSWORD,
+        nickname: String? = UPDATE_NICKNAME,
+        profileImagePath: String? = UPDATE_PROFILE_IMAGE_PATH,
+    ) =
+        UpdateMemberRequest(password, nickname, profileImagePath)
+
+    fun authMember(
+        id: Long = ID,
+        email: String = EMAIL,
+        password: String = "SECRET",
+        role: Role = Role.BASIC
+    ) =
+        AuthMember(id= id, email = email, password = password, role = role)
 }

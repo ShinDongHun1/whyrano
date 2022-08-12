@@ -3,7 +3,6 @@ package com.whyrano.domain.common.auditoraware
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.repository.MemberRepository
-import com.whyrano.domain.member.service.MemberService
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.repository.PostRepository
 import org.assertj.core.api.Assertions

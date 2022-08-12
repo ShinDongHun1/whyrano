@@ -2,12 +2,19 @@ package com.whyrano.domain.member.controller
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.member.fixture.MemberFixture
+import com.whyrano.domain.member.fixture.MemberFixture.accessToken
+import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberRequest
+import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.jwt.JwtService
+import com.whyrano.global.auth.jwt.TokenDto
 import com.whyrano.global.config.SecurityConfig
 import io.mockk.every
+import io.mockk.just
+import io.mockk.runs
 import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -17,6 +24,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 
 /**
@@ -42,6 +50,8 @@ internal class MemberControllerTest {
 
     @MockkBean
     private lateinit var memberService: MemberService
+    @MockkBean
+    private lateinit var jwtService: JwtService
 
 
     @Test
@@ -185,6 +195,35 @@ internal class MemberControllerTest {
 
 
 
+    //TODO(여기부터!!!)
+    /**
+     * 회원 수정 시 -> member로 put 요청을 보낸다
+     *
+     * 시큐리티 인증정보로부터 회원 정보를 받아온당
+     *
+     * 업데이트한다.
+     */
+    @Test
+    fun `회원수정 성공`() {
+        //given
+        val umr = MemberFixture.updateMemberRequest()
+
+        every { memberService.update(any(), umr.toServiceDto()) } just runs
+        every { jwtService.extractToken(any()) } returns TokenDto(accessToken().accessToken, refreshToken().refreshToken)
+        every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
+        every { jwtService.extractAuthMember(any()) } returns authMember()
+
+        mockMvc.perform(
+            put("/member")
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(umr))
+        )
+            .andExpect(status().isOk)
+
+
+
+        verify (exactly = 1){ memberService.update(any(), umr.toServiceDto()) }
+    }
 
 
 }

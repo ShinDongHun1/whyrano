@@ -2,6 +2,7 @@ package com.whyrano.global.auth.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberDto
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.jwt.JwtService
@@ -9,16 +10,13 @@ import com.whyrano.global.auth.jwt.TokenDto
 import com.whyrano.global.config.SecurityConfig
 import com.whyrano.global.config.SecurityConfig.Companion.LOGIN_URL
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.MockMvc
@@ -53,7 +51,7 @@ internal class JsonLoginSuccessHandlerTest {
         //given
         val memberDto = createMemberDto()
         val member = memberDto.toEntity(passwordEncoder)
-        every { memberService.loadUserByUsername(member.email) } returns User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        every { memberService.loadUserByUsername(member.email) } returns authMember(password = member.password)
         every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto("Access", "ref")
 
         val hashMap = usernamePasswordHashMap(memberDto.email, memberDto.password)

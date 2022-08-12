@@ -5,7 +5,9 @@ import com.ninjasquad.springmockk.MockkBean
 import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Role
+import com.whyrano.domain.member.fixture.MemberFixture.ID
 import com.whyrano.domain.member.fixture.MemberFixture.accessToken
+import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.repository.MemberRepository
@@ -17,11 +19,9 @@ import com.whyrano.global.auth.jwt.JwtService.Companion.REFRESH_TOKEN_HEADER_NAM
 import com.whyrano.global.auth.jwt.TokenDto
 import com.whyrano.global.config.SecurityConfig
 import io.mockk.every
-import io.mockk.junit5.MockKExtension
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
@@ -137,7 +137,7 @@ internal class JwtAuthenticationFilterTest {
         every { jwtService.extractToken(any()) } returns tokenDto
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
         every { jwtService.isValid(any()) } returns true //RefreshToken은 만료되지 않음
-        every { jwtService.findMemberByTokens(any(), any()) } returns member()
+        every { jwtService.findMemberByTokens(any(), any()) } returns member(id = ID)
         every { jwtService.createAccessAndRefreshToken(any()) } returns tokenDto
 
 
@@ -230,7 +230,7 @@ internal class JwtAuthenticationFilterTest {
         val tokenDto = createTokenDto(accessToken(),  refreshToken())
         every { jwtService.extractToken(any()) } returns tokenDto
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
-        every { jwtService.extractUserDetail(any()) } returns userDetails
+        every { jwtService.extractAuthMember(any()) } returns authMember()
 
         mockMvc
             .perform(

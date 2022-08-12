@@ -3,6 +3,9 @@ package com.whyrano.global.auth.filter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
 import com.whyrano.domain.member.fixture.MemberFixture
+import com.whyrano.domain.member.fixture.MemberFixture.accessToken
+import com.whyrano.domain.member.fixture.MemberFixture.authMember
+import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
@@ -18,7 +21,6 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UsernameNotFoundException
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
@@ -144,8 +146,10 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
 
         val memberDto = MemberFixture.createMemberDto()
         val member = memberDto.toEntity(passwordEncoder)
-        every { memberService.loadUserByUsername(member.email) } returns User.builder().username(member.email).password(member.password).roles(member.role.name).build()
-        every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto("Access", "ref")
+        every { memberService.loadUserByUsername(member.email) } returns authMember(password = member.password)
+
+
+        every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto(accessToken().accessToken, refreshToken().refreshToken)
 
 
         val hashMap = usernamePasswordHashMap(memberDto.email, memberDto.password)

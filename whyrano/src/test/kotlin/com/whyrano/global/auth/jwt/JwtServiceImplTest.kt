@@ -9,6 +9,7 @@ import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.ACCESS_TOKEN_EXPIRATION_PERIOED_DAY
 import com.whyrano.domain.member.fixture.MemberFixture.REFRESH_TOKEN_EXPIRATION_PERIOED_DAY
 import com.whyrano.domain.member.fixture.MemberFixture.SECRRT_KEY
+import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_NAME
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_PREFIX
@@ -22,7 +23,6 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.mock.web.MockHttpServletRequest
-import org.springframework.security.core.userdetails.User
 import java.lang.System.currentTimeMillis
 import java.util.*
 import java.util.concurrent.TimeUnit.DAYS
@@ -31,6 +31,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 /**
  * Created by ShinD on 2022/08/10.
  */
+@ExtendWith(MockKExtension::class)
 internal class JwtServiceImplTest{
 
 
@@ -66,10 +67,10 @@ internal class JwtServiceImplTest{
         //given
         val member = MemberFixture.member()
         every { memberRepository.findByEmail(member.email) } returns member
-        val userDetails = User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        val authMember = authMember()
 
         //when
-        val tokenDto = jwtService.createAccessAndRefreshToken(userDetails)
+        val tokenDto = jwtService.createAccessAndRefreshToken(authMember)
 
 
         // AccessToken 만료일 검증
@@ -97,19 +98,19 @@ internal class JwtServiceImplTest{
     @DisplayName("AccessToken으로부터 userDetail 추출 성공")
     fun test_extractMemberEmail_success() {
         //given
-        val member = MemberFixture.member()
-        val userDetails = User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        val member = MemberFixture.authMember()
         val accessToken = AccessToken.create(
+            member.id,
             member.email,
-            userDetails.authorities.toList()[0].toString(),
+            member.role,
             jwtProperties.accessTokenExpirationPeriodDay,
             algorithm
         )
 
 
         //when, then
-        assertThat(jwtService.extractUserDetail(accessToken)!!.username).isEqualTo(userDetails.username)
-        assertThat(jwtService.extractUserDetail(accessToken)!!.authorities).isEqualTo(userDetails.authorities)
+        assertThat(jwtService.extractAuthMember(accessToken)!!.username).isEqualTo(member.username)
+        assertThat(jwtService.extractAuthMember(accessToken)!!.authorities).isEqualTo(member.authorities)
     }
 
 
@@ -134,14 +135,15 @@ internal class JwtServiceImplTest{
     @DisplayName("request로부터 토큰 추출 성공")
     fun test_extractToken_success() {
         //given
-        val member = MemberFixture.member()
-        val userDetails = User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        val member = MemberFixture.authMember()
         val accessToken = AccessToken.create(
+            member.id,
             member.email,
-            userDetails.authorities.toList()[0].toString(),
+            member.role,
             jwtProperties.accessTokenExpirationPeriodDay,
             algorithm
         )
+
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()
@@ -185,14 +187,15 @@ internal class JwtServiceImplTest{
     @DisplayName("request로부터 토큰 추출 실패 - Refresh Token이 없는 경우")
     fun `request로부터 토큰 추출 실패 - Refresh Token이 없는 경우`() {
         //given
-        val member = MemberFixture.member()
-        val userDetails = User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        val member = MemberFixture.authMember()
         val accessToken = AccessToken.create(
+            member.id,
             member.email,
-            userDetails.authorities.toList()[0].toString(),
+            member.role,
             jwtProperties.accessTokenExpirationPeriodDay,
             algorithm
         )
+
 
         val mockHttpServletRequest = MockHttpServletRequest()
         mockHttpServletRequest.addHeader(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken!!)
@@ -227,14 +230,16 @@ internal class JwtServiceImplTest{
     @DisplayName("request로부터 토큰 추출 실패 - AccessToken 앞에 Bearer이 없는 경우")
     fun `request로부터 토큰 추출 실패 - AccessToken 앞에 Bearer이 없는 경우`() {
         //given
-        val member = MemberFixture.member()
-        val userDetails = User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        val member = MemberFixture.authMember()
         val accessToken = AccessToken.create(
+            member.id,
             member.email,
-            userDetails.authorities.toList()[0].toString(),
+            member.role,
             jwtProperties.accessTokenExpirationPeriodDay,
             algorithm
         )
+
+
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()
@@ -254,14 +259,16 @@ internal class JwtServiceImplTest{
     @DisplayName("request로부터 토큰 추출 실패 - AccessToken의 HeaderName이 Authorization이 아닌 경우")
     fun `request로부터 토큰 추출 실패 - AccessToken의 HeaderName이 Authorization이 아닌 경우`() {
         //given
-        val member = MemberFixture.member()
-        val userDetails = User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        val member = MemberFixture.authMember()
         val accessToken = AccessToken.create(
+            member.id,
             member.email,
-            userDetails.authorities.toList()[0].toString(),
+            member.role,
             jwtProperties.accessTokenExpirationPeriodDay,
             algorithm
         )
+
+
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()
@@ -282,14 +289,16 @@ internal class JwtServiceImplTest{
     @DisplayName("request로부터 토큰 추출 실패 - RefreshToken HeaderName이 RefreshToken이 아닌 경우")
     fun `request로부터 토큰 추출 실패 - RefreshToken HeaderName이 RefreshToken이 아닌 경우`() {
         //given
-        val member = MemberFixture.member()
-        val userDetails = User.builder().username(member.email).password(member.password).roles(member.role.name).build()
+        val member = MemberFixture.authMember()
         val accessToken = AccessToken.create(
+            member.id,
             member.email,
-            userDetails.authorities.toList()[0].toString(),
+            member.role,
             jwtProperties.accessTokenExpirationPeriodDay,
             algorithm
         )
+
+
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()

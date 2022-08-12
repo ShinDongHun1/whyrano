@@ -2,8 +2,8 @@ package com.whyrano.global.config
 
 import com.ninjasquad.springmockk.MockkBean
 import com.whyrano.domain.member.entity.Role.*
-import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.accessToken
+import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.MemberService
@@ -67,7 +67,7 @@ internal class SecurityConfigTest {
             refreshToken().refreshToken
         )
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
-        every { jwtService.extractUserDetail(any()) } returns MemberFixture.userDetail(role = BASIC)
+        every { jwtService.extractAuthMember(any()) } returns authMember(role = BASIC)
 
 
         mockMvc.perform(get("/any"))
@@ -83,7 +83,7 @@ internal class SecurityConfigTest {
         //given
         every { jwtService.extractToken(any()) } returns TokenDto(accessToken(role = BASIC).accessToken, refreshToken().refreshToken)
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
-        every { jwtService.extractUserDetail(any()) } returns MemberFixture.userDetail(role = BASIC)
+        every { jwtService.extractAuthMember(any()) } returns authMember(role = BASIC)
 
 
         mockMvc.perform(get("/admin"))
@@ -95,7 +95,7 @@ internal class SecurityConfigTest {
         //given
         every { jwtService.extractToken(any()) } returns TokenDto(accessToken(role = ADMIN).accessToken, refreshToken().refreshToken)
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
-        every { jwtService.extractUserDetail(any()) } returns MemberFixture.userDetail(role = ADMIN)
+        every { jwtService.extractAuthMember(any()) } returns  authMember(role = ADMIN)
 
 
         mockMvc.perform(get("/any"))
@@ -110,7 +110,7 @@ internal class SecurityConfigTest {
         //given
         every { jwtService.extractToken(any()) } returns TokenDto(accessToken(role = ADMIN).accessToken, refreshToken().refreshToken)
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
-        every { jwtService.extractUserDetail(any()) } returns MemberFixture.userDetail(role = ADMIN)
+        every { jwtService.extractAuthMember(any()) } returns authMember(role = ADMIN)
 
 
         mockMvc.perform(get("/admin"))
@@ -125,7 +125,7 @@ internal class SecurityConfigTest {
         //given
         every { jwtService.extractToken(any()) } returns TokenDto(accessToken(role = BLACK).accessToken, refreshToken().refreshToken)
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
-        every { jwtService.extractUserDetail(any()) } returns MemberFixture.userDetail(role = BLACK)
+        every { jwtService.extractAuthMember(any()) } returns authMember(role = BLACK)
 
 
         mockMvc.perform(get("/admin"))
