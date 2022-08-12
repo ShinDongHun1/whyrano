@@ -7,6 +7,8 @@ import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.service.dto.CreateMemberDto
 import com.whyrano.domain.member.service.dto.UpdateMemberDto
+import org.springframework.security.core.userdetails.User
+import org.springframework.security.core.userdetails.UserDetails
 
 /**
  * Created by ShinD on 2022/08/09.
@@ -74,4 +76,13 @@ object MemberFixture {
         refreshTokenExpirationPeriodDay: Long = REFRESH_TOKEN_EXPIRATION_PERIOED_DAY,
     ) =
         RefreshToken.create( refreshTokenExpirationPeriodDay, ALGORITHM)
+
+    fun userDetail(
+        username: String = EMAIL,
+        password: String = "SECRET",
+        role: Role = Role.BASIC,
+    ): UserDetails =
+        User.builder().username(username).password(password).roles(role.name).build()
+
+
 }
