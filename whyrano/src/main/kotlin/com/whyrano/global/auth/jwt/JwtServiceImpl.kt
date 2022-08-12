@@ -8,7 +8,7 @@ import com.whyrano.domain.member.entity.Token
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_NAME
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_PREFIX
-import org.springframework.security.core.userdetails.UserDetails
+import com.whyrano.global.auth.userdetails.AuthMember
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -33,10 +33,10 @@ class JwtServiceImpl(
      * 회원 인증 정보로부터 AccessToken과 RefreshToken 추출
      */
     @Transactional
-    override fun createAccessAndRefreshToken(userDetails: UserDetails): TokenDto {
+    override fun createAccessAndRefreshToken(authMember: AuthMember): TokenDto {
 
         // 인증 정보로부터 email 추출
-        val email = userDetails.username
+        val email = authMember.email
 
         // 이메일로 회원 찾아오기 -> 영속성 컨텍스트에 회원 저장
         val member = memberRepository.findByEmail(email)
@@ -44,8 +44,9 @@ class JwtServiceImpl(
 
         // AccessToken 발급
         val accessToken = AccessToken.create(
-            email = member.email,
-            authority = userDetails.authorities.toList()[0].toString(), // Authority는 반드시 하나임
+            id = authMember.id,
+            email = authMember.email,
+            role = authMember.role, // Authority는 반드시 하나임
             accessTokenExpirationPeriodDay = jwtProperties.accessTokenExpirationPeriodDay,
             algorithm = algorithm
         )
@@ -69,8 +70,8 @@ class JwtServiceImpl(
     /**
      * AccessToken으로부터 이메일 추출
      */
-    override fun extractUserDetail(accessToken: AccessToken) =
-        accessToken.getUserDetails(algorithm)
+    override fun extractAuthMember(accessToken: AccessToken) =
+        accessToken.getAuthMember(algorithm)
 
 
 

@@ -3,8 +3,8 @@ package com.whyrano.domain.member.service
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.dto.CreateMemberDto
 import com.whyrano.domain.member.service.dto.UpdateMemberDto
+import com.whyrano.global.auth.userdetails.AuthMember
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -49,12 +49,7 @@ class MemberService(
     override fun loadUserByUsername(username: String): UserDetails {
         val member = memberRepository.findByEmail(username) ?: throw UsernameNotFoundException("회원을 찾을 수 없습니다.")
 
-        return User.builder()
-            .username(username)
-            .password(member.password)
-            .roles(member.role.name)
-            .build()
-
+        return AuthMember(id = member.id!!, email = member.email, password = member.password, role = member.role)
     }
 
 

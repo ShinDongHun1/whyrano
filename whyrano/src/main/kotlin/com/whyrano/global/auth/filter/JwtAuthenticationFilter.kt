@@ -3,6 +3,8 @@ package com.whyrano.global.auth.filter
 import com.whyrano.global.auth.handler.JsonLoginSuccessHandler
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
+import com.whyrano.global.auth.userdetails.AuthMember
+import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.OK
@@ -10,7 +12,6 @@ import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import java.nio.charset.Charset
 import java.nio.charset.StandardCharsets.UTF_8
@@ -32,8 +33,6 @@ class JwtAuthenticationFilter(
 
 
 
-
-
     /**
      * AccessToken이 만료되지 않은 경우 ->
      * (5분 이상 남은 경우 -> 아래 진행, 5분 이하로 남은 경우 -> 재발급 요청 (오류날수도 있으니까))
@@ -48,6 +47,7 @@ class JwtAuthenticationFilter(
      *          일치하는 경우 AceessToken 재발급, 동시에 RefreshToken도 재발급 해주기(보안을 위해 자주 변경하는 느낌?)
      */
 
+    private val log = KotlinLogging.logger {  }
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
 
         val req = request as HttpServletRequest
@@ -77,7 +77,7 @@ class JwtAuthenticationFilter(
         if (jwtService.isValidMoreThanMinute(accessToken = accessToken, minute = 5)){
 
             // UserDetails 이 없는 경우 오류
-            val userDetails = jwtService.extractUserDetail(accessToken)
+            val userDetails = jwtService.extractAuthMember(accessToken)
                 ?:  return failureAuthentication(res)
 
             // 인증 성공
@@ -101,13 +101,17 @@ class JwtAuthenticationFilter(
 
 
         /**
+         * AccessToken이 만료되었으나, AccessToken과 RefreshToken이 모두 유효한 경우
          * 토큰 재발급 시 들어갈 정보 생성
          */
-        val userDetails = User.builder()
-                                            .username(member.email)
-                                            .password("SECRET")
-                                            .authorities(member.role.authority)
-                                            .build()
+        checkNotNull(member.id) {
+            val message = "member ID is Null"
+            log.error { message }
+            message
+        }
+
+
+        val authMember = AuthMember(id= member.id!!, email = member.email, role = member.role)
 
         // Http 응답 설정
         setResponse(
@@ -115,7 +119,7 @@ class JwtAuthenticationFilter(
             status = OK,
             contentType = APPLICATION_JSON_VALUE,
             charset = UTF_8,
-            content = tokenToJson(jwtService.createAccessAndRefreshToken(userDetails = userDetails)) // 토큰 재발급
+            content = tokenToJson(jwtService.createAccessAndRefreshToken(authMember = authMember)) // 토큰 재발급
         )
     }
 
