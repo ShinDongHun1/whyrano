@@ -32,7 +32,7 @@ class Member(
     var point: Int = 0, // 포인트
 
     @Column(nullable = true)
-    var profileImagePath: String, // 프로필 사진 경로 (https://~~)
+    var profileImagePath: String?, // 프로필 사진 경로 (https://~~)
 
     @Embedded
     @Column(nullable = true)

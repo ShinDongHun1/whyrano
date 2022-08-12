@@ -12,7 +12,7 @@ data class CreateMemberDto(
     var email: String,
     var password: String,
     var nickname: String,
-    var profileImagePath: String,
+    var profileImagePath: String?,
 ) {
     fun toEntity(passwordEncoder: PasswordEncoder): Member {
         return Member(

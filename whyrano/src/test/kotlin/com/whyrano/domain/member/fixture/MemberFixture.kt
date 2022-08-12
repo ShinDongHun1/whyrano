@@ -1,6 +1,7 @@
 package com.whyrano.domain.member.fixture
 
 import com.auth0.jwt.algorithms.Algorithm
+import com.whyrano.domain.member.controller.CreateMemberRequest
 import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.RefreshToken
@@ -39,9 +40,9 @@ object MemberFixture {
         email: String = EMAIL,
         password: String = PASSWORD,
         nickname: String = NICKNAME,
-        profileImagePath: String = PROFILE_IMAGE_PATH,
+        profileImagePath: String? = PROFILE_IMAGE_PATH,
     ) =
-        CreateMemberDto(AUTHORITY, EMAIL, PASSWORD, NICKNAME, PROFILE_IMAGE_PATH)
+        CreateMemberDto(authority, email, password, nickname, profileImagePath)
 
 
     fun member(
@@ -85,4 +86,11 @@ object MemberFixture {
         User.builder().username(username).password(password).roles(role.name).build()
 
 
+    fun createMemberRequest(
+        email: String = EMAIL,
+        password: String = PASSWORD,
+        nickname: String = NICKNAME,
+        profileImagePath: String? = PROFILE_IMAGE_PATH
+    ) =
+        CreateMemberRequest(email, password, nickname, profileImagePath)
 }
