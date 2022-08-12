@@ -1,4 +1,4 @@
-package com.whyrano.domain.member.controller
+package com.whyrano.domain.member.controller.dto.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.whyrano.domain.member.entity.Role

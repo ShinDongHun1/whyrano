@@ -1,4 +1,4 @@
-package com.whyrano.domain.member.controller
+package com.whyrano.domain.member.controller.dto.request
 
 import com.whyrano.domain.member.service.dto.CreateMemberDto
 import javax.validation.constraints.NotEmpty

@@ -1,7 +1,7 @@
 package com.whyrano.domain.member.fixture
 
 import com.auth0.jwt.algorithms.Algorithm
-import com.whyrano.domain.member.controller.CreateMemberRequest
+import com.whyrano.domain.member.controller.dto.request.CreateMemberRequest
 import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.RefreshToken
