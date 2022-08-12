@@ -1,6 +1,7 @@
 package com.whyrano.domain.member.controller.dto.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberDto
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberRequest
@@ -13,7 +14,7 @@ import org.junit.jupiter.api.Test
 internal class CreateMemberRequestTest {
 
     companion object {
-        private val objectMapper = ObjectMapper()
+        private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
         private var JSON_STRING_FORMAT = """
             {   
                 "email":"%s",
