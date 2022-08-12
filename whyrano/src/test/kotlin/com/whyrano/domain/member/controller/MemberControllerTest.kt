@@ -6,6 +6,7 @@ import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.accessToken
 import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberRequest
+import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.MemberService
@@ -207,11 +208,11 @@ internal class MemberControllerTest {
     fun `회원수정 성공`() {
         //given
         val umr = MemberFixture.updateMemberRequest()
-
+        val memberId = 10L
         every { memberService.update(any(), umr.toServiceDto()) } just runs
-        every { jwtService.extractToken(any()) } returns TokenDto(accessToken().accessToken, refreshToken().refreshToken)
+        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
-        every { jwtService.extractAuthMember(any()) } returns authMember()
+        every { jwtService.extractAuthMember(any()) } returns authMember(id = memberId)
 
         mockMvc.perform(
             put("/member")
@@ -221,9 +222,55 @@ internal class MemberControllerTest {
             .andExpect(status().isOk)
 
 
-
         verify (exactly = 1){ memberService.update(any(), umr.toServiceDto()) }
     }
 
+
+
+
+    @Test
+    fun `회원수정 실패 - AccessToken이 만료, RefreshToken은 멀쩡한 경우`() {
+        //given
+        val umr = MemberFixture.updateMemberRequest()
+        val memberId = 10L
+        every { memberService.update(any(), umr.toServiceDto()) } just runs
+        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
+        every { jwtService.isValid( any()) } returns true
+        every { jwtService.findMemberByTokens( any(), any()) } returns member(id= memberId)
+        every { jwtService.createAccessAndRefreshToken( any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+
+        mockMvc.perform(
+            put("/member")
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(umr))
+        )
+            .andExpect(status().isOk)
+
+
+        verify (exactly = 0){ memberService.update(any(), umr.toServiceDto()) }
+    }
+
+
+    @Test
+    fun `회원수정 실패 - AccessToken이 만료, RefreshToken도 만료된 경우`() {
+        //given
+        val umr = MemberFixture.updateMemberRequest()
+        val memberId = 10L
+        every { memberService.update(any(), umr.toServiceDto()) } just runs
+        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
+        every { jwtService.isValid( any()) } returns false
+
+        mockMvc.perform(
+            put("/member")
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(umr))
+        )
+            .andExpect(status().isForbidden)
+
+
+        verify (exactly = 0){ memberService.update(any(), umr.toServiceDto()) }
+    }
 
 }
