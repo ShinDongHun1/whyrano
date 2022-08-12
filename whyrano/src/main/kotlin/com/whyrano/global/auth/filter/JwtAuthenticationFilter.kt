@@ -6,7 +6,6 @@ import com.whyrano.global.auth.jwt.TokenDto
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.FORBIDDEN
 import org.springframework.http.HttpStatus.OK
-import org.springframework.http.MediaType
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
@@ -14,7 +13,6 @@ import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
 import java.nio.charset.Charset
-import java.nio.charset.StandardCharsets
 import java.nio.charset.StandardCharsets.UTF_8
 import javax.servlet.Filter
 import javax.servlet.FilterChain
@@ -74,7 +72,7 @@ class JwtAuthenticationFilter(
 
         /**
          * AccessToken이 만료되지 않은 경우
-         *                               (5분 이상 남았는지 검사)
+         *                               (5분 이상 남았는지 검사)[extractUserDetail 에서 오류날수도 있기 때문에]
          */
         if (jwtService.isValidMoreThanMinute(accessToken = accessToken, minute = 5)){
 
@@ -101,7 +99,10 @@ class JwtAuthenticationFilter(
         val member = jwtService.findMemberByTokens(accessToken, refreshToken)
             ?: return failureAuthentication(res) // 두 토큰을 가진 회원이 없는 경우 403
 
-        // 토큰 재발급
+
+        /**
+         * 토큰 재발급 시 들어갈 정보 생성
+         */
         val userDetails = User.builder()
                                             .username(member.email)
                                             .password("SECRET")
@@ -114,9 +115,8 @@ class JwtAuthenticationFilter(
             status = OK,
             contentType = APPLICATION_JSON_VALUE,
             charset = UTF_8,
-            content = tokenToJson(jwtService.createAccessAndRefreshToken(userDetails = userDetails))
+            content = tokenToJson(jwtService.createAccessAndRefreshToken(userDetails = userDetails)) // 토큰 재발급
         )
-
     }
 
 
