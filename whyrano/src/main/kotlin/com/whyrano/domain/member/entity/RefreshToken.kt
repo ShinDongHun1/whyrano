@@ -12,7 +12,7 @@ import javax.persistence.Embeddable
  * Created by ShinD on 2022/08/10.
  */
 @Embeddable
-class RefreshToken (
+data class RefreshToken (
     var refreshToken: String? =null
 ) : Token {
     companion object {

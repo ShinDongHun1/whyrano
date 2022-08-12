@@ -12,7 +12,7 @@ import javax.persistence.Embeddable
  * Created by ShinD on 2022/08/10.
  */
 @Embeddable
-class AccessToken (
+data class AccessToken (
     var accessToken: String? = null,
 ) : Token {
 
