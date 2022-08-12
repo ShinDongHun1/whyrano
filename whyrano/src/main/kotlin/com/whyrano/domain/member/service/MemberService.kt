@@ -22,11 +22,11 @@ class MemberService(
     private val passwordEncoder: PasswordEncoder,
 ) : UserDetailsService {
 
-    fun signUp(createMemberDto: CreateMemberDto) {
+    fun signUp(createMemberDto: CreateMemberDto) : Long {
         memberRepository.findByEmail(createMemberDto.email)
             ?.let { throw IllegalStateException("이미 존재") } // 이미 가입된 이메일인 경우 예외 발생
 
-        memberRepository.save(createMemberDto.toEntity(passwordEncoder))
+        return memberRepository.save(createMemberDto.toEntity(passwordEncoder)).id!!
     }
 
     fun update(id: Long, UMDto: UpdateMemberDto) {
