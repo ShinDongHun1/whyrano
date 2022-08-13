@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.whyrano.global.auth.exception.AuthException
 import com.whyrano.global.auth.exception.AuthExceptionType.ELSE
 import com.whyrano.global.exception.ExceptionResponse
+import mu.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatus.UNAUTHORIZED
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
@@ -20,6 +21,8 @@ import javax.servlet.http.HttpServletResponse
 class JsonLoginFailureHandler(
     private val objectMapper: ObjectMapper,
 ) : AuthenticationFailureHandler {
+
+    private val log = KotlinLogging.logger {  }
 
 
     override fun onAuthenticationFailure(
@@ -45,12 +48,15 @@ class JsonLoginFailureHandler(
 
             //예상하지 못한 오류
             else -> {
+                log.error { exception.message }
+                exception.printStackTrace()
+
                 setResponse(
                     response = response,
                     status = UNAUTHORIZED,
                     contentType = APPLICATION_JSON_VALUE,
                     charset = UTF_8,
-                    content = objectMapper.writeValueAsString(ExceptionResponse(errorCode = ELSE.errorCode(), message = exception.message!!))
+                    content = objectMapper.writeValueAsString(ExceptionResponse(errorCode = ELSE.errorCode(), message = ELSE.message()))
                 )
             }
         }
