@@ -34,11 +34,12 @@ internal class SecurityConfigTest {
     @MockkBean private lateinit var jwtService: JwtService
 
     @Test
-    fun `로그인 경로 접근 시 401`() {
+    fun `로그인 경로 post가 아닌 메서드로 접근 시 405`() {
         //given
         mockMvc.perform(get("/login"))
-            .andExpect(status().isUnauthorized)
+            .andExpect(status().isMethodNotAllowed)
     }
+
 
     @Test
     fun `모두 허용된 경로 접근 시 인증처리 하지 않음`() {
@@ -51,11 +52,11 @@ internal class SecurityConfigTest {
     }
 
     @Test
-    fun `나머지 경로 접근 시 403`() {
+    fun `나머지 경로 접근 시 401`() {
         //given
         every { jwtService.extractToken(any()) } returns null
         mockMvc.perform(get("/any"))
-            .andExpect(status().isForbidden)
+            .andExpect(status().isUnauthorized)
     }
 
 

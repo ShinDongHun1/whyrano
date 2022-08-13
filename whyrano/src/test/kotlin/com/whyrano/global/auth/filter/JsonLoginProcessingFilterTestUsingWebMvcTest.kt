@@ -1,6 +1,7 @@
 package com.whyrano.global.auth.filter
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.ninjasquad.springmockk.MockkBean
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.accessToken
@@ -11,6 +12,7 @@ import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
 import com.whyrano.global.config.SecurityConfig
 import com.whyrano.global.config.SecurityConfig.Companion.LOGIN_URL
+import com.whyrano.global.exception.ExceptionResponse
 import io.mockk.every
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -41,7 +43,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     
     companion object {
-        private val objectMapper = ObjectMapper()
+        private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
         private var passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
     }
 
@@ -63,24 +65,29 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     @Test
     @DisplayName("로그인 get 요청인 경우 - 401")
     fun test_login_get_fail_unauthorized() {
-        mockMvc
+        val result = mockMvc
             .perform(
-                     get(LOGIN_URL)
+                get(LOGIN_URL)
                     .contentType(APPLICATION_JSON)
             )
-            .andExpect(status().isUnauthorized)
+            .andExpect(status().isMethodNotAllowed)
+            .andReturn()
+
+        val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
+        assertThat(readValue.errorCode).isEqualTo(1100)
+
     }
 
 
     @Test
-    @DisplayName("로그인시 json이 아닌 경우 - 401")
+    @DisplayName("로그인시 json이 아닌 경우 - 415")
     fun test_login_noJson_fail_unauthorized() {
         mockMvc
             .perform(
                     post(LOGIN_URL)
                     .contentType(APPLICATION_FORM_URLENCODED)
             )
-            .andExpect(status().isUnauthorized)
+            .andExpect(status().isUnsupportedMediaType)
     }
 
 
