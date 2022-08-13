@@ -12,5 +12,4 @@ data class UpdateMemberRequest(
 ) {
     fun toServiceDto(): UpdateMemberDto =
         UpdateMemberDto(password, nickname, profileImagePath)
-
 }

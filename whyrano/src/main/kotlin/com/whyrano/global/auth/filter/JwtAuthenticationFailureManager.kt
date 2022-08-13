@@ -19,9 +19,9 @@ class JwtAuthenticationFailureManager(
 ) {
 
     private val log = KotlinLogging.logger {  }
+
     fun failureAuthentication(response: HttpServletResponse ,ex: Exception) {
         when (ex) {
-
             //예상한 범위 내의 오류
             is AuthException -> {
                 val exceptionType = ex.exceptionType()
@@ -48,7 +48,6 @@ class JwtAuthenticationFailureManager(
             }
         }
     }
-
 
     private fun setResponse(
         response: HttpServletResponse,

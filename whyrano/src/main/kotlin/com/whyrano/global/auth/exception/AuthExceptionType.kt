@@ -12,7 +12,8 @@ enum class AuthExceptionType(
     private val message: String
 ) : BaseExceptionType{
 
-    NOT_ALLOWED_LOGIN_METHOD(1100, HttpStatus.METHOD_NOT_ALLOWED, "요청이 POST 가 아닙니다."),
+    //== Json 로그인 관련 ==//
+    NOT_ALLOWED_LOGIN_METHOD(1100, HttpStatus.METHOD_NOT_ALLOWED, "요청이 POST가 아닙니다."),
     UNSUPPORTED_LOGIN_MEDIA_TYPE(1101, HttpStatus.UNSUPPORTED_MEDIA_TYPE, "요청이 JSON 형식이 아닙니다."),
     BAD_USERNAME_PASSWORD(1102, HttpStatus.UNAUTHORIZED, "아이디나 비밀번호가 없거나, 형식이 잘못되었습니다."),
     NOT_FOUND_MEMBER(1103, HttpStatus.UNAUTHORIZED, "유저 정보가 없습니다."),
@@ -25,7 +26,7 @@ enum class AuthExceptionType(
     UNMATCHED_MEMBER(1107, HttpStatus.UNAUTHORIZED, "두 토큰을 가진 유저 정보가 없습니다."),
 
 
-
+    //== 이외 예측하지 못한 오류 ==//
     ELSE(1199, HttpStatus.UNAUTHORIZED, "로그인 도중 오류가 발생하였습니다."),
 
     ;
@@ -34,5 +35,4 @@ enum class AuthExceptionType(
     override fun errorCode() = errorCode
     override fun httpStatus() = httpStatus
     override fun message() = message
-
 }

@@ -43,7 +43,6 @@ class SecurityConfig {
 
 
 
-
     /**
      * Security 관련 설정
      */
@@ -70,6 +69,7 @@ class SecurityConfig {
 
         return http.build()
     }
+
 
 
 
@@ -181,7 +181,6 @@ class SecurityConfig {
 
 
 
-
     /**
      * 권한별 계층 설정
      * https://www.javafixing.com/2022/01/fixed-spring-security-role-hierarchy.html
@@ -198,7 +197,6 @@ class SecurityConfig {
 
 
 
-
     /**
      * https://velog.io/@gkdud583/HttpSecurity-WebSecurity%EC%9D%98-%EC%B0%A8%EC%9D%B4
      * WebSecurity - 인증,인가 모두 처리 X
@@ -207,7 +205,6 @@ class SecurityConfig {
     @Bean
     fun webSecurityCustomizer(): WebSecurityCustomizer
             = WebSecurityCustomizer { it.ignoring().antMatchers("/images/**", "/js/**", "/webjars/**") }
-
 
 
 

@@ -25,7 +25,10 @@ class ExceptionController {
         val UNEXPECTED_EXCEPTION_HTTP_STATUS = INTERNAL_SERVER_ERROR
     }
 
+
     private val log = KotlinLogging.logger {  }
+
+
 
     @ExceptionHandler(BaseException::class)
     fun handleBaseException(ex: BaseException): ResponseEntity<ExceptionResponse> {
@@ -36,7 +39,6 @@ class ExceptionController {
             .status(exceptionType.httpStatus())
             .body(ExceptionResponse(errorCode = exceptionType.errorCode(), message = exceptionType.message()))
     }
-
 
 
 
@@ -63,6 +65,8 @@ class ExceptionController {
             .body(ExceptionResponse(errorCode = UNEXPECTED_EXCEPTION_ERROR_CODE, message = UNEXPECTED_EXCEPTION_MESSAGE))
     }
 }
+
+
 
 data class ExceptionResponse(
     val errorCode: Int,

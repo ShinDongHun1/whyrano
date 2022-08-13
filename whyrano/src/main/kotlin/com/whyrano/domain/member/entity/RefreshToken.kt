@@ -18,6 +18,7 @@ data class RefreshToken (
     companion object {
         private const val REFRESH_TOKEN_SUBJECT = "RefreshToken"
 
+        //== 정적 팩터리 메서드 ==//
         fun create(
             refreshTokenExpirationPeriodDay: Long,
             algorithm: Algorithm,
@@ -26,14 +27,10 @@ data class RefreshToken (
                 refreshToken = JWT.create()
                     .withSubject(RefreshToken.REFRESH_TOKEN_SUBJECT)
                     .withExpiresAt(
-                        Date(MILLISECONDS
-                            .convert(refreshTokenExpirationPeriodDay, DAYS)
-                            .plus(currentTimeMillis())
-                        ))
+                        Date(MILLISECONDS.convert(refreshTokenExpirationPeriodDay, DAYS).plus(currentTimeMillis())))
                     .sign(algorithm)
             )
     }
-
 
     override fun isValid(algorithm: Algorithm) =
         try {

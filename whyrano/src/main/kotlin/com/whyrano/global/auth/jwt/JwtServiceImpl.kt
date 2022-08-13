@@ -83,20 +83,17 @@ class JwtServiceImpl(
     override fun extractToken(request: HttpServletRequest): TokenDto? {
 
         //ACCESS_TOKEN_HEADER_NAME(Authorization) 이 없는 경우 Null
-        val accessTokenValue = request.getHeader(ACCESS_TOKEN_HEADER_NAME)
-            ?: return null
+        val accessTokenValue = request.getHeader(ACCESS_TOKEN_HEADER_NAME) ?: return null
 
         //ACCESS_TOKEN_HEADER_PREFIX(Bearer )로 시작하지 않는 경우 Null
-        if (!accessTokenValue.startsWith(ACCESS_TOKEN_HEADER_PREFIX))
-            return null
+        if (!accessTokenValue.startsWith(ACCESS_TOKEN_HEADER_PREFIX)) return null
 
 
         //accessToken 추출 (Bearer 제거)
         val accessToken = accessTokenValue.replace(ACCESS_TOKEN_HEADER_PREFIX, "").trim()
 
-        //refreshToken 추출
-        val refreshToken = request.getHeader(JwtService.REFRESH_TOKEN_HEADER_NAME)
-            ?: return null
+        //refreshToken 추출, 없는 경우 null
+        val refreshToken = request.getHeader(JwtService.REFRESH_TOKEN_HEADER_NAME) ?: return null
 
         return TokenDto(accessToken, refreshToken)
     }
@@ -109,24 +106,27 @@ class JwtServiceImpl(
     /**
      * AccessToken 혹은 RefreshToken이 유효한 상태인지 확인
      */
-    override fun isValid(token: Token) =
-        token.isValid(algorithm)
+    override fun isValid(token: Token) = token.isValid(algorithm)
+
+
+
+
 
     /**
      * AccessToken의 유효기간이 특정 시간보다 길게 남았는지 검사
      */
     override fun isValidMoreThanMinute(accessToken: AccessToken, minute: Long): Boolean {
         return try {
-            val expiredDate = accessToken.getExpiredDate(algorithm)
-
-            val expiredDateTime = expiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-            val now = LocalDateTime.now().plusMinutes(minute)
+            val expiredDate     = accessToken.getExpiredDate(algorithm) // 만료일(Date)
+            val expiredDateTime = expiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() //Date -> LocalDateTime
+            val now             = LocalDateTime.now().plusMinutes(minute)//현재 시간
 
             now.isBefore(expiredDateTime)
         }catch (e: Exception){
             false
         }
     }
+
 
     override fun findMemberByTokens(accessToken: AccessToken, refreshToken: RefreshToken) =
         memberRepository.findByAccessTokenAndRefreshToken(accessToken, refreshToken)

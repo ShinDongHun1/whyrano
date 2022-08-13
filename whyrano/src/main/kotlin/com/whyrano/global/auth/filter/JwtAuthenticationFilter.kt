@@ -12,15 +12,12 @@ import javax.servlet.http.HttpServletResponse
  * Created by ShinD on 2022/08/13.
  */
 class JwtAuthenticationFilter(
-    private val uncheckedUrls: List<String> = emptyList(),
+    uncheckedUrls: List<String> = emptyList(),
     private val jwtAuthenticationManager: JwtAuthenticationManager,
     private val jwtAuthenticationFailureManager: JwtAuthenticationFailureManager,
 ) : Filter {
 
-
-
     private val DEFAULT_ANT_PATH_REQUEST_MATCHERS: List<AntPathRequestMatcher> = uncheckedUrls.map { AntPathRequestMatcher(it) }
-
 
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
 
@@ -34,7 +31,6 @@ class JwtAuthenticationFilter(
             }
         }
 
-
         try {
             //인증 진행
             jwtAuthenticationManager.authenticateWithTokens(req, res, chain)
@@ -44,7 +40,5 @@ class JwtAuthenticationFilter(
             jwtAuthenticationFailureManager.failureAuthentication(res, ex)
         }
     }
-
-    private fun isUncheckUrl(requestURI: String) = uncheckedUrls.contains(requestURI)
 }
 

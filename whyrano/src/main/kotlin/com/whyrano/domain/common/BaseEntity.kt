@@ -18,5 +18,4 @@ abstract class BaseEntity : BaseTimeEntity() {
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "created_by", nullable = false)
     var createdBy: Member? = null
-
 }

@@ -15,7 +15,7 @@ class MemberAuditorAware(
 
     override fun getCurrentAuditor(): Optional<Member> =
         Optional.ofNullable(SecurityContextHolder.getContext())
-            .map { it.authentication }
-            .filter{ it.isAuthenticated }
-            .map { memberRepository.findByEmail(it.name) }
+            .map { it.authentication } // authentication 으로 변환
+            .filter{ it.isAuthenticated } // 인증되었다면 진행
+            .map { memberRepository.findByEmail(it.name) } // it은 AbstractAuthenticationToken(UsernamePasswordAuthenticationToken)이며,  ((UserDetails) this.getPrincipal()).getUsername() 을 반환
 }

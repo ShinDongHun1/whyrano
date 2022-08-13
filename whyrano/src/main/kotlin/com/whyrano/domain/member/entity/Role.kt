@@ -10,9 +10,9 @@ enum class Role {
     BASIC, // 일반 유저
 
     BLACK, // 블랙리스트
+
     ;
-    val authority: String =
-        "ROLE_${this.name}"
+    val authority: String = "ROLE_${this.name}"
 }
 
 

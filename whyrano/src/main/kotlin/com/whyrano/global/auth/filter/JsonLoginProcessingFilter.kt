@@ -16,38 +16,39 @@ import javax.servlet.http.HttpServletResponse
 /**
  * Created by ShinD on 2022/08/09.
  */
-class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProcessingFilter(
-    AntPathRequestMatcher(loginUrl)
-) {
-
+class JsonLoginProcessingFilter(
+    loginUrl: String
+) : AbstractAuthenticationProcessingFilter(AntPathRequestMatcher(loginUrl)) {   // 로그인 처리 하지 않을 url 설정
 
     companion object {
-        private const val NO_CONTENT = -1
-        // ObjectMapper 는 Thread Safe 하다.
-        private val objectMapper: ObjectMapper = ObjectMapper()
+        private const val NO_CONTENT = -1 // 내용이 없는 경우 length는 -1을 반환
+        private val objectMapper: ObjectMapper = ObjectMapper()  // ObjectMapper는 Thread Safe
     }
-
 
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
 
+        // 메서드가 Post 가 아닌 경우 로그인 시도하지 않음
+        if(!isPost(request)) throw AuthException(AuthExceptionType.NOT_ALLOWED_LOGIN_METHOD)
 
-        if(!isPost(request))  // 메서드가 Post 가 아닌 경우 로그인 시도하지 않음
-            throw AuthException(AuthExceptionType.NOT_ALLOWED_LOGIN_METHOD)
+        // Json 이 아닌 경우 로그인 시도하지 않음
+        if(!isJson(request)) throw AuthException(AuthExceptionType.UNSUPPORTED_LOGIN_MEDIA_TYPE)
 
-        if(!isJson(request))  // Json 이 아닌 경우 로그인 시도하지 않음
-            throw AuthException(AuthExceptionType.UNSUPPORTED_LOGIN_MEDIA_TYPE)
-
-        if (request.contentLength == NO_CONTENT)   // body에 아무것도 작성되지 않았다면 로그인 실패
-            throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
+        // body에 아무것도 작성되지 않았다면 로그인 실패
+        if (request.contentLength == NO_CONTENT) throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
 
 
+
+
+        /**
+         * 로그인 처리 로직
+         */
 
         // request로부터 계정 정보 추출
         val accountDto = extractAccount(request)
 
-        if (usernameIsBlank(accountDto) || passwordIsBlank(accountDto) ) { // 공백이 있다면 처리하지 않음
-            throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
-        }
+        // 공백이 있다면 처리하지 않음
+        if (usernameIsBlank(accountDto) || passwordIsBlank(accountDto) ) throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
+
 
         return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(accountDto.username, accountDto.password));
     }
@@ -77,7 +78,9 @@ class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProces
 
 
 
+
     private data class AccountDto(
         var username: String? = null,
-        var password: String? = null)
+        var password: String? = null,
+    )
 }

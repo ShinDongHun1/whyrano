@@ -12,4 +12,5 @@ class AuthMember(
     val email: String,
     password: String = "SECRET",
     val role: Role,
-) : User(email, password, listOf(SimpleGrantedAuthority(role.authority)))//SimpleGrantedAuthority(ROLE_XXX)) 이런 식으로 사용함
+) : User(email, password, listOf(SimpleGrantedAuthority(role.authority)))
+                          //SimpleGrantedAuthority(ROLE_XXX)) 이런 식으로 사용함

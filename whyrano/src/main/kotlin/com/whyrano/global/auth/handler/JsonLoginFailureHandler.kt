@@ -24,13 +24,11 @@ class JsonLoginFailureHandler(
 
     private val log = KotlinLogging.logger {  }
 
-
     override fun onAuthenticationFailure(
         request: HttpServletRequest,
         response: HttpServletResponse,
         exception: AuthenticationException,
     ) {
-
         //예외 정보 가져오기
         when (exception) {
 
@@ -62,7 +60,6 @@ class JsonLoginFailureHandler(
         }
     }
 
-
     private fun setResponse(
         response: HttpServletResponse,
         status: HttpStatus,
@@ -75,5 +72,4 @@ class JsonLoginFailureHandler(
         response.characterEncoding = charset.name()
         response.writer.println(content)
     }
-
 }

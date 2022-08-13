@@ -10,7 +10,6 @@ data class CreateMemberRequest(
     val profileImagePath: String? = null,
 ) {
 
-
     fun toServiceDto(): CreateMemberDto {
         //profileImagePath가 null이 아닌 ""가 넘어온 경우 null로 변경하여 넘기기
         if (profileImagePath != null && profileImagePath.isBlank()) {
@@ -18,5 +17,4 @@ data class CreateMemberRequest(
         }
         return CreateMemberDto(email = email, password = password, nickname = nickname, profileImagePath = profileImagePath)
     }
-
 }

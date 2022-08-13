@@ -23,16 +23,20 @@ class MemberController(
      * 회원 가입 요청
      */
     @PostMapping("/signup")
-    fun signUp(@Valid @RequestBody cmr: CreateMemberRequest) : ResponseEntity<Unit> {
-        val memberId = memberService.signUp(cmr.toServiceDto())
+    fun signUp(
+        @Valid @RequestBody cmr: CreateMemberRequest
+    ) : ResponseEntity<Unit> {
 
+        val memberId = memberService.signUp(cmr.toServiceDto())
         val url = fromCurrentContextPath() // http://~~
             .path("/member/{memberId}")    // http://~~/member/{memberId}
             .buildAndExpand(memberId)      // http://~~/member/10
             .toUri()
-
         return ResponseEntity.created(url).build()
     }
+
+
+
 
     /**
      * 회원 수정
@@ -40,12 +44,16 @@ class MemberController(
     @PutMapping("/member")
     fun update(
         @Auth authMember: AuthMember,
-        @RequestBody umr: UpdateMemberRequest) : ResponseEntity<Unit> {
-
+        @RequestBody umr: UpdateMemberRequest
+    ): ResponseEntity<Unit> {
 
         memberService.update(authMember.id, umr.toServiceDto())
         return ResponseEntity.ok().build()
     }
+
+
+
+
 
 
     /**
@@ -58,11 +66,6 @@ class MemberController(
     ): ResponseEntity<Unit> {
 
         memberService.delete(authMember.id, passwordDto.password)
-
         return ResponseEntity.noContent().build()
     }
-
-
-
-
 }

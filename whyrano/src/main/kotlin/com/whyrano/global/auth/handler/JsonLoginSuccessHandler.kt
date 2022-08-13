@@ -36,7 +36,6 @@ class JsonLoginSuccessHandler(
         response: HttpServletResponse,
         authentication: Authentication,
     ) {
-
         try {
             authentication.principal as AuthMember
         } catch (e: Exception){
@@ -44,7 +43,6 @@ class JsonLoginSuccessHandler(
             e.printStackTrace()
             return
         }
-
 
 
         // 반환 정보 설정
@@ -56,7 +54,6 @@ class JsonLoginSuccessHandler(
             content =  tokenToJson(jwtService.createAccessAndRefreshToken(authentication.principal as AuthMember))
         )
     }
-
 
     private fun setResponse(
         response: HttpServletResponse,
@@ -73,5 +70,4 @@ class JsonLoginSuccessHandler(
 
     private fun tokenToJson(tokenDto: TokenDto): String
         = TOKEN_BODY_FORMAT.format(tokenDto.accessToken, tokenDto.refreshToken)
-
 }

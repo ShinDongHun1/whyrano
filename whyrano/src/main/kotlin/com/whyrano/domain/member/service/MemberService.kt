@@ -25,27 +25,43 @@ class MemberService(
     private val passwordEncoder: PasswordEncoder,
 ) : UserDetailsService {
 
-    fun signUp(createMemberDto: CreateMemberDto) : Long {
-        memberRepository.findByEmail(createMemberDto.email)
-            ?.let { throw MemberException(MemberExceptionType.ALREADY_EXIST) } // 이미 가입된 이메일인 경우 예외 발생
 
-        return memberRepository.save(createMemberDto.toEntity(passwordEncoder)).id!!
+    /**
+     * 회원 가입
+     */
+    fun signUp(cmd: CreateMemberDto) : Long {
+
+
+        // 아이디 중복 체크
+        memberRepository.findByEmail(cmd.email)?.let { throw MemberException(MemberExceptionType.ALREADY_EXIST) } // 이미 가입된 이메일인 경우 예외 발생
+
+        return memberRepository.save(cmd.toEntity(passwordEncoder)).id!!
     }
 
-    fun update(id: Long, UMDto: UpdateMemberDto) {
-        memberRepository.findByIdOrNull(id)
-            ?.apply { update(UMDto.nickname, UMDto.encodedPassword(passwordEncoder), UMDto.profileImagePath) }  // 존재하는 경우 update
+
+
+    /**
+     * 회원 정보 수정
+     */
+    fun update(id: Long, umd: UpdateMemberDto) {
+        memberRepository.findByIdOrNull(id) // 아이디를 통해 회원 정보 조회
+            ?.apply { update(umd.nickname, umd.encodedPassword(passwordEncoder), umd.profileImagePath) }  // 존재하는 경우 회원 정보 수정
             ?: throw MemberException(MemberExceptionType.NOT_FOUND) // 존재하지 않는 경우 예외 발생
     }
 
+    /**
+     * 회원 탈퇴
+     */
     fun delete(id: Long, password: String) {
-        val findMember = memberRepository.findByIdOrNull(id)
-            ?: throw MemberException(MemberExceptionType.NOT_FOUND) // 존재하지 않는 경우 예외 발생
 
+        // 회원 정보가 존재하지 않는 경우 예외 발생
+        val findMember = memberRepository.findByIdOrNull(id) ?: throw MemberException(MemberExceptionType.NOT_FOUND)
+
+        // 비밀번호 일치 여부 체크
         if (passwordEncoder.matches(password, findMember.password)) {
-            memberRepository.delete(findMember)
+            memberRepository.delete(findMember) // 일치한 경우 삭제
         }
-        else throw MemberException(MemberExceptionType.UNMATCHED_PASSWORD)
+        else throw MemberException(MemberExceptionType.UNMATCHED_PASSWORD) // 일치하지 않는 경우 예외 발생
     }
 
 
@@ -54,6 +70,4 @@ class MemberService(
 
         return AuthMember(id = member.id!!, email = member.email, password = member.password, role = member.role)
     }
-
-
 }

@@ -45,12 +45,19 @@ class Member(
     ) : BaseTimeEntity() {
 
 
+
+    /**
+     * 회원 정보 수정
+     */
     fun update(nickname: String?, password: String?, profileImagePath: String?) {
         nickname?.let { this.nickname = it }
         password?.let { this.password = it }
         profileImagePath?.let { this.profileImagePath = it }
     }
 
+    /**
+     * 회원 토큰 업데이트
+     */
     fun updateToken(accessToken: AccessToken, refreshToken: RefreshToken) {
         this.accessToken = accessToken
         this.refreshToken = refreshToken
