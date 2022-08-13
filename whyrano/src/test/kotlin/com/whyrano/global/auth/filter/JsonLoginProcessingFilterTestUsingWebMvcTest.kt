@@ -1,13 +1,18 @@
 package com.whyrano.global.auth.filter
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.ninjasquad.springmockk.MockkBean
 import com.whyrano.domain.member.fixture.MemberFixture
+import com.whyrano.domain.member.fixture.MemberFixture.accessToken
+import com.whyrano.domain.member.fixture.MemberFixture.authMember
+import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
 import com.whyrano.global.config.SecurityConfig
 import com.whyrano.global.config.SecurityConfig.Companion.LOGIN_URL
+import com.whyrano.global.exception.ExceptionResponse
 import io.mockk.every
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
@@ -18,8 +23,8 @@ import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.http.MediaType.APPLICATION_JSON
-import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UsernameNotFoundException
+import org.springframework.security.crypto.factory.PasswordEncoderFactories
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -34,11 +39,12 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * 확실히 얘가 빠르다
  */
 @WebMvcTest
-@Import(SecurityConfig::class,)
+@Import(SecurityConfig::class)
 internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     
     companion object {
-        private val objectMapper = ObjectMapper()
+        private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
+        private var passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
     }
 
     @Autowired
@@ -46,9 +52,6 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
 
     @MockkBean
     private lateinit var memberService: MemberService
-
-    @Autowired
-    private lateinit var passwordEncoder: PasswordEncoder
 
     @MockkBean
     private lateinit var jwtService: JwtService
@@ -62,24 +65,29 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     @Test
     @DisplayName("로그인 get 요청인 경우 - 401")
     fun test_login_get_fail_unauthorized() {
-        mockMvc
+        val result = mockMvc
             .perform(
-                     get(LOGIN_URL)
+                get(LOGIN_URL)
                     .contentType(APPLICATION_JSON)
             )
-            .andExpect(status().isUnauthorized)
+            .andExpect(status().isMethodNotAllowed)
+            .andReturn()
+
+        val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
+        assertThat(readValue.errorCode).isEqualTo(1100)
+
     }
 
 
     @Test
-    @DisplayName("로그인시 json이 아닌 경우 - 401")
+    @DisplayName("로그인시 json이 아닌 경우 - 415")
     fun test_login_noJson_fail_unauthorized() {
         mockMvc
             .perform(
                     post(LOGIN_URL)
                     .contentType(APPLICATION_FORM_URLENCODED)
             )
-            .andExpect(status().isUnauthorized)
+            .andExpect(status().isUnsupportedMediaType)
     }
 
 
@@ -145,8 +153,10 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
 
         val memberDto = MemberFixture.createMemberDto()
         val member = memberDto.toEntity(passwordEncoder)
-        every { memberService.loadUserByUsername(member.email) } returns User.builder().username(member.email).password(member.password).roles(member.role.name).build()
-        every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto("Access", "ref")
+        every { memberService.loadUserByUsername(member.email) } returns authMember(password = member.password)
+
+
+        every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto(accessToken().accessToken, refreshToken().refreshToken)
 
 
         val hashMap = usernamePasswordHashMap(memberDto.email, memberDto.password)

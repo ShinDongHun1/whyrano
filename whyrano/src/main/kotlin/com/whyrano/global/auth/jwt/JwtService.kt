@@ -4,7 +4,7 @@ import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Token
-import org.springframework.security.core.userdetails.UserDetails
+import com.whyrano.global.auth.userdetails.AuthMember
 import javax.servlet.http.HttpServletRequest
 
 /**
@@ -19,9 +19,9 @@ interface JwtService {
         const val REFRESH_TOKEN_HEADER_NAME = "RefreshToken"
     }
 
-    fun createAccessAndRefreshToken(userDetails: UserDetails): TokenDto
+    fun createAccessAndRefreshToken(authMember: AuthMember): TokenDto
 
-    fun extractUserDetail(accessToken: AccessToken): UserDetails?
+    fun extractAuthMember(accessToken: AccessToken): AuthMember?
 
     fun extractToken(request: HttpServletRequest): TokenDto?
 

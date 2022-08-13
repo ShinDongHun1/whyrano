@@ -32,7 +32,7 @@ class Member(
     var point: Int = 0, // 포인트
 
     @Column(nullable = true)
-    var profileImagePath: String, // 프로필 사진 경로 (https://~~)
+    var profileImagePath: String?, // 프로필 사진 경로 (https://~~)
 
     @Embedded
     @Column(nullable = true)
@@ -45,12 +45,19 @@ class Member(
     ) : BaseTimeEntity() {
 
 
+
+    /**
+     * 회원 정보 수정
+     */
     fun update(nickname: String?, password: String?, profileImagePath: String?) {
         nickname?.let { this.nickname = it }
         password?.let { this.password = it }
         profileImagePath?.let { this.profileImagePath = it }
     }
 
+    /**
+     * 회원 토큰 업데이트
+     */
     fun updateToken(accessToken: AccessToken, refreshToken: RefreshToken) {
         this.accessToken = accessToken
         this.refreshToken = refreshToken

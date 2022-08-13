@@ -8,12 +8,11 @@ import com.whyrano.domain.member.entity.Token
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_NAME
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_PREFIX
-import org.springframework.security.core.userdetails.UserDetails
+import com.whyrano.global.auth.userdetails.AuthMember
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 import java.time.ZoneId
-import javax.annotation.PostConstruct
 import javax.servlet.http.HttpServletRequest
 
 
@@ -27,23 +26,17 @@ class JwtServiceImpl(
     private val jwtProperties: JwtProperties,
 ) : JwtService{
 
-    private lateinit var algorithm: Algorithm
-
-
-    @PostConstruct
-    private fun setAlgorithm() {
-        algorithm = HMAC512(jwtProperties.secretKey)
-    }
+    private val algorithm: Algorithm = HMAC512(jwtProperties.secretKey)
 
 
     /**
      * 회원 인증 정보로부터 AccessToken과 RefreshToken 추출
      */
     @Transactional
-    override fun createAccessAndRefreshToken(userDetails: UserDetails): TokenDto {
+    override fun createAccessAndRefreshToken(authMember: AuthMember): TokenDto {
 
         // 인증 정보로부터 email 추출
-        val email = userDetails.username
+        val email = authMember.email
 
         // 이메일로 회원 찾아오기 -> 영속성 컨텍스트에 회원 저장
         val member = memberRepository.findByEmail(email)
@@ -51,8 +44,9 @@ class JwtServiceImpl(
 
         // AccessToken 발급
         val accessToken = AccessToken.create(
-            email = member.email,
-            authority = userDetails.authorities.toList()[0].toString(), // Authority는 반드시 하나임
+            id = authMember.id,
+            email = authMember.email,
+            role = authMember.role, // Authority는 반드시 하나임
             accessTokenExpirationPeriodDay = jwtProperties.accessTokenExpirationPeriodDay,
             algorithm = algorithm
         )
@@ -76,8 +70,8 @@ class JwtServiceImpl(
     /**
      * AccessToken으로부터 이메일 추출
      */
-    override fun extractUserDetail(accessToken: AccessToken) =
-        accessToken.getUserDetails(algorithm)
+    override fun extractAuthMember(accessToken: AccessToken) =
+        accessToken.getAuthMember(algorithm)
 
 
 
@@ -89,20 +83,17 @@ class JwtServiceImpl(
     override fun extractToken(request: HttpServletRequest): TokenDto? {
 
         //ACCESS_TOKEN_HEADER_NAME(Authorization) 이 없는 경우 Null
-        val accessTokenValue = request.getHeader(ACCESS_TOKEN_HEADER_NAME)
-            ?: return null
+        val accessTokenValue = request.getHeader(ACCESS_TOKEN_HEADER_NAME) ?: return null
 
         //ACCESS_TOKEN_HEADER_PREFIX(Bearer )로 시작하지 않는 경우 Null
-        if (!accessTokenValue.startsWith(ACCESS_TOKEN_HEADER_PREFIX))
-            return null
+        if (!accessTokenValue.startsWith(ACCESS_TOKEN_HEADER_PREFIX)) return null
 
 
         //accessToken 추출 (Bearer 제거)
         val accessToken = accessTokenValue.replace(ACCESS_TOKEN_HEADER_PREFIX, "").trim()
 
-        //refreshToken 추출
-        val refreshToken = request.getHeader(JwtService.REFRESH_TOKEN_HEADER_NAME)
-            ?: return null
+        //refreshToken 추출, 없는 경우 null
+        val refreshToken = request.getHeader(JwtService.REFRESH_TOKEN_HEADER_NAME) ?: return null
 
         return TokenDto(accessToken, refreshToken)
     }
@@ -115,24 +106,27 @@ class JwtServiceImpl(
     /**
      * AccessToken 혹은 RefreshToken이 유효한 상태인지 확인
      */
-    override fun isValid(token: Token) =
-        token.isValid(algorithm)
+    override fun isValid(token: Token) = token.isValid(algorithm)
+
+
+
+
 
     /**
      * AccessToken의 유효기간이 특정 시간보다 길게 남았는지 검사
      */
     override fun isValidMoreThanMinute(accessToken: AccessToken, minute: Long): Boolean {
         return try {
-            val expiredDate = accessToken.getExpiredDate(algorithm)
-
-            val expiredDateTime = expiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime()
-            val now = LocalDateTime.now().plusMinutes(minute)
+            val expiredDate     = accessToken.getExpiredDate(algorithm) // 만료일(Date)
+            val expiredDateTime = expiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() //Date -> LocalDateTime
+            val now             = LocalDateTime.now().plusMinutes(minute)//현재 시간
 
             now.isBefore(expiredDateTime)
         }catch (e: Exception){
             false
         }
     }
+
 
     override fun findMemberByTokens(accessToken: AccessToken, refreshToken: RefreshToken) =
         memberRepository.findByAccessTokenAndRefreshToken(accessToken, refreshToken)

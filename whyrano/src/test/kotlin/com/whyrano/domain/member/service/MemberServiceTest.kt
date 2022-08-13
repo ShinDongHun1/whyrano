@@ -1,6 +1,8 @@
 package com.whyrano.domain.member.service
 
 import com.whyrano.domain.member.entity.Member
+import com.whyrano.domain.member.exception.MemberException
+import com.whyrano.domain.member.exception.MemberExceptionType
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.EMAIL
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberDto
@@ -76,7 +78,9 @@ internal class MemberServiceTest{
         memberService.signUp(createMemberDto)
 
         //when, then
-        assertThrows(IllegalStateException::class.java) { memberService.signUp(createMemberDto) }
+        val exceptionType = assertThrows(MemberException::class.java) { memberService.signUp(createMemberDto) }
+            .exceptionType()
+        assertThat(exceptionType).isEqualTo(MemberExceptionType.ALREADY_EXIST)
     }
 
 
@@ -135,7 +139,10 @@ internal class MemberServiceTest{
         val noExistId = 1L
 
         //when
-        assertThrows(IllegalStateException::class.java) { memberService.update(noExistId, updateMemberDto) }
+        val exceptionType = assertThrows(MemberException::class.java) { memberService.update(noExistId, updateMemberDto) }
+                .exceptionType()
+
+        assertThat(exceptionType).isEqualTo(MemberExceptionType.NOT_FOUND)
     }
 
     @Test
@@ -161,7 +168,12 @@ internal class MemberServiceTest{
         val member = createMember(createMemberDto)
 
         //when, then
-        assertThrows(IllegalStateException::class.java) { memberService.delete(member.id!!, createMemberDto.password+"!!!!!") }
+        val exceptionType = assertThrows(MemberException::class.java) {
+            memberService.delete(member.id!!, createMemberDto.password + "!!!!!")
+        }.exceptionType()
+
+        assertThat(exceptionType).isEqualTo(MemberExceptionType.UNMATCHED_PASSWORD)
+
     }
 }
 

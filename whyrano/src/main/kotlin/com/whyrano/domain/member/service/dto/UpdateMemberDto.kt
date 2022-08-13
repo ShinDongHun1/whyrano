@@ -12,4 +12,5 @@ data class UpdateMemberDto (
 ) {
     fun encodedPassword(passwordEncoder: PasswordEncoder): String? =
         password?.let { passwordEncoder.encode(it) }
+
 }

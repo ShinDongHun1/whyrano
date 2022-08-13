@@ -11,9 +11,7 @@ data class TokenDto(
     val refreshToken: String? = null,
 ) {
 
-    fun accessToken(): AccessToken =
-        AccessToken(accessToken)
+    fun accessToken(): AccessToken = AccessToken(accessToken)
 
-    fun refreshToken(): RefreshToken =
-        RefreshToken(refreshToken)
+    fun refreshToken(): RefreshToken = RefreshToken(refreshToken)
 }

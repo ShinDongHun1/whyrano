@@ -35,6 +35,9 @@ dependencies {
 
 	//implementation("org.springframework.boot:spring-boot-starter-batch")
 
+	//코틀린 로깅
+	implementation("io.github.microutils:kotlin-logging:1.12.5")
+
 
 	implementation("com.auth0:java-jwt:4.0.0")
 
