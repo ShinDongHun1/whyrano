@@ -52,6 +52,7 @@ class JwtAuthenticationManager(
             val authMember = jwtService.extractAuthMember(accessToken) ?: throw AuthException(AuthExceptionType.BAD_TOKEN)
             successAuthentication(authMember)
             chain.doFilter(request, response)
+            return
         }
 
 
