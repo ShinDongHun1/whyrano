@@ -58,24 +58,24 @@ internal class JwtAuthenticationFilterTest {
     @DisplayName("permitAll 요청 url인 경우 처리 X")
     fun test_permitAll_no_filtering() {
         mockMvc
-            .perform(get("/login"))
-            .andExpect(status().isUnauthorized)
+            .perform(get("/h2-console"))
+            .andExpect(status().isNotFound)
     }
 
     @Test
-    @DisplayName("토큰이 존재하지 않는 경우 403")
+    @DisplayName("토큰이 존재하지 않는 경우 401")
     fun test_no_token_403() {
         //given
         every { jwtService.extractToken(any()) } returns null // AccessToken에 Bearer이 안 붙으면 null을 반환하는 것은 JwtServiceTest에서 확인
 
         mockMvc
             .perform(get("/test"))
-            .andExpect(status().isForbidden)
+            .andExpect(status().isUnauthorized)
     }
 
 
     @Test
-    @DisplayName("Access 토큰 하나만 존재하는 경우 403")
+    @DisplayName("Access 토큰 하나만 존재하는 경우 401")
     fun test_only_access_token_403() {
         //given
         every { jwtService.extractToken(any()) } returns null // AccessToken이 하나만 존재하면 null을 반환하는 것은 JwtServiceTest에서 확인
@@ -86,7 +86,7 @@ internal class JwtAuthenticationFilterTest {
             .perform(get("/test")
                 .header(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + tokenDto.accessToken)
             )
-            .andExpect(status().isForbidden)
+            .andExpect(status().isUnauthorized)
     }
 
 
@@ -95,7 +95,7 @@ internal class JwtAuthenticationFilterTest {
 
 
     @Test
-    @DisplayName("Refresh 토큰 하나만 존재하는 경우 403")
+    @DisplayName("Refresh 토큰 하나만 존재하는 경우 401")
     fun test_only_refresh_token_403() {
         //given
         every { jwtService.extractToken(any()) } returns null // AccessToken에 Bearer이 안 붙으면 null을 반환하는 것은 JwtServiceTest에서 확인
@@ -106,15 +106,15 @@ internal class JwtAuthenticationFilterTest {
             .perform(get("/test")
                 .header(REFRESH_TOKEN_HEADER_NAME,   tokenDto.refreshToken)
             )
-            .andExpect(status().isForbidden)
+            .andExpect(status().isUnauthorized)
     }
 
 
 
 
     @Test
-    @DisplayName("Access 토큰에 Bearer이 안 붙은 경우 - (AccessToken,RefreshToken 모두 정상 ) - 403")
-    fun `Access 토큰에 Bearer이 안 붙은 경우 - (AccessToken,RefreshToken 모두 정상 ) - 403`() {
+    @DisplayName("Access 토큰에 Bearer이 안 붙은 경우 - (AccessToken,RefreshToken 모두 정상 ) - 401")
+    fun `Access 토큰에 Bearer이 안 붙은 경우 - (AccessToken,RefreshToken 모두 정상 ) - 401`() {
         //given
         val tokenDto = createTokenDto(accessToken(), refreshToken())
         every { jwtService.extractToken(any()) } returns null // AccessToken에 Bearer이 안 붙으면 null을 반환하는 것은 JwtServiceTest에서 확인
@@ -125,7 +125,7 @@ internal class JwtAuthenticationFilterTest {
                 .header(ACCESS_TOKEN_HEADER_NAME,  tokenDto.accessToken)
                 .header(REFRESH_TOKEN_HEADER_NAME,   tokenDto.refreshToken)
             )
-            .andExpect(status().isForbidden)
+            .andExpect(status().isUnauthorized)
     }
 
 
@@ -159,8 +159,8 @@ internal class JwtAuthenticationFilterTest {
 
 
     @Test
-    @DisplayName("Access 토큰이 만료된 경우, Refresh 토큰도 만료되었을 때 - 403")
-    fun `Access 토큰이 만료된 경우, Refresh 토큰도 만료되었을 때 - 403`() {
+    @DisplayName("Access 토큰이 만료된 경우, Refresh 토큰도 만료되었을 때 - 401")
+    fun `Access 토큰이 만료된 경우, Refresh 토큰도 만료되었을 때 - 401`() {
         //given
         val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = -1),  refreshToken(refreshTokenExpirationPeriodDay = -1))
         every { jwtService.extractToken(any()) } returns tokenDto
@@ -173,7 +173,7 @@ internal class JwtAuthenticationFilterTest {
                     .header(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + tokenDto.accessToken)
                     .header(REFRESH_TOKEN_HEADER_NAME, tokenDto.refreshToken)
             )
-            .andExpect(status().isForbidden)
+            .andExpect(status().isUnauthorized)
     }
 
 
@@ -183,8 +183,8 @@ internal class JwtAuthenticationFilterTest {
 
 
     @Test
-    @DisplayName("Access 토큰이 만료된 경우 - (AccessToken 정상, RefreshToken이 회원의 것과 다를 때 ) - 403")
-    fun `Access 토큰이 만료된 경우 - (AccessToken 정상, RefreshToken이 회원의 것과 다를 때 ) - 403`() {
+    @DisplayName("Access 토큰이 만료된 경우 - (AccessToken 정상, RefreshToken이 회원의 것과 다를 때 ) - 401")
+    fun `Access 토큰이 만료된 경우 - (AccessToken 정상, RefreshToken이 회원의 것과 다를 때 ) - 401`() {
         //given
         val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = -1),  refreshToken())
         every { jwtService.extractToken(any()) } returns tokenDto
@@ -198,13 +198,13 @@ internal class JwtAuthenticationFilterTest {
                     .header(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + tokenDto.accessToken)
                     .header(REFRESH_TOKEN_HEADER_NAME, tokenDto.refreshToken)
             )
-            .andExpect(status().isForbidden)
+            .andExpect(status().isUnauthorized)
     }
 
 
     @Test
-    @DisplayName("Access 토큰이 만료된 경우 - (AccessToken, RefreshToken 모두 회원의 것과 다를 때 ) - 403")
-    fun `Access 토큰이 만료된 경우 - (AccessToken, RefreshToken 모두 회원의 것과 다를 때 ) - 403`() {
+    @DisplayName("Access 토큰이 만료된 경우 - (AccessToken, RefreshToken 모두 회원의 것과 다를 때 ) - 401")
+    fun `Access 토큰이 만료된 경우 - (AccessToken, RefreshToken 모두 회원의 것과 다를 때 ) - 401`() {
         //given
         val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = -1),  refreshToken())
         every { jwtService.extractToken(any()) } returns tokenDto
@@ -217,7 +217,7 @@ internal class JwtAuthenticationFilterTest {
                     .header(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + tokenDto.accessToken)
                     .header(REFRESH_TOKEN_HEADER_NAME, tokenDto.refreshToken)
             )
-            .andExpect(status().isForbidden)
+            .andExpect(status().isUnauthorized)
     }
 
 
