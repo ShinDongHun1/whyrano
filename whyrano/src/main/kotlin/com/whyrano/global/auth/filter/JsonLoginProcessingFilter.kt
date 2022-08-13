@@ -1,6 +1,8 @@
 package com.whyrano.global.auth.filter
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.whyrano.global.auth.exception.AuthException
+import com.whyrano.global.auth.exception.AuthExceptionType
 import org.springframework.http.HttpMethod.POST
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import org.springframework.security.authentication.AuthenticationServiceException
@@ -28,14 +30,15 @@ class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProces
 
     override fun attemptAuthentication(request: HttpServletRequest, response: HttpServletResponse): Authentication {
 
-        if(!isJson(request))  // Json 이 아닌 경우 로그인 시도하지 않음
-            throw AuthenticationServiceException("Authentication content-type not supported: ${request.contentType}")
 
         if(!isPost(request))  // 메서드가 Post 가 아닌 경우 로그인 시도하지 않음
-            throw AuthenticationServiceException("Authentication method not supported: ${request.method}")
+            throw AuthException(AuthExceptionType.NOT_ALLOWED_LOGIN_METHOD)
+
+        if(!isJson(request))  // Json 이 아닌 경우 로그인 시도하지 않음
+            throw AuthException(AuthExceptionType.UNSUPPORTED_LOGIN_MEDIA_TYPE)
 
         if (request.contentLength == NO_CONTENT)   // body에 아무것도 작성되지 않았다면 로그인 실패
-            throw AuthenticationServiceException("Authentication request-body is null")
+            throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
 
 
 
@@ -43,7 +46,7 @@ class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProces
         val accountDto = extractAccount(request)
 
         if (usernameIsBlank(accountDto) || passwordIsBlank(accountDto) ) { // 공백이 있다면 처리하지 않음
-            throw AuthenticationServiceException("Username or Password is empty")
+            throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
         }
 
         return authenticationManager.authenticate(UsernamePasswordAuthenticationToken(accountDto.username, accountDto.password));
@@ -54,7 +57,7 @@ class JsonLoginProcessingFilter(loginUrl: String) : AbstractAuthenticationProces
             objectMapper.readValue(request.reader, AccountDto::class.java) // Json 파싱 중 오류가 발생할 수 있으므로 예외 처리
         }
         catch (e: Exception) {
-            throw AuthenticationServiceException("요청 오류")
+            throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
         }
     }
 
