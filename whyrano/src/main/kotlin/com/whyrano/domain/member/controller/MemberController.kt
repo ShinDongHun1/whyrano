@@ -1,15 +1,13 @@
 package com.whyrano.domain.member.controller
 
 import com.whyrano.domain.member.controller.dto.request.CreateMemberRequest
+import com.whyrano.domain.member.controller.dto.request.PasswordDto
 import com.whyrano.domain.member.controller.dto.request.UpdateMemberRequest
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.userdetails.AuthMember
 import com.whyrano.global.web.argumentresolver.Auth
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.PutMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath
 import javax.validation.Valid
 
@@ -37,18 +35,32 @@ class MemberController(
     }
 
     /**
-     * 회원 수정 -> 자기 자신만 수정할 수 있음
-     *
+     * 회원 수정
      */
     @PutMapping("/member")
     fun update(
         @Auth authMember: AuthMember,
         @RequestBody umr: UpdateMemberRequest) : ResponseEntity<Unit> {
 
+
         memberService.update(authMember.id, umr.toServiceDto())
         return ResponseEntity.ok().build()
     }
 
+
+    /**
+     * 회원 탈퇴
+     */
+    @DeleteMapping("/member")
+    fun delete(
+        @Auth authMember: AuthMember,
+        @Valid @RequestBody passwordDto: PasswordDto
+    ): ResponseEntity<Unit> {
+
+        memberService.delete(authMember.id, passwordDto.password)
+
+        return ResponseEntity.noContent().build()
+    }
 
 
 
