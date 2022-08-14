@@ -29,7 +29,7 @@ class MemberService(
     /**
      * 회원 가입
      */
-    fun signUp(cmd: CreateMemberDto) : Long {
+    fun signUp(cmd: CreateMemberDto): Long {
 
 
         // 아이디 중복 체크
