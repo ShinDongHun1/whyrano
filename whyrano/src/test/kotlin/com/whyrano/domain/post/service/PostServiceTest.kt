@@ -21,12 +21,14 @@ import org.springframework.data.repository.findByIdOrNull
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextHolder
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Created by ShinD on 2022/08/14.
  */
 @Import(JpaConfig::class)
 @DataJpaTest
+@Transactional
 internal class PostServiceTest {
 
     private lateinit var postService: PostService
@@ -41,11 +43,6 @@ internal class PostServiceTest {
     private var adminAuthMember = MemberFixture.authMember(id = 1L, role = Role.ADMIN)
     private var blackAuthMember = MemberFixture.authMember(id = 1L, role = Role.BLACK)
 
-    @BeforeEach
-    fun setUp() {
-        postService = PostService(memberRepository, postRepository)
-    }
-
     /**
      * 질문 작성
      * 질문 수정
@@ -53,12 +50,27 @@ internal class PostServiceTest {
      * 질문 검색
      */
 
+    @BeforeEach
+    fun setUp() {
+        postService = PostService(memberRepository, postRepository)
+
+
+        val basic = memberRepository.save(MemberFixture.member(id = null, authority = Role.BASIC, email = "basic@example.com"))
+        val admin = memberRepository.save(MemberFixture.member(id = null, authority = Role.ADMIN, email = "admin@example.com"))
+        val black = memberRepository.save(MemberFixture.member(id = null, authority = Role.BLACK, email = "black@example.com"))
+
+
+        basicAuthMember = MemberFixture.authMember(id = basic.id!!, email = basic.email, role = Role.BASIC)
+        adminAuthMember =MemberFixture.authMember(id = admin.id!!,  email = admin.email, role = Role.ADMIN)
+        blackAuthMember = MemberFixture.authMember(id = black.id!!,  email = black.email, role = Role.BLACK)
+    }
+
+
+
     private fun saveAuthMemberInSecurityContext(authMember: AuthMember) {
         val context: SecurityContext = SecurityContextHolder.createEmptyContext()
         context.authentication = UsernamePasswordAuthenticationToken(authMember, null, authMember.authorities)
         SecurityContextHolder.setContext(context)
-
-        val save = memberRepository.save(MemberFixture.member(authority = authMember.role, email = authMember.email))
     }
 
 
@@ -74,7 +86,6 @@ internal class PostServiceTest {
 
         //then
         assertThat(postId).isNotNull
-        val findPost = postRepository.findByIdOrNull(postId)
 
     }
 
@@ -114,8 +125,8 @@ internal class PostServiceTest {
         assertThat(findPost.answerCount).isEqualTo(0)
         assertThat(findPost.viewCount).isEqualTo(0)
         assertThat(findPost.likeCount).isEqualTo(0)
-        assertThat(findPost.writer!!.email).isEqualTo(basicAuthMember.email)
-        assertThat(findPost.writer!!.id).isEqualTo(basicAuthMember.id)
+        assertThat(findPost.writer!!.email).isEqualTo(adminAuthMember.email)
+        assertThat(findPost.writer!!.id).isEqualTo(adminAuthMember.id)
     }
 
     @Test
