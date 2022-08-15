@@ -362,6 +362,15 @@ internal class PostServiceTest {
 
         //given
         TODO("공지 수정 성공 - 여러 관리자가 동시에 수정할 경우, 가장 처음 수정한 사람 적용, 나머지는 예외 발생")
+        /*
+            멀티스레드 테스트 할 때 영속성 컨텍스트가 공유되지 않음
+            https://dulajra.medium.com/spring-transaction-management-over-multiple-threads-dzone-java-b36a5bc342e5
+
+            그리고 테스트케이스에 @Transactional이 붙어있으면 먼가 잘 안됐음
+
+            이건 그 예시인데, @Transactional 없이 테스트 한 것을 확인할 수 있음.
+            https://4whomtbts.tistory.com/118
+         */
     }
 
 
