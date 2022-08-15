@@ -4,6 +4,7 @@ package com.whyrano.domain.member.entity
  * Created by ShinD on 2022/08/09.
  */
 import com.whyrano.domain.common.BaseTimeEntity
+import com.whyrano.domain.member.entity.Role.*
 import javax.persistence.*
 
 @Entity
@@ -62,4 +63,17 @@ class Member(
         this.accessToken = accessToken
         this.refreshToken = refreshToken
     }
+
+    /**
+     * 회원 권한 수정
+     */
+    fun changRole(role: Role) {
+        this.role = role
+    }
+
+    //== 역할 확인 ==//
+    fun isBlack(): Boolean = this.role == BLACK
+    fun isAdmin(): Boolean = this.role == ADMIN
+    fun isBasic(): Boolean = this.role == BASIC
+
 }
