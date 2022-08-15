@@ -1,13 +1,17 @@
 package com.whyrano.domain.post.service
 
+import com.whyrano.domain.common.search.SearchResultDto
 import com.whyrano.domain.member.exception.MemberException
 import com.whyrano.domain.member.exception.MemberExceptionType.NOT_FOUND
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.post.exception.PostException
 import com.whyrano.domain.post.exception.PostExceptionType
 import com.whyrano.domain.post.repository.PostRepository
+import com.whyrano.domain.post.search.PostSearchCond
 import com.whyrano.domain.post.service.dto.CreatePostDto
+import com.whyrano.domain.post.service.dto.SimplePostDto
 import com.whyrano.domain.post.service.dto.UpdatePostDto
+import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -104,6 +108,32 @@ class PostService(
         // post 삭제
         postRepository.delete(post)
     }
+
+
+    /**
+     * 질문, 공지 검색
+     *
+     * 컨트롤러에서 page를 1씩 빼서 넘겨줌
+     *
+     * 즉 page=1 인 경우 page = 0으로 넘어오므로 정삭적으로 작동함
+     */
+    fun search(postSearchCond: PostSearchCond, pageable: Pageable): SearchResultDto<SimplePostDto> {
+
+        // 검색 수행
+        val result = postRepository.search(postSearchCond, pageable)
+
+        // 검색 결과를 DTO로 변환
+        val simplePostDtos = result.content.map { SimplePostDto.from(it) }
+
+        return SearchResultDto(
+            totalPage = result.totalPages,                  // 전체 페이지 수
+            totalElementCount = result.totalElements,       // 전체 요소 수
+            currentPage = result.number,                    // 현재 페이지가 몇 페이지인지 (0부터 시작하므로 1 더해서 넘겨주기)
+            currentElementCount = result.numberOfElements,  // 현재 요소의 수가 몇개인지
+            simpleDtos = simplePostDtos                     // 요소에 대한 간단한 정보를 담은 DTO
+        )
+    }
+
 
 
 }
