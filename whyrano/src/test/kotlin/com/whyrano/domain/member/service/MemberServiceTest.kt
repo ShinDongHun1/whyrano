@@ -1,5 +1,6 @@
 package com.whyrano.domain.member.service
 
+import com.ninjasquad.springmockk.MockkBean
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.exception.MemberException
 import com.whyrano.domain.member.exception.MemberExceptionType
@@ -8,6 +9,7 @@ import com.whyrano.domain.member.fixture.MemberFixture.EMAIL
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberDto
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.dto.CreateMemberDto
+import com.whyrano.domain.post.repository.QueryPostRepository
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
@@ -21,6 +23,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories
  * Created by ShinD on 2022/08/09.
  */
 @DataJpaTest
+@MockkBean(QueryPostRepository::class)
 internal class MemberServiceTest{
 
     @Autowired
