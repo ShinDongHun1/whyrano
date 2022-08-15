@@ -5,8 +5,8 @@ import com.whyrano.domain.member.entity.Role.*
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.repository.MemberRepository
-import com.whyrano.domain.post.entity.Type.NOTICE
-import com.whyrano.domain.post.entity.Type.QUESTION
+import com.whyrano.domain.post.entity.PostType.NOTICE
+import com.whyrano.domain.post.entity.PostType.QUESTION
 import com.whyrano.domain.post.exception.PostException
 import com.whyrano.domain.post.exception.PostExceptionType
 import com.whyrano.domain.post.fixture.PostFixture.UPDATE_CONTENT
@@ -46,7 +46,6 @@ internal class PostServiceTest {
      * TODO 질문 검색
      */
 
-
     private lateinit var postService: PostService
 
     @MockkBean private lateinit var postRepository: PostRepository
@@ -82,7 +81,7 @@ internal class PostServiceTest {
     fun `질문 작성 성공`() {
 
         //given
-        val cpd = createPostDto(type = QUESTION) // 질문 생성 DTO
+        val cpd = createPostDto(postType = QUESTION) // 질문 생성 DTO
         every { postRepository.save(any()) } returns post()
 
         //when
@@ -99,7 +98,7 @@ internal class PostServiceTest {
     fun `질문 작성 실패 - 블랙리스트인 경우`() {
 
         //given
-        val cpd = createPostDto(type = QUESTION) // 질문 생성 DTO
+        val cpd = createPostDto(postType = QUESTION) // 질문 생성 DTO
 
         //when
         val exceptionType =  // 블랙리스트가 질문을 작성하려는 경우
@@ -118,7 +117,7 @@ internal class PostServiceTest {
     fun `공지 작성 성공`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE) // 질문 생성 DTO
+        val cpd = createPostDto(postType = NOTICE) // 질문 생성 DTO
         every { postRepository.save(any()) } returns post()
 
         //when
@@ -137,7 +136,7 @@ internal class PostServiceTest {
     fun `공지 작성 실패 - 어드민이 아닌 경우(일반 유저)`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
+        val cpd = createPostDto(postType = NOTICE)
 
         //when
         val exceptionType =
@@ -155,7 +154,7 @@ internal class PostServiceTest {
     fun `공지 작성 실패 - 어드민이 아닌 경우(블랙리스트)`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
+        val cpd = createPostDto(postType = NOTICE)
 
         //when
         val exceptionType =
@@ -175,7 +174,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
 
 
         //when
@@ -194,7 +193,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId,type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId,postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
 
 
         //when
@@ -217,7 +216,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
 
 
         //when
@@ -238,7 +237,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
         every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BLACK) //회원 권한 변경
 
 
@@ -263,7 +262,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
         every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BASIC) //회원 권한 변경
 
 
@@ -285,7 +284,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
 
         val anotherAdminId = 20L
         every { memberRepository.findByIdOrNull(anotherAdminId) } returns member(id = anotherAdminId, authority = ADMIN)
@@ -330,7 +329,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
 
 
@@ -352,7 +351,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
 
 
@@ -372,7 +371,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
 
         val anotherBasicId = 200L
@@ -400,7 +399,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
         every { postRepository.delete(any()) } just runs
 
 
@@ -423,7 +422,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
 
         every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BASIC)
@@ -445,7 +444,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = blackAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = blackAuthMember.role )
         every { postRepository.delete(any()) } just runs
 
         every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BLACK)
@@ -466,7 +465,7 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
 
         val anotherAdminId = 300L

@@ -8,7 +8,7 @@ import com.whyrano.domain.common.BaseTimeEntity
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.entity.Role.BLACK
-import com.whyrano.domain.post.entity.Type.NOTICE
+import com.whyrano.domain.post.entity.PostType.NOTICE
 import com.whyrano.domain.post.exception.PostException
 import com.whyrano.domain.post.exception.PostExceptionType
 import javax.persistence.*
@@ -24,8 +24,8 @@ class Post(
     val id: Long? = null,
 
     @Enumerated(STRING)
-    @Column(name = "type", nullable = false)
-    val type: Type, // 공지 | 질문
+    @Column(name = "post_type", nullable = false)
+    val postType: PostType, // 공지 | 질문
 
     @Column(name = "title", nullable = false)
     var title: String, // 제목
@@ -77,9 +77,9 @@ class Post(
      *   질문 - 어드민, 일반 유저 가능 (블랙리스트 불가능)
      */
     fun checkCreateAuthority(writer: Member) {
-        when(type) {
+        when(postType) {
             NOTICE -> if (writer.role != Role.ADMIN) throw PostException(PostExceptionType.NO_AUTHORITY_CREATE_NOTICE)
-            Type.QUESTION -> if (writer.role == BLACK) throw PostException(PostExceptionType.NO_AUTHORITY_CREATE_QUESTION)
+            PostType.QUESTION -> if (writer.role == BLACK) throw PostException(PostExceptionType.NO_AUTHORITY_CREATE_QUESTION)
         }
     }
 
@@ -98,7 +98,7 @@ class Post(
         if (writer.isBlack()) throw PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
 
         // 블랙리스트가 아닌 경우
-        when (this.type) {
+        when (this.postType) {
             // 공지의 경우 관리자가 아니면 수정 불가능
             NOTICE ->  if ( ! writer.isAdmin() ) throw PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
 
@@ -122,7 +122,7 @@ class Post(
         if (writer.isBlack()) throw PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
 
         // 블랙리스트가 아닌 경우
-        when (this.type) {
+        when (this.postType) {
             // 공지의 경우 관리자가 아니면 삭제 불가능
             NOTICE ->  if ( ! writer.isAdmin() ) throw PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
 
