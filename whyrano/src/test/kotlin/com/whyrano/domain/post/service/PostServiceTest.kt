@@ -1,8 +1,7 @@
 package com.whyrano.domain.post.service
 
-import com.whyrano.domain.member.entity.Role
-import com.whyrano.domain.member.entity.Role.BASIC
-import com.whyrano.domain.member.entity.Role.BLACK
+import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.member.entity.Role.*
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.repository.MemberRepository
@@ -13,27 +12,29 @@ import com.whyrano.domain.post.exception.PostExceptionType
 import com.whyrano.domain.post.fixture.PostFixture.UPDATE_CONTENT
 import com.whyrano.domain.post.fixture.PostFixture.UPDATE_TITLE
 import com.whyrano.domain.post.fixture.PostFixture.createPostDto
+import com.whyrano.domain.post.fixture.PostFixture.post
 import com.whyrano.domain.post.fixture.PostFixture.updatePostDto
 import com.whyrano.domain.post.repository.PostRepository
 import com.whyrano.global.auth.userdetails.AuthMember
 import com.whyrano.global.config.JpaConfig
+import com.whyrano.global.config.QuerydslConfig
+import io.mockk.every
+import io.mockk.just
+import io.mockk.runs
+import io.mockk.verify
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
 import org.springframework.data.repository.findByIdOrNull
-import org.springframework.transaction.annotation.Transactional
-import javax.persistence.EntityManager
 
 /**
  * Created by ShinD on 2022/08/14.
  */
-@Import(JpaConfig::class)
 @DataJpaTest
-@Transactional
+@Import(JpaConfig::class, QuerydslConfig::class)
 internal class PostServiceTest {
 
 
@@ -48,9 +49,8 @@ internal class PostServiceTest {
 
     private lateinit var postService: PostService
 
-    @Autowired private lateinit var postRepository: PostRepository
-    @Autowired private lateinit var memberRepository: MemberRepository
-    @Autowired private lateinit var em: EntityManager
+    @MockkBean private lateinit var postRepository: PostRepository
+    @MockkBean private lateinit var memberRepository: MemberRepository
 
     private lateinit var basicAuthMember: AuthMember // 일반 회원
     private lateinit var adminAuthMember: AuthMember // 관리자
@@ -62,29 +62,19 @@ internal class PostServiceTest {
         //PostService 세팅
         postService = PostService(memberRepository, postRepository)
 
-        // 회원들 DB에 저장
-        val basic = memberRepository.save(MemberFixture.member(id = null, authority = BASIC, email = "basic@example.com"))
-        val admin = memberRepository.save(MemberFixture.member(id = null, authority = Role.ADMIN, email = "admin@example.com"))
-        val black = memberRepository.save(MemberFixture.member(id = null, authority = Role.BLACK, email = "black@example.com"))
 
         // 회원들 인증정보 세팅
-        basicAuthMember = MemberFixture.authMember(id = basic.id!!, email = basic.email, role = BASIC)
-        adminAuthMember =MemberFixture.authMember(id = admin.id!!,  email = admin.email, role = Role.ADMIN)
-        blackAuthMember = MemberFixture.authMember(id = black.id!!,  email = black.email, role = Role.BLACK)
+        basicAuthMember = MemberFixture.authMember(id = 1L, email = "basic@example.com", role = BASIC)
+        adminAuthMember =MemberFixture.authMember(id = 2L,  email = "admin@example.com", role = ADMIN)
+        blackAuthMember = MemberFixture.authMember(id = 3L,  email = "black@example.com", role = BLACK)
+
+
+        // 회원들 DB에 저장
+        every { memberRepository.findByIdOrNull(basicAuthMember.id) } returns member(id = basicAuthMember.id, authority = BASIC, email = "basic@example.com")
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = ADMIN, email = "admin@example.com")
+        every { memberRepository.findByIdOrNull(blackAuthMember.id) } returns member(id = blackAuthMember.id, authority = BLACK, email = "black@example.com")
+
     }
-
-
-
-
-    /**
-     * 영속성 컨텍스트 비우기
-     */
-    private fun clearPersistenceContext() {
-        em.flush()
-        em.clear()
-    }
-
-
 
 
 
@@ -93,19 +83,13 @@ internal class PostServiceTest {
 
         //given
         val cpd = createPostDto(type = QUESTION) // 질문 생성 DTO
+        every { postRepository.save(any()) } returns post()
 
         //when
         val postId = postService.create(basicAuthMember.id, cpd) // 질문 작성
 
         //then
-        val savedPost = postRepository.findByIdOrNull(postId)
-        assertThat(savedPost).isNotNull // 작성된 질문은 null이 아니어야 함
-        assertThat(savedPost!!.title).isEqualTo(cpd.title)
-        assertThat(savedPost.content).isEqualTo(cpd.content)
-        assertThat(savedPost.answerCount).isEqualTo(0)
-        assertThat(savedPost.likeCount).isEqualTo(0)
-        assertThat(savedPost.viewCount).isEqualTo(0)
-        assertThat(savedPost.type).isEqualTo(QUESTION)
+        verify (exactly = 1){ postRepository.save(any()) }
     }
 
 
@@ -123,8 +107,8 @@ internal class PostServiceTest {
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_CREATE_QUESTION)
-        assertThat(postRepository.findAll()).isEmpty()
 
+        verify (exactly = 0){ postRepository.save(any()) }
     }
 
 
@@ -134,21 +118,16 @@ internal class PostServiceTest {
     fun `공지 작성 성공`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
+        val cpd = createPostDto(type = NOTICE) // 질문 생성 DTO
+        every { postRepository.save(any()) } returns post()
 
         //when
-        val postId = postService.create(adminAuthMember.id, cpd)
+        val postId = postService.create(adminAuthMember.id, cpd) // 질문 작성
 
         //then
-        val findPost = postRepository.findByIdOrNull(postId)
-        assertThat(findPost!!.title).isEqualTo(cpd.title)
-        assertThat(findPost.type).isEqualTo(cpd.type)
-        assertThat(findPost.content).isEqualTo(cpd.content)
-        assertThat(findPost.answerCount).isEqualTo(0)
-        assertThat(findPost.viewCount).isEqualTo(0)
-        assertThat(findPost.likeCount).isEqualTo(0)
-        assertThat(findPost.writer!!.email).isEqualTo(adminAuthMember.email)
-        assertThat(findPost.writer!!.id).isEqualTo(adminAuthMember.id)
+        verify (exactly = 1){ postRepository.save(any()) }
+
+
     }
 
 
@@ -166,7 +145,7 @@ internal class PostServiceTest {
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_CREATE_NOTICE)
-        assertThat(postRepository.findAll()).isEmpty()
+        verify (exactly = 0){ postRepository.save(any()) }
     }
 
 
@@ -184,7 +163,7 @@ internal class PostServiceTest {
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_CREATE_NOTICE)
-        assertThat(postRepository.findAll()).isEmpty()
+        verify (exactly = 0){ postRepository.save(any()) }
     }
 
 
@@ -195,8 +174,8 @@ internal class PostServiceTest {
     fun `질문 수정 성공`() {
 
         //given
-        val cpd = createPostDto(type = QUESTION)
-        val postId = postService.create(basicAuthMember.id, cpd)
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
 
 
         //when
@@ -205,10 +184,7 @@ internal class PostServiceTest {
 
 
         //then
-        val findPost = postRepository.findByIdOrNull(postId)!!
-        assertThat(findPost.content).isEqualTo(cpd.content)
-        assertThat(findPost.title).isEqualTo(upd.title)
-        assertThat(findPost.title).isNotEqualTo(cpd.title)
+        verify(exactly = 1) { memberRepository.findByIdOrNull(basicAuthMember.id) }
     }
 
 
@@ -217,8 +193,8 @@ internal class PostServiceTest {
     fun `질문 수정 실패 - 자신의 질문이 아닌 경우`() {
 
         //given
-        val cpd = createPostDto(type = QUESTION)
-        val postId = postService.create(basicAuthMember.id, cpd)
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId,type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
 
 
         //when
@@ -230,11 +206,6 @@ internal class PostServiceTest {
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
 
-        val findPost = postRepository.findByIdOrNull(postId)!!
-        assertThat(findPost.content).isEqualTo(cpd.content)
-        assertThat(findPost.title).isEqualTo(cpd.title)
-        assertThat(findPost.title).isNotEqualTo(upd.title)
-        assertThat(findPost.content).isNotEqualTo(upd.content)
     }
 
 
@@ -245,8 +216,8 @@ internal class PostServiceTest {
     fun `공지 수정 성공 - 자신(관리자)의 공지`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
-        val postId = postService.create(adminAuthMember.id, cpd)
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
 
 
         //when
@@ -254,12 +225,8 @@ internal class PostServiceTest {
         postService.update(adminAuthMember.id, postId, upd)
 
 
-
         //then
-        val findPost = postRepository.findByIdOrNull(postId)!!
-        assertThat(findPost.content).isEqualTo(cpd.content)
-        assertThat(findPost.title).isEqualTo(upd.title)
-        assertThat(findPost.title).isNotEqualTo(cpd.title)
+        verify(exactly = 1) { memberRepository.findByIdOrNull(adminAuthMember.id) }
     }
 
 
@@ -270,12 +237,9 @@ internal class PostServiceTest {
     fun `공지 수정 실패 - 자신의 공지이나 관리자 자격을 박탈당한 경우 ( 블랙리스트 )`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
-        val postId = postService.create(adminAuthMember.id, cpd)
-
-        val member = memberRepository.findByIdOrNull(adminAuthMember.id)!!
-        member.changRole(Role.BLACK)    //회원 권한 변경
-        clearPersistenceContext()
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BLACK) //회원 권한 변경
 
 
         //when
@@ -286,12 +250,7 @@ internal class PostServiceTest {
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
-
-        val findPost = postRepository.findByIdOrNull(postId)!!
-        assertThat(findPost.content).isEqualTo(cpd.content)
-        assertThat(findPost.title).isEqualTo(cpd.title)
-        assertThat(findPost.title).isNotEqualTo(upd.title)
-        assertThat(findPost.content).isNotEqualTo(upd.content)
+        verify(exactly = 1) { memberRepository.findByIdOrNull(adminAuthMember.id) }
     }
 
 
@@ -303,14 +262,9 @@ internal class PostServiceTest {
     fun `공지 수정 실패 - 자신의 공지이나 관리자 자격을 박탈당한 경우 ( 일반 회원 )`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
-        val postId = postService.create(adminAuthMember.id, cpd)
-
-
-        val member = memberRepository.findByIdOrNull(adminAuthMember.id)!!
-        member.changRole(BASIC)    //회원 권한 변경
-
-        clearPersistenceContext()
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BASIC) //회원 권한 변경
 
 
         //when
@@ -321,11 +275,7 @@ internal class PostServiceTest {
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
-        val findPost = postRepository.findByIdOrNull(postId)!!
-        assertThat(findPost.content).isEqualTo(cpd.content)
-        assertThat(findPost.title).isEqualTo(cpd.title)
-        assertThat(findPost.title).isNotEqualTo(upd.title)
-        assertThat(findPost.content).isNotEqualTo(upd.content)
+        verify(exactly = 1) { memberRepository.findByIdOrNull(adminAuthMember.id) }
     }
 
 
@@ -334,25 +284,22 @@ internal class PostServiceTest {
     fun `공지 수정 성공 - 다른 관리자가 등록한 게시물`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
-        val postId = postService.create(adminAuthMember.id, cpd)
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
 
-        val anotherAdmin = memberRepository.save(member(authority = Role.ADMIN, email = "admin2@example.com"))
-        clearPersistenceContext()
+        val anotherAdminId = 20L
+        every { memberRepository.findByIdOrNull(anotherAdminId) } returns member(id = anotherAdminId, authority = ADMIN)
 
 
         //when
         val upd = updatePostDto(title = UPDATE_TITLE, content = null)
-        postService.update(anotherAdmin.id!!, postId, upd)
-
+        postService.update(anotherAdminId, postId, upd)
 
 
         //then
-        val findPost = postRepository.findByIdOrNull(postId)!!
-        assertThat(findPost.content).isEqualTo(cpd.content)
-        assertThat(findPost.title).isEqualTo(upd.title)
-        assertThat(findPost.title).isNotEqualTo(cpd.title)
+        verify(exactly = 1) { memberRepository.findByIdOrNull(anotherAdminId) }
     }
+
 
 
 
@@ -382,16 +329,18 @@ internal class PostServiceTest {
     fun `질문 삭제 성공 - 자신의 게시물인 경우 - 작성된 댓글 & 대댓글 모두 제거`() {
 
         //given
-        val cpd = createPostDto(type = QUESTION)
-        val postId = postService.create(basicAuthMember.id, cpd)
-        clearPersistenceContext()
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.delete(any()) } just runs
+
 
 
         //when
         postService.delete(basicAuthMember.id!!, postId)
 
         //then
-        assertThat(postRepository.findByIdOrNull(postId)).isNull()
+        verify( exactly =  1 ) { postRepository.delete(any()) }
+
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
     }
@@ -402,38 +351,44 @@ internal class PostServiceTest {
     fun `질문 삭제 성공 - 관리자가 삭제하는 경우 - 작성된 댓글 & 대댓글 모두 제거`() {
 
         //given
-        val cpd = createPostDto(type = QUESTION)
-        val postId = postService.create(basicAuthMember.id, cpd)
-        clearPersistenceContext()
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.delete(any()) } just runs
+
 
 
         //when
         postService.delete(adminAuthMember.id!!, postId)
 
         //then
-        assertThat(postRepository.findByIdOrNull(postId)).isNull()
+        verify( exactly =  1 ) { postRepository.delete(any()) }
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
     }
+
 
     @Test
     fun `질문 삭제 실패 - 자신의 게시물이 아닌 경우`() {
 
         //given
-        val cpd = createPostDto(type = QUESTION)
-        val postId = postService.create(basicAuthMember.id, cpd)
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.delete(any()) } just runs
 
-        val anotherBasic = memberRepository.save(member(authority = BASIC, email = "basic2@example.com"))
-        clearPersistenceContext()
+        val anotherBasicId = 200L
+        every { memberRepository.findByIdOrNull(anotherBasicId) } returns member(id = anotherBasicId, authority = BASIC)
+
+
 
 
         //when
         val exceptionType =
-            assertThrows<PostException> { postService.delete(anotherBasic.id!!, postId) }.exceptionType()
+            assertThrows<PostException> { postService.delete(anotherBasicId, postId) }.exceptionType()
 
         //then
-        assertThat(postRepository.findByIdOrNull(postId)).isNotNull
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST)
+        verify (exactly = 0) { postRepository.delete(any()) }
+
     }
 
 
@@ -444,16 +399,18 @@ internal class PostServiceTest {
     fun `공지 삭제 성공 - 자신의 공지`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
-        val postId = postService.create(adminAuthMember.id, cpd)
-        clearPersistenceContext()
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
+        every { postRepository.delete(any()) } just runs
+
 
 
         //when
         postService.delete(adminAuthMember.id!!, postId)
 
         //then
-        assertThat(postRepository.findByIdOrNull(postId)).isNull()
+        verify( exactly =  1 ) { postRepository.delete(any()) }
+
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
     }
@@ -465,60 +422,61 @@ internal class PostServiceTest {
     fun `공지 삭제 실패 - 자신의 공지이나 관리자 자격을 박탈당해 일반 회원이 된 경우`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
-        val postId = postService.create(adminAuthMember.id, cpd)
-        val writer = memberRepository.findByIdOrNull(adminAuthMember.id)!!
-        writer.changRole(BASIC)
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.delete(any()) } just runs
 
-        clearPersistenceContext()
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BASIC)
 
 
         //when
         val exceptionType =
-            assertThrows<PostException> { postService.delete(writer.id!!, postId) }.exceptionType()
+            assertThrows<PostException> { postService.delete(adminAuthMember.id!!, postId) }.exceptionType()
 
         //then
-        assertThat(postRepository.findByIdOrNull(postId)).isNotNull
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST)
+        verify( exactly =  0 ) { postRepository.delete(any()) }
     }
+
+
 
     @Test
     fun `공지 삭제 실패 - 자신의 공지이나 관리자 자격을 박탈당해 블랙리스트가 된 경우`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
-        val postId = postService.create(adminAuthMember.id, cpd)
-        val writer = memberRepository.findByIdOrNull(adminAuthMember.id)!!
-        writer.changRole(BLACK)
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = adminAuthMember.id, writerRole = blackAuthMember.role )
+        every { postRepository.delete(any()) } just runs
 
-        clearPersistenceContext()
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BLACK)
 
 
         //when
         val exceptionType =
-            assertThrows<PostException> { postService.delete(writer.id!!, postId) }.exceptionType()
+            assertThrows<PostException> { postService.delete(adminAuthMember.id!!, postId) }.exceptionType()
 
         //then
-        assertThat(postRepository.findByIdOrNull(postId)).isNotNull
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST)
+        verify( exactly =  0 ) { postRepository.delete(any()) }
     }
+
 
     @Test
     fun `공지 삭제 성공 - 다른 관리자의 공지`() {
 
         //given
-        val cpd = createPostDto(type = NOTICE)
-        val postId = postService.create(adminAuthMember.id, cpd)
+        val postId = 10L
+        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, type = NOTICE, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.delete(any()) } just runs
 
-        val anotherAdmin = memberRepository.save(member(authority = Role.ADMIN, email = "admin2@example.com"))
-        clearPersistenceContext()
-
+        val anotherAdminId = 300L
+        every { memberRepository.findByIdOrNull(anotherAdminId) } returns member(id = anotherAdminId, authority = ADMIN)
 
         //when
-        postService.delete(anotherAdmin.id!!, postId)
+        postService.delete(anotherAdminId, postId)
 
         //then
-        assertThat(postRepository.findByIdOrNull(postId)).isNull()
+        verify( exactly =  1 ) { postRepository.delete(any()) }
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
     }
