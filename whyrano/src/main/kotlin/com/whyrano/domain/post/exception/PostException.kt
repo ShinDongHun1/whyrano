@@ -1,6 +1,5 @@
 package com.whyrano.domain.post.exception
 
-import com.whyrano.domain.member.exception.MemberExceptionType
 import com.whyrano.global.exception.BaseException
 
 /**
