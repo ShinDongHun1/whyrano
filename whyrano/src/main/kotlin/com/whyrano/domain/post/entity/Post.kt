@@ -40,6 +40,8 @@ class Post(
 
     var likeCount: Int = 0, // 좋아요 개수
 
+    var commentCount: Int = 0, // 댓글 수
+
 
 
     @ManyToOne(fetch = LAZY)
