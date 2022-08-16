@@ -1,5 +1,6 @@
 package com.whyrano.domain.member.controller.dto.request
 
+import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotEmpty
 
 /**
@@ -7,6 +8,6 @@ import javax.validation.constraints.NotEmpty
  */
 data class PasswordDto(
 
-    @field:NotEmpty val password: String
+    @field:NotBlank val password: String
 
 )

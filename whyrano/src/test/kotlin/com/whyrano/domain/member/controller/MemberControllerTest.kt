@@ -224,7 +224,7 @@ internal class MemberControllerTest {
     fun `회원가입 실패 - nickname이 없는 경우`() {
         //given
         val createMemberId = 11L
-        val cmr = createMemberRequest(nickname= "")
+        val cmr = createMemberRequest(nickname= "       ")
         every { memberService.signUp(cmr.toServiceDto()) } returns createMemberId
 
 
