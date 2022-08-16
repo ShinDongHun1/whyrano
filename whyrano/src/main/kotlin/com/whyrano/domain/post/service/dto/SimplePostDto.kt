@@ -1,5 +1,6 @@
 package com.whyrano.domain.post.service.dto
 
+import com.whyrano.domain.member.service.dto.MemberDto
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
 import java.time.LocalDateTime
@@ -8,7 +9,7 @@ import java.time.LocalDateTime
  * Created by ShinD on 2022/08/15.
  */
 data class SimplePostDto(
-    val id: Long? = null,
+    val id: Long,
 
     val postType: PostType, // 공지 | 질문
 
@@ -24,13 +25,27 @@ data class SimplePostDto(
 
     var commentCount: Int = 0, // 댓글 수
 
-    var createdDate: LocalDateTime, // 생성일
+    var createdDate: LocalDateTime?, // 생성일
 
-    var modifiedDate: LocalDateTime, // 수정일
+    var modifiedDate: LocalDateTime?, // 수정일
+
+    var writerDto: MemberDto, // 작성자 정보
 ) {
+
     companion object {
-        fun from(it: Post): SimplePostDto {
-            TODO("Not yet implemented")
-        }
+        fun from(post: Post) =
+            SimplePostDto(
+                id = post.id!!,
+                postType = post.postType,
+                title = post.title,
+                content = post.content,
+                answerCount = post.answerCount,
+                viewCount = post.viewCount,
+                likeCount = post.likeCount,
+                commentCount = post.commentCount,
+                createdDate = post.createdDate,
+                modifiedDate = post.modifiedDate,
+                writerDto = MemberDto.from(post.writer!!)
+            )
     }
 }

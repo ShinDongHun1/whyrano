@@ -1,10 +1,12 @@
 package com.whyrano.domain.post.service
 
 import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.common.search.SearchResultDto
 import com.whyrano.domain.member.entity.Role.*
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.repository.MemberRepository
+import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType.NOTICE
 import com.whyrano.domain.post.entity.PostType.QUESTION
 import com.whyrano.domain.post.exception.PostException
@@ -13,8 +15,11 @@ import com.whyrano.domain.post.fixture.PostFixture.UPDATE_CONTENT
 import com.whyrano.domain.post.fixture.PostFixture.UPDATE_TITLE
 import com.whyrano.domain.post.fixture.PostFixture.createPostDto
 import com.whyrano.domain.post.fixture.PostFixture.post
+import com.whyrano.domain.post.fixture.PostFixture.postPageable
+import com.whyrano.domain.post.fixture.PostFixture.postSearchCond
 import com.whyrano.domain.post.fixture.PostFixture.updatePostDto
 import com.whyrano.domain.post.repository.PostRepository
+import com.whyrano.domain.post.service.dto.SimplePostDto
 import com.whyrano.global.auth.userdetails.AuthMember
 import com.whyrano.global.config.JpaConfig
 import com.whyrano.global.config.QuerydslConfig
@@ -28,6 +33,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
+import org.springframework.data.domain.PageImpl
 import org.springframework.data.repository.findByIdOrNull
 
 /**
@@ -478,5 +484,109 @@ internal class PostServiceTest {
         verify( exactly =  1 ) { postRepository.delete(any()) }
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
+    }
+
+
+    @Test
+    fun `게시글 검색 - 결과 여러개인 경우`() {
+        //given
+        val totalElement = 100L
+        val searchPage = 2
+        val searchSize = 10
+        val totalPage = (totalElement / searchSize).toInt()
+
+        val postSearchCond = postSearchCond(title = null, content = null, postType = null)
+        val postPageable = postPageable(page = searchPage, size = searchSize, orders = emptyList())
+
+        val posts = mutableListOf<Post>()
+        repeat(searchSize) {
+            posts.add(post(id = it.toLong(), writerId = 1L, writerRole = BASIC))
+        }
+
+        val searchResult = PageImpl(posts, postPageable, totalElement)
+
+        every { postRepository.search(postSearchCond, postPageable) } returns searchResult
+
+        //when
+        val result = postService.search(postSearchCond, postPageable)
+
+        //then
+
+        val expectedResult = SearchResultDto(
+            totalPage = totalPage,
+            totalElementCount = totalElement,
+            currentPage = searchPage,
+            currentElementCount = searchSize,
+            simpleDtos = searchResult.content.map { SimplePostDto.from(it) })
+        assertThat(result).isEqualTo(expectedResult)
+    }
+
+
+    @Test
+    fun `게시글 검색 - 결과 1개인 경우`() {
+        //given
+        val totalElement = 100L
+        val searchPage = 2
+        val searchSize = 10
+        val totalPage = (totalElement / searchSize).toInt()
+
+        val postSearchCond = postSearchCond(title = null, content = null, postType = null)
+        val postPageable = postPageable(page = searchPage, size = searchSize, orders = emptyList())
+
+        val posts = mutableListOf<Post>()
+        repeat(1) {
+            posts.add(post(id = it.toLong(), writerId = 1L, writerRole = BASIC))
+        }
+
+        val searchResult = PageImpl(posts, postPageable, totalElement)
+
+        every { postRepository.search(postSearchCond, postPageable) } returns searchResult
+
+        //when
+        val result = postService.search(postSearchCond, postPageable)
+
+        //then
+
+        val expectedResult = SearchResultDto(
+            totalPage = totalPage,
+            totalElementCount = totalElement,
+            currentPage = searchPage,
+            currentElementCount = 1,
+            simpleDtos = searchResult.content.map { SimplePostDto.from(it) })
+        assertThat(result).isEqualTo(expectedResult)
+        assertThat(result.currentElementCount).isEqualTo(1)
+    }
+
+    @Test
+    fun `게시글 검색 - 결과 0개인 경우`() {
+        //given
+        val totalElement = 100L
+        val searchPage = 2
+        val searchSize = 10
+        val totalPage = (totalElement / searchSize).toInt()
+
+        val postSearchCond = postSearchCond(title = null, content = null, postType = null)
+        val postPageable = postPageable(page = searchPage, size = searchSize, orders = emptyList())
+
+        val posts = mutableListOf<Post>()
+
+        val searchResult = PageImpl(posts, postPageable, totalElement)
+
+        every { postRepository.search(postSearchCond, postPageable) } returns searchResult
+
+        //when
+        val result = postService.search(postSearchCond, postPageable)
+
+        //then
+
+        val expectedResult = SearchResultDto(
+            totalPage = totalPage,
+            totalElementCount = totalElement,
+            currentPage = searchPage,
+            currentElementCount = 0,
+            simpleDtos = searchResult.content.map { SimplePostDto.from(it) })
+        assertThat(result).isEqualTo(expectedResult)
+        assertThat(result.currentElementCount).isEqualTo(0)
+        assertThat(result.simpleDtos.size).isEqualTo(0)
     }
 }

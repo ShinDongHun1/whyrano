@@ -5,8 +5,12 @@ import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
+import com.whyrano.domain.post.search.PostSearchCond
 import com.whyrano.domain.post.service.dto.CreatePostDto
 import com.whyrano.domain.post.service.dto.UpdatePostDto
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.data.domain.Sort.Order
 
 
 /**
@@ -53,5 +57,23 @@ object PostFixture {
         content: String? = UPDATE_CONTENT,
     ) =
         UpdatePostDto(title = title, content = content)
+
+
+    fun postSearchCond(
+        title: String? = null,
+        content: String? = null,
+        postType: PostType? = null,
+    ) =
+        PostSearchCond(title = title, content = content, postType = postType)
+
+
+
+    fun postPageable(
+        page: Int = 0,
+        size: Int = 0,
+        orders: List<Order> = emptyList()
+    ) =
+        PageRequest.of(page, size, Sort.by(orders))
+
 
 }
