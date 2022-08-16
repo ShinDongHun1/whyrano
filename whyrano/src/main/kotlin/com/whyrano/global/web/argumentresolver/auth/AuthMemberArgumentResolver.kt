@@ -1,4 +1,4 @@
-package com.whyrano.global.web.argumentresolver
+package com.whyrano.global.web.argumentresolver.auth
 
 import com.whyrano.global.auth.userdetails.AuthMember
 import org.springframework.core.MethodParameter

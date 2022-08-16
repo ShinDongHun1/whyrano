@@ -5,7 +5,7 @@ import com.whyrano.domain.member.controller.dto.request.PasswordDto
 import com.whyrano.domain.member.controller.dto.request.UpdateMemberRequest
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.userdetails.AuthMember
-import com.whyrano.global.web.argumentresolver.Auth
+import com.whyrano.global.web.argumentresolver.auth.Auth
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath
