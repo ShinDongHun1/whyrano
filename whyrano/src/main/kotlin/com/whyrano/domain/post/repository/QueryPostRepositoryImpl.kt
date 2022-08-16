@@ -94,12 +94,38 @@ class QueryPostRepositoryImpl(
 
             val pathBuilder =  PathBuilder(post.type, post.metadata)
 
+            // 해당 필드가 존재하지 않으면 무시
+            if ( ! checkFieldExist(post.type, o.property)) continue
+
             beforeSortQuery.orderBy(
                 OrderSpecifier(if (o.isAscending) ASC else DESC, pathBuilder.get(o.property) as Expression<out Comparable<*>>)
             )
         }
 
         return beforeSortQuery
+    }
+
+
+
+
+
+    /**
+     * 필드가 해당 클래스에 존재하는지 확인
+     */
+    private fun checkFieldExist(type: Class<*>, property: String): Boolean {
+
+        // 모든 필드명을 담을 리스트
+        val allFieldNames = mutableListOf<String>()
+
+        // 자신의 필드를 모두 추가
+        allFieldNames.addAll(type.declaredFields.map { it.name })
+
+        // 부모의 필드도 모두 추가
+        allFieldNames.addAll(type.superclass.declaredFields.map { it.name })
+
+        // 속성이 존재하는지 확인
+        return allFieldNames.contains(property)
+
     }
 
 
