@@ -238,6 +238,77 @@ internal class QueryPostRepositoryImplTest {
     }
 
 
+    @Test
+    fun `제목으로 검색 - 대소문자 구분 X`() {
+
+        //given
+        val totalCount = 10
+        val pageCount = 0
+        val pageSize = 10
+
+        repeat(totalCount) {
+            val post = post(
+                id = null,
+                title = "t i tLE${it+50}",
+                content = "c    on    te    n t        ${it+50}",
+                likeCount = it + 50,
+                viewCount = it + 50,
+                answerCount = it + 50,
+                commentCount = it + 50,
+            )
+            post.confirmWriter(member)
+            postRepository.save(post)
+        }
+        val pageable = PageRequest.of(0, 10)
+
+        //when
+        val search = postRepository.search(PostSearchCond(title = "TIt  LE"), pageable)
+
+
+        //then
+        assertThat(search.totalElements).isEqualTo(totalCount.toLong())
+        assertThat(search.totalPages).isEqualTo(1)
+        assertThat(search.number).isEqualTo(pageCount)
+        assertThat(search.numberOfElements).isEqualTo(10)
+
+        search.content.map { it.title }.forEach{assertThat(it).contains("t i tLE")}
+    }
+
+    @Test
+    fun `제목으로 검색 - 한글의 경우`() {
+
+        //given
+        val totalCount = 10
+        val pageCount = 0
+        val pageSize = 10
+
+        repeat(totalCount) {
+            val post = post(
+                id = null,
+                title = "가나따fl마 보 슈 썅${it+50}",
+                content = "c    on    te    n t        ${it+50}",
+                likeCount = it + 50,
+                viewCount = it + 50,
+                answerCount = it + 50,
+                commentCount = it + 50,
+            )
+            post.confirmWriter(member)
+            postRepository.save(post)
+        }
+        val pageable = PageRequest.of(0, 10)
+
+        //when
+        val search = postRepository.search(PostSearchCond(title = "가    나따fL마   보슈썅"), pageable)
+
+
+        //then
+        assertThat(search.totalElements).isEqualTo(totalCount.toLong())
+        assertThat(search.totalPages).isEqualTo(1)
+        assertThat(search.number).isEqualTo(pageCount)
+        assertThat(search.numberOfElements).isEqualTo(10)
+        search.content.map { it.title }.forEach{assertThat(it).contains("가나따fl마 보 슈 썅")}
+    }
+
 
     @Test
     fun `내용으로 검색 - 공백 없이 포함된 경우`() {
@@ -412,7 +483,7 @@ internal class QueryPostRepositoryImplTest {
         val pageable = PageRequest.of(pageCount,  pageSize)
 
         //when
-        val search = postRepository.search(PostSearchCond(content  = "  con     t en    t       "), pageable)
+        val search = postRepository.search(PostSearchCond(content  = "c o n te    n t    "), pageable)
 
 
         //then
@@ -422,6 +493,42 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.numberOfElements).isEqualTo(10)
 
         search.content.map { it.content }.forEach{assertThat(it).contains("c    on    te    n t        ")}
+    }
+
+    @Test
+    fun `내용으로 검색 - 대소문자 구분 X`() {
+
+        //given
+        val totalCount = 10
+        val pageCount = 0
+        val pageSize = 10
+
+        repeat(totalCount) {
+            val post = post(
+                id = null,
+                title = "t i tLE${it+50}",
+                content = "c    ON    te    n t        ${it+50}",
+                likeCount = it + 50,
+                viewCount = it + 50,
+                answerCount = it + 50,
+                commentCount = it + 50,
+            )
+            post.confirmWriter(member)
+            postRepository.save(post)
+        }
+        val pageable = PageRequest.of(0, 10)
+
+        //when
+        val search = postRepository.search(PostSearchCond(content = "Con   tE    n t        "), pageable)
+
+
+        //then
+        assertThat(search.totalElements).isEqualTo(totalCount.toLong())
+        assertThat(search.totalPages).isEqualTo(1)
+        assertThat(search.number).isEqualTo(pageCount)
+        assertThat(search.numberOfElements).isEqualTo(10)
+
+        search.content.map { it.content }.forEach{assertThat(it).contains("c    ON    te    n t        ")}
     }
 
 
