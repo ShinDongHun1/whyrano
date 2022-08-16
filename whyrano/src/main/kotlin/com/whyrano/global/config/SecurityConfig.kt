@@ -74,7 +74,6 @@ class SecurityConfig {
 
 
 
-
     /**
      * Json 형식으로 로그인을 진행하는 필터
      */
@@ -91,13 +90,10 @@ class SecurityConfig {
         checkNotNull(passwordEncoder) { "passwordEncoder is null !" }
         checkNotNull(jsonLoginSuccessHandler) { "JsonLoginSuccessHandler is null !" }
 
-
         //== DaoAuthenticationProvider 설정 ==//
         val daoAuthenticationProvider = DaoAuthenticationProvider()
         daoAuthenticationProvider.setUserDetailsService(memberService)
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder)
-
-
 
         //== JsonLoginProcessingFilter 설정 ==//
         val jsonLoginProcessingFilter = JsonLoginProcessingFilter(LOGIN_URL)
@@ -112,13 +108,14 @@ class SecurityConfig {
 
 
 
-
     /**
      * Json 로그인 성공시 처리 - JWT 발급
      */
     @Bean
     fun jsonLoginSuccessHandler(jwtService: JwtService? = null): JsonLoginSuccessHandler{
+
         checkNotNull(jwtService) { "jwtService is null !" }
+
         return JsonLoginSuccessHandler(jwtService)
     }
 
@@ -131,11 +128,11 @@ class SecurityConfig {
      */
     @Bean
     fun jsonLoginFailureHandler(objectMapper: ObjectMapper? =null): JsonLoginFailureHandler {
+
         checkNotNull(objectMapper) { "objectMapper is null !" }
+
         return JsonLoginFailureHandler(objectMapper)
     }
-
-
 
 
 
@@ -149,6 +146,7 @@ class SecurityConfig {
        jwtAuthenticationManager: JwtAuthenticationManager? = null,
        jwtAuthenticationFailureManager: JwtAuthenticationFailureManager? = null,
     ): JwtAuthenticationFilter {
+
         checkNotNull(jwtAuthenticationManager) { "jwtAuthenticationManager is null !" }
         checkNotNull(jwtAuthenticationFailureManager) { "jwtAuthenticationFailureManager is null !" }
 
@@ -156,15 +154,22 @@ class SecurityConfig {
     }
 
 
+
+
+
     /**
      * JWT를 사용하여 실제 인증을 처리
      */
     @Bean
     fun jwtAuthenticationManager(jwtService: JwtService? = null) :JwtAuthenticationManager {
+
         checkNotNull(jwtService) { "jwtService is null !" }
 
         return JwtAuthenticationManager(jwtService)
     }
+
+
+
 
 
     /**
@@ -172,10 +177,11 @@ class SecurityConfig {
      */
     @Bean
     fun jwtAuthenticationFailureManager(objectMapper: ObjectMapper? = null) :JwtAuthenticationFailureManager {
+
         checkNotNull(objectMapper) { "objectMapper is null !" }
+
         return JwtAuthenticationFailureManager(objectMapper)
     }
-
 
 
 
@@ -187,9 +193,13 @@ class SecurityConfig {
      */
     @Bean
     fun roleHierarchy(): RoleHierarchy {
+
         val roleHierarchy = RoleHierarchyImpl()
+
         val hierarchy = "ROLE_ADMIN > ROLE_BASIC"
+
         roleHierarchy.setHierarchy(hierarchy)
+
         return roleHierarchy
     }
 

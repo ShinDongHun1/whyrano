@@ -19,6 +19,7 @@ import javax.persistence.GenerationType.IDENTITY
 @Entity
 @Table(name = "POST")
 class Post(
+
     @Id @Column(name = "post_id")
     @GeneratedValue(strategy = IDENTITY)
     val id: Long? = null,
@@ -42,8 +43,6 @@ class Post(
 
     var commentCount: Int = 0, // 댓글 수
 
-
-
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "writer", nullable = false)
     var writer: Member? = null // 작성자
@@ -51,21 +50,31 @@ class Post(
 ) : BaseTimeEntity() {
 
 
+
+
+
     /**
      * 작성자 설정
      */
     fun confirmWriter(writer: Member) {
+
         this.writer = writer
     }
+
+
+
 
 
     /**
      * post 수정
      */
     fun update(title: String?, content: String?) {
+
         title?.let { this.title = it }
+
         content?.let { this.content = it }
     }
+
 
 
 
@@ -77,11 +86,16 @@ class Post(
      *   질문 - 어드민, 일반 유저 가능 (블랙리스트 불가능)
      */
     fun checkCreateAuthority(writer: Member) {
+
         when(postType) {
+
             NOTICE -> if (writer.role != Role.ADMIN) throw PostException(PostExceptionType.NO_AUTHORITY_CREATE_NOTICE)
+
             PostType.QUESTION -> if (writer.role == BLACK) throw PostException(PostExceptionType.NO_AUTHORITY_CREATE_QUESTION)
         }
     }
+
+
 
 
 
@@ -99,6 +113,7 @@ class Post(
 
         // 블랙리스트가 아닌 경우
         when (this.postType) {
+
             // 공지의 경우 관리자가 아니면 수정 불가능
             NOTICE ->  if ( ! writer.isAdmin() ) throw PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
 
@@ -106,6 +121,8 @@ class Post(
             else ->  if ( ! isSameWriter(writer) ) throw PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
         }
     }
+
+
 
 
 
@@ -123,6 +140,7 @@ class Post(
 
         // 블랙리스트가 아닌 경우
         when (this.postType) {
+
             // 공지의 경우 관리자가 아니면 삭제 불가능
             NOTICE ->  if ( ! writer.isAdmin() ) throw PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
 
@@ -133,8 +151,12 @@ class Post(
     }
 
 
+
+
+
     /**
      * 동일한 작성자인지 확인
      */
-    private fun isSameWriter(writer: Member) = this.writer!!.id == writer.id
+    private fun isSameWriter(writer: Member) =
+        this.writer!!.id == writer.id
 }

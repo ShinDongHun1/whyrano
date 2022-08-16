@@ -37,12 +37,9 @@ class JsonLoginProcessingFilter(
         if (request.contentLength == NO_CONTENT) throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
 
 
-
-
         /**
          * 로그인 처리 로직
          */
-
         // request로부터 계정 정보 추출
         val accountDto = extractAccount(request)
 
@@ -54,10 +51,13 @@ class JsonLoginProcessingFilter(
     }
 
     private fun extractAccount(request: HttpServletRequest): AccountDto {
+
         return try {
+
             objectMapper.readValue(request.reader, AccountDto::class.java) // Json 파싱 중 오류가 발생할 수 있으므로 예외 처리
         }
         catch (e: Exception) {
+
             throw AuthException(AuthExceptionType.BAD_USERNAME_PASSWORD)
         }
     }

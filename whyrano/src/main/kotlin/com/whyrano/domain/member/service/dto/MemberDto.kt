@@ -8,6 +8,7 @@ import java.time.LocalDateTime
  * Created by ShinD on 2022/08/15.
  */
 data class MemberDto(
+
     val id: Long,
 
     var role: Role, // 권한
@@ -23,6 +24,7 @@ data class MemberDto(
     var createdDate: LocalDateTime?, // 생성일
 
     var modifiedDate: LocalDateTime?, // 최종 정보 수정일
+
 ) {
 
     companion object {

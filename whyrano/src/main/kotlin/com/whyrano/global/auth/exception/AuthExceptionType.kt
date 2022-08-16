@@ -7,9 +7,13 @@ import org.springframework.http.HttpStatus
  * Created by ShinD on 2022/08/13.
  */
 enum class AuthExceptionType(
+
     private val errorCode: Int,
+
     private val httpStatus: HttpStatus,
+
     private val message: String
+
 ) : BaseExceptionType{
 
     //== Json 로그인 관련 ==//

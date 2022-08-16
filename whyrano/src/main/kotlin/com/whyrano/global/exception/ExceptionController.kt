@@ -25,14 +25,17 @@ class ExceptionController {
         val UNEXPECTED_EXCEPTION_HTTP_STATUS = INTERNAL_SERVER_ERROR
     }
 
-
     private val log = KotlinLogging.logger {  }
+
+
 
 
 
     @ExceptionHandler(BaseException::class)
     fun handleBaseException(ex: BaseException): ResponseEntity<ExceptionResponse> {
+
         val exceptionType = ex.exceptionType()
+
         log.error { "ErrorCode : [${exceptionType.errorCode()}], message : [${exceptionType.message()}]" }
 
         return ResponseEntity
@@ -42,14 +45,18 @@ class ExceptionController {
 
 
 
+
+
     @ExceptionHandler(BindException::class)
     fun handleBindException(ex: BindException): ResponseEntity<ExceptionResponse> {
 
         log.error { "Http 요청 중 채워지지 않은 필드를 가진 요청이 들어왔습니다. - message : [${ex.message}], cause : [${ex.cause}]" }
 
-        return ResponseEntity.status(BIND_EXCEPTION_HTTP_STATUS)
+        return ResponseEntity
+            .status(BIND_EXCEPTION_HTTP_STATUS)
             .body(ExceptionResponse(errorCode = BIND_EXCEPTION_ERROR_CODE, message = BIND_EXCEPTION_MESSAGE))
     }
+
 
 
 
@@ -61,10 +68,12 @@ class ExceptionController {
 
         ex.printStackTrace()
 
-        return ResponseEntity.status(UNEXPECTED_EXCEPTION_HTTP_STATUS)
+        return ResponseEntity
+            .status(UNEXPECTED_EXCEPTION_HTTP_STATUS)
             .body(ExceptionResponse(errorCode = UNEXPECTED_EXCEPTION_ERROR_CODE, message = UNEXPECTED_EXCEPTION_MESSAGE))
     }
 }
+
 
 
 

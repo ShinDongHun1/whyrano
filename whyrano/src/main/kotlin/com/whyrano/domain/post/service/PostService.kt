@@ -22,9 +22,16 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 @Transactional
 class PostService(
+
     private val memberRepository: MemberRepository,
+
     private val postRepository: PostRepository,
+
 ) {
+
+
+
+
 
     /**
      * 질문 작성
@@ -36,6 +43,9 @@ class PostService(
      * TODO 질문 조회 - 댓글, 답글 기능 구현 후 작성
      * TODO 동시에 여러 관리자가 공지를 수정할 경우(동시성 문제 발생), 락을 걸어 처리하기
      */
+
+
+
 
 
     /**
@@ -60,6 +70,7 @@ class PostService(
         //저장 후 id 반환
         return postRepository.save(post).id!!
     }
+
 
 
 
@@ -96,6 +107,7 @@ class PostService(
      * 질문, 공지 삭제
      */
     fun delete(writerId: Long, postId: Long) {
+
         // Post 정보 조회
         val post = postRepository.findByIdOrNull(postId) ?: throw PostException(PostExceptionType.NOT_FOUND)
 
@@ -108,6 +120,9 @@ class PostService(
         // post 삭제
         postRepository.delete(post)
     }
+
+
+
 
 
     /**
@@ -133,7 +148,4 @@ class PostService(
             simpleDtos = simplePostDtos                     // 요소에 대한 간단한 정보를 담은 DTO
         )
     }
-
-
-
 }

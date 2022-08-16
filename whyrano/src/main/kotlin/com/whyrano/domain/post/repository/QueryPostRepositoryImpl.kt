@@ -25,8 +25,13 @@ import org.springframework.util.StringUtils.hasText
  */
 @Repository
 class QueryPostRepositoryImpl(
+
     private val query: JPAQueryFactory,
+
 ) : QueryPostRepository {
+
+
+
 
 
     /**
@@ -40,24 +45,24 @@ class QueryPostRepositoryImpl(
 
         val beforeSortQuery = query.selectFrom(post)
 
+            // join 설정
             .join(post.writer, member)
             .fetchJoin()
 
+            // 검색 조건 설정
             .where(
                 titleContains(cond.title),
                 contentContains(cond.content),
                 typeEq(cond.postType),
             )
 
+        // orderBy 설정
         val afterSortQuery = sortQuery(beforeSortQuery, pageable)
-
 
         val contentQuery = afterSortQuery
             .offset(pageable.offset)
             .limit(pageable.pageSize.toLong())
             .fetch()
-
-
 
         val countQuery = query.select(post.count())
             .from(post)
@@ -69,6 +74,7 @@ class QueryPostRepositoryImpl(
 
         return PageableExecutionUtils.getPage(contentQuery, pageable) {countQuery.fetchOne()!!}
     }
+
 
 
 
@@ -85,14 +91,17 @@ class QueryPostRepositoryImpl(
     private fun sortQuery(beforeSortQuery: JPAQuery<Post>, pageable: Pageable): JPAQuery<Post> {
 
         for (o in pageable.sort) {
+
             val pathBuilder =  PathBuilder(post.type, post.metadata)
 
             beforeSortQuery.orderBy(
                 OrderSpecifier(if (o.isAscending) ASC else DESC, pathBuilder.get(o.property) as Expression<out Comparable<*>>)
             )
         }
+
         return beforeSortQuery
     }
+
 
 
 
@@ -111,6 +120,9 @@ class QueryPostRepositoryImpl(
     }
 
 
+
+
+
     /**
      *  내용 검색
      *  공백 무시하고 처리
@@ -125,10 +137,14 @@ class QueryPostRepositoryImpl(
     }
 
 
+
+
+
     /**
      * 게시글 타입으로 검색
      */
     private fun typeEq(postType: PostType?): BooleanExpression? {
+
         return postType?.let { post.postType.eq(it) }
     }
 }

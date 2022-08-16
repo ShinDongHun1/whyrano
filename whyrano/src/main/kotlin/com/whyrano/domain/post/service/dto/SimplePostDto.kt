@@ -9,6 +9,7 @@ import java.time.LocalDateTime
  * Created by ShinD on 2022/08/15.
  */
 data class SimplePostDto(
+
     val id: Long,
 
     val postType: PostType, // 공지 | 질문
@@ -30,6 +31,7 @@ data class SimplePostDto(
     var modifiedDate: LocalDateTime?, // 수정일
 
     var writerDto: MemberDto, // 작성자 정보
+
 ) {
 
     companion object {

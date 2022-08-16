@@ -10,12 +10,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
  */
 @Configuration
 class WebConfig(
+
     private val authMemberArgumentResolver: AuthMemberArgumentResolver,
 
 ) : WebMvcConfigurer { //TODO WebMvcConfigurationSupport 와의 차이가 뭘까..?
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
+
         super.addArgumentResolvers(resolvers)
+
         resolvers.add(authMemberArgumentResolver)
     }
 }

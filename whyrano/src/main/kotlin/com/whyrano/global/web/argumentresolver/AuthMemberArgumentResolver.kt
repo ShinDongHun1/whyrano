@@ -16,11 +16,16 @@ import org.springframework.web.method.support.ModelAndViewContainer
 class AuthMemberArgumentResolver : HandlerMethodArgumentResolver {
 
     override fun supportsParameter(parameter: MethodParameter): Boolean {
+
         val hasAuthAnnotation = parameter.hasParameterAnnotation(Auth::class.java)
+
         val hasAuthMemberType = AuthMember::class.java.isAssignableFrom(parameter.parameterType)
 
         return hasAuthAnnotation && hasAuthMemberType
     }
+
+
+
 
 
     override fun resolveArgument(
@@ -29,9 +34,11 @@ class AuthMemberArgumentResolver : HandlerMethodArgumentResolver {
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?,
     ): AuthMember? {
+
         val authentication = SecurityContextHolder.getContext().authentication
 
         if(authentication == null || !authentication.isAuthenticated ) return null
+
         return authentication.principal as AuthMember
     }
 }

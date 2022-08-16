@@ -10,4 +10,5 @@ enum class PostType {
     NOTICE, // 공지
 
     ;
+
 }

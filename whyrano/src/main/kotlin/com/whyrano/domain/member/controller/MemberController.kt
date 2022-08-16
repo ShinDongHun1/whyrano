@@ -28,12 +28,15 @@ class MemberController(
     ) : ResponseEntity<Unit> {
 
         val memberId = memberService.signUp(cmr.toServiceDto())
+
         val url = fromCurrentContextPath() // http://~~
             .path("/member/{memberId}")    // http://~~/member/{memberId}
             .buildAndExpand(memberId)      // http://~~/member/10
             .toUri()
+
         return ResponseEntity.created(url).build()
     }
+
 
 
 
@@ -48,9 +51,9 @@ class MemberController(
     ): ResponseEntity<Unit> {
 
         memberService.update(authMember.id, umr.toServiceDto())
+
         return ResponseEntity.ok().build()
     }
-
 
 
 
@@ -66,6 +69,7 @@ class MemberController(
     ): ResponseEntity<Unit> {
 
         memberService.delete(authMember.id, passwordDto.password)
+
         return ResponseEntity.noContent().build()
     }
 }

@@ -15,16 +15,24 @@ import javax.servlet.http.HttpServletResponse
  * Created by ShinD on 2022/08/13.
  */
 class JwtAuthenticationFailureManager(
+
     private val objectMapper: ObjectMapper,
+
 ) {
 
     private val log = KotlinLogging.logger {  }
+
+
+
+
 
     fun failureAuthentication(response: HttpServletResponse ,ex: Exception) {
         when (ex) {
             //예상한 범위 내의 오류
             is AuthException -> {
+
                 val exceptionType = ex.exceptionType()
+
                 setResponse(
                     response = response,
                     status = exceptionType.httpStatus(),
@@ -36,8 +44,11 @@ class JwtAuthenticationFailureManager(
 
             //예상하지 못한 오류
             else -> {
+
                 log.error { ex.message }
+
                 ex.printStackTrace()
+
                 setResponse(
                     response = response,
                     status = HttpStatus.UNAUTHORIZED,
@@ -48,6 +59,10 @@ class JwtAuthenticationFailureManager(
             }
         }
     }
+
+
+
+
 
     private fun setResponse(
         response: HttpServletResponse,

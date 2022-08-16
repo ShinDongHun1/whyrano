@@ -22,11 +22,17 @@ import javax.servlet.http.HttpServletRequest
 
 @Service
 class JwtServiceImpl(
+
     private val memberRepository: MemberRepository,
+
     private val jwtProperties: JwtProperties,
+
 ) : JwtService{
 
     private val algorithm: Algorithm = HMAC512(jwtProperties.secretKey)
+
+
+
 
 
     /**
@@ -67,6 +73,7 @@ class JwtServiceImpl(
 
 
 
+
     /**
      * AccessToken으로부터 이메일 추출
      */
@@ -102,7 +109,6 @@ class JwtServiceImpl(
 
 
 
-
     /**
      * AccessToken 혹은 RefreshToken이 유효한 상태인지 확인
      */
@@ -116,16 +122,22 @@ class JwtServiceImpl(
      * AccessToken의 유효기간이 특정 시간보다 길게 남았는지 검사
      */
     override fun isValidMoreThanMinute(accessToken: AccessToken, minute: Long): Boolean {
+
         return try {
             val expiredDate     = accessToken.getExpiredDate(algorithm) // 만료일(Date)
             val expiredDateTime = expiredDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime() //Date -> LocalDateTime
             val now             = LocalDateTime.now().plusMinutes(minute)//현재 시간
 
             now.isBefore(expiredDateTime)
-        }catch (e: Exception){
+        }
+        catch (e: Exception){
+
             false
         }
     }
+
+
+
 
 
     override fun findMemberByTokens(accessToken: AccessToken, refreshToken: RefreshToken) =

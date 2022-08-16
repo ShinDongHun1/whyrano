@@ -13,9 +13,12 @@ import javax.persistence.Embeddable
  */
 @Embeddable
 data class RefreshToken (
+
     var refreshToken: String? =null
+
 ) : Token {
     companion object {
+
         private const val REFRESH_TOKEN_SUBJECT = "RefreshToken"
 
         //== 정적 팩터리 메서드 ==//

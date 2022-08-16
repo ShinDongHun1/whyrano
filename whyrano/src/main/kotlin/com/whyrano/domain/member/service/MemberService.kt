@@ -32,7 +32,8 @@ class MemberService(
     fun signUp(cmd: CreateMemberDto): Long {
 
         // 아이디 중복 체크
-        memberRepository.findByEmail(cmd.email)?.let { throw MemberException(MemberExceptionType.ALREADY_EXIST) } // 이미 가입된 이메일인 경우 예외 발생
+        memberRepository.findByEmail(cmd.email)
+            ?.let { throw MemberException(MemberExceptionType.ALREADY_EXIST) } // 이미 가입된 이메일인 경우 예외 발생
 
         return memberRepository.save(cmd.toEntity(passwordEncoder)).id!!
     }
@@ -66,6 +67,7 @@ class MemberService(
 
         // 비밀번호 일치 여부 체크
         if (passwordEncoder.matches(password, findMember.password)) {
+
             memberRepository.delete(findMember) // 일치한 경우 삭제
         }
 
@@ -76,7 +78,8 @@ class MemberService(
     override fun loadUserByUsername(username: String): UserDetails {
 
         // 회원 정보가 존재하지 않는 경우 예외 발생
-        val member = memberRepository.findByEmail(username) ?: throw AuthException(AuthExceptionType.NOT_FOUND_MEMBER)
+        val member = memberRepository.findByEmail(username)
+            ?: throw AuthException(AuthExceptionType.NOT_FOUND_MEMBER)
 
         return AuthMember(id = member.id!!, email = member.email, password = member.password, role = member.role)
     }
