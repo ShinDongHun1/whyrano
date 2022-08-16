@@ -833,12 +833,12 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.numberOfElements).isEqualTo(15)
 
         for (i in 1 until  totalCount) {
-            //조회수 오름차순, 즉 0이 제일 작음
+            //댓글수 내림차순, 즉 0이 제일 큼
             assertThat(search.content[i-1].commentCount).isGreaterThanOrEqualTo(search.content[i].commentCount)
 
 
             if (search.content[i-1].commentCount == search.content[i].commentCount) {
-                //댓글수 내림차순, 즉 0이 제일 큼
+                //조회수 오름차순, 즉 0이 제일 작음
                 assertThat(search.content[i-1].viewCount).isLessThanOrEqualTo(search.content[i].viewCount)
             }
         }
@@ -890,7 +890,7 @@ internal class QueryPostRepositoryImplTest {
 
 
     @Test
-    fun `없는 필드를 정렬하는 경우 무시?`() {
+    fun `없는 필드를 정렬하는 경우 무시하고 있는 조건만 사용`() {
 
         //given
         val totalCount = 15
@@ -924,11 +924,8 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.numberOfElements).isEqualTo(15)
 
         for (i in 1 until  totalCount) {
+            //댓글수 내림차순, 즉 0이 제일 큼
             assertThat(search.content[i].createdDate).isAfter(search.content[i-1].createdDate)
-        }
-        for (i in 1 until  totalCount) {
-            //조회수 오름차순, 즉 0이 제일 작음
-            assertThat(search.content[i-1].commentCount).isLessThanOrEqualTo(search.content[i].commentCount)
         }
     }
 }
