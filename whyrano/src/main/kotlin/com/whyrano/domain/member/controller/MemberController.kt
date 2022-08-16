@@ -49,7 +49,7 @@ class MemberController(
         @Auth authMember: AuthMember,
         @RequestBody umr: UpdateMemberRequest
     ): ResponseEntity<Unit> {
-
+        //TODO 빈칸으로만 들어있는 경우 null이 되도록 수정
         memberService.update(authMember.id, umr.toServiceDto())
 
         return ResponseEntity.ok().build()
