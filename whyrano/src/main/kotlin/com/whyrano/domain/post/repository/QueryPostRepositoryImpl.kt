@@ -11,8 +11,8 @@ import com.querydsl.jpa.impl.JPAQuery
 import com.querydsl.jpa.impl.JPAQueryFactory
 import com.whyrano.domain.member.entity.QMember.member
 import com.whyrano.domain.post.entity.Post
-import com.whyrano.domain.post.entity.QPost.post
 import com.whyrano.domain.post.entity.PostType
+import com.whyrano.domain.post.entity.QPost.post
 import com.whyrano.domain.post.search.PostSearchCond
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
@@ -105,9 +105,9 @@ class QueryPostRepositoryImpl(
 
         if ( !hasText(title) ) return null
 
-        val noWhiteStr = title!!.replace(" ", "").replace("\t", "")
+        val noWhiteStrUpperCase= title!!.replace(" ", "").replace("\t", "").uppercase()
 
-        return Expressions.stringTemplate("replace({0},' ','')", post.title).contains(noWhiteStr)
+        return Expressions.stringTemplate("replace({0},' ','')", post.title).upper().contains(noWhiteStrUpperCase)
     }
 
 
@@ -119,9 +119,9 @@ class QueryPostRepositoryImpl(
 
         if ( !hasText(content) ) return null
 
-        val noWhiteStr = content!!.replace(" ", "").replace("\t", "")
+        val noWhiteStrUpperCase= content!!.replace(" ", "").replace("\t", "").uppercase()
 
-        return Expressions.stringTemplate("replace({0},' ','')", post.content).contains(noWhiteStr)
+        return Expressions.stringTemplate("replace({0},' ','')", post.content).upper().contains(noWhiteStrUpperCase)
     }
 
 
