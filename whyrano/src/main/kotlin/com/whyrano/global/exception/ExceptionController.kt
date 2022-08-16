@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.validation.BindException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -47,10 +48,10 @@ class ExceptionController {
 
 
 
-    @ExceptionHandler(BindException::class)
-    fun handleBindException(ex: BindException): ResponseEntity<ExceptionResponse> {
+    @ExceptionHandler(BindException::class, HttpMessageNotReadableException::class)
+    fun handleBindException(ex: Exception): ResponseEntity<ExceptionResponse> {
 
-        log.error { "Http 요청 중 채워지지 않은 필드를 가진 요청이 들어왔습니다. - message : [${ex.message}], cause : [${ex.cause}]" }
+        log.error { "Json 혹은 요청 파라미터의 형식이 올바르지 않습니다. - message : [${ex.message}], cause : [${ex.cause}]" }
 
         return ResponseEntity
             .status(BIND_EXCEPTION_HTTP_STATUS)
