@@ -844,4 +844,91 @@ internal class QueryPostRepositoryImplTest {
         }
     }
 
+
+
+
+
+    @Test
+    fun `아무 정렬 조건이 없다면 생성일 오름차순 정렬`() {
+
+        //given
+        val totalCount = 5
+        val pageCount = 0
+        val pageSize = 5
+
+        repeat(totalCount) {
+            val post = post(
+                id = null,
+                postType = NOTICE,
+                title = " title${it}",
+                content = "content${it}",
+            )
+            post.confirmWriter(member)
+            postRepository.save(post)
+        }
+
+
+        val pageable = PageRequest.of(pageCount,  pageSize)
+
+
+        //when
+        val search = postRepository.search(PostSearchCond(), pageable)
+
+
+        //then
+        assertThat(search.totalElements).isEqualTo(totalCount.toLong())
+        assertThat(search.totalPages).isEqualTo(1)
+        assertThat(search.number).isEqualTo(pageCount)
+        assertThat(search.numberOfElements).isEqualTo(5)
+
+        for (i in 1 until  totalCount) {
+            assertThat(search.content[i].createdDate).isAfter(search.content[i-1].createdDate)
+        }
+    }
+
+
+
+
+    @Test
+    fun `없는 필드를 정렬하는 경우 무시?`() {
+
+        //given
+        val totalCount = 15
+        val pageCount = 0
+        val pageSize = 15
+
+        repeat(totalCount) {
+            val post = post(
+                id = null,
+                postType = NOTICE,
+                title = " title${it}",
+                content = "content${it}",
+                commentCount = it,
+            )
+            post.confirmWriter(member)
+            postRepository.save(post)
+        }
+
+
+        val pageable = PageRequest.of(pageCount,  pageSize, Sort.by(Order(ASC, "commentCount"), Order(ASC, "createdDatㅇㅂㅈㅇㅈㅂe")))
+
+
+        //when
+        val search = postRepository.search(PostSearchCond(), pageable)
+
+
+        //then
+        assertThat(search.totalElements).isEqualTo(totalCount.toLong())
+        assertThat(search.totalPages).isEqualTo(1)
+        assertThat(search.number).isEqualTo(pageCount)
+        assertThat(search.numberOfElements).isEqualTo(15)
+
+        for (i in 1 until  totalCount) {
+            assertThat(search.content[i].createdDate).isAfter(search.content[i-1].createdDate)
+        }
+        for (i in 1 until  totalCount) {
+            //조회수 오름차순, 즉 0이 제일 작음
+            assertThat(search.content[i-1].commentCount).isLessThanOrEqualTo(search.content[i].commentCount)
+        }
+    }
 }
