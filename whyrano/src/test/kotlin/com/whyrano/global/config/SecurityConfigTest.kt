@@ -1,18 +1,22 @@
 package com.whyrano.global.config
 
 import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.member.controller.MemberController
 import com.whyrano.domain.member.entity.Role.*
 import com.whyrano.domain.member.fixture.MemberFixture.accessToken
 import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.MemberService
+import com.whyrano.domain.post.controller.PostController
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
 import io.mockk.every
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get
@@ -22,7 +26,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 /**
  * Created by ShinD on 2022/08/12.
  */
-@WebMvcTest
+@WebMvcTest(
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [PostController::class, MemberController::class])]
+)
 @Import(SecurityConfig::class)
 @MockkBean(JwtService::class, MemberRepository::class, MemberService::class)
 internal class SecurityConfigTest {

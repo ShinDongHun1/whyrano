@@ -3,11 +3,13 @@ package com.whyrano.global.auth.filter
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.member.controller.MemberController
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.accessToken
 import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.service.MemberService
+import com.whyrano.domain.post.controller.PostController
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
 import com.whyrano.global.config.SecurityConfig
@@ -19,6 +21,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
@@ -38,7 +42,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 /**
  * 확실히 얘가 빠르다
  */
-@WebMvcTest
+@WebMvcTest(
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [PostController::class, MemberController::class])]
+)
 @Import(SecurityConfig::class)
 internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     
