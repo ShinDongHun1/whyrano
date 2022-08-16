@@ -3,6 +3,7 @@ package com.whyrano.domain.post.fixture
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.member
+import com.whyrano.domain.post.controller.dto.CreatePostRequest
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.search.PostSearchCond
@@ -74,6 +75,13 @@ object PostFixture {
         orders: List<Order> = emptyList()
     ) =
         PageRequest.of(page, size, Sort.by(orders))
+
+    fun createPostRequest(
+        postType: PostType = PostType.QUESTION,
+        title: String = TITLE,
+        content: String = CONTENT,
+    ) =
+        CreatePostRequest(title = title, content = content, postType = postType)
 
 
 }
