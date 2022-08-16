@@ -5,6 +5,8 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.ninjasquad.springmockk.MockkBean
 import com.whyrano.domain.member.controller.dto.request.PasswordDto
 import com.whyrano.domain.member.exception.MemberException
+import com.whyrano.domain.member.exception.MemberExceptionType
+import com.whyrano.domain.member.exception.MemberExceptionType.NOT_FOUND
 import com.whyrano.domain.member.exception.MemberExceptionType.UNMATCHED_PASSWORD
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.accessToken
@@ -48,23 +50,34 @@ import java.nio.charset.StandardCharsets.UTF_8
 internal class MemberControllerTest {
 
     companion object {
+
         private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
     }
+
+
+
+
     @Autowired
     private lateinit var mockMvc: MockMvc
-
 
     @MockkBean
     private lateinit var memberService: MemberService
 
+
     @MockkBean
     private lateinit var jwtService: JwtService
+
+
+
 
 
     @BeforeEach
     fun setUp() {
         ReflectionTestUtils.setField(mockMvc, "defaultResponseCharacterEncoding", UTF_8)
     }
+
+
+
 
 
     @Test
@@ -76,22 +89,18 @@ internal class MemberControllerTest {
         every { memberService.signUp(cmr.toServiceDto()) } returns createMemberId
 
 
-
-
         val result = mockMvc.perform(
             post("/signup")
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(cmr))
-            )
+        )
             .andExpect(status().isCreated)
             .andReturn()
 
 
 
-
-
         assertThat(result.response.getHeader("location")).contains("/member/${createMemberId}")
-        verify (exactly = 1) { memberService.signUp(any()) }
+        verify(exactly = 1) { memberService.signUp(any()) }
     }
 
 
@@ -107,8 +116,6 @@ internal class MemberControllerTest {
         every { memberService.signUp(cmr.toServiceDto()) } returns createMemberId
 
 
-
-
         val result = mockMvc.perform(
             post("/signup")
                 .contentType(APPLICATION_JSON)
@@ -119,10 +126,8 @@ internal class MemberControllerTest {
 
 
 
-
-
         assertThat(result.response.getHeader("location")).contains("/member/${createMemberId}")
-        verify (exactly = 1) { memberService.signUp(any()) }
+        verify(exactly = 1) { memberService.signUp(any()) }
     }
 
 
@@ -138,8 +143,6 @@ internal class MemberControllerTest {
         every { memberService.signUp(cmr.toServiceDto()) } returns createMemberId
 
 
-
-
         val result = mockMvc.perform(
             post("/signup")
                 .contentType(APPLICATION_JSON)
@@ -150,14 +153,9 @@ internal class MemberControllerTest {
 
 
 
-
-
         assertThat(result.response.getHeader("location")).contains("/member/${createMemberId}")
-        verify (exactly = 1) { memberService.signUp(any()) }
+        verify(exactly = 1) { memberService.signUp(any()) }
     }
-
-
-
 
 
 
@@ -172,7 +170,6 @@ internal class MemberControllerTest {
         every { memberService.signUp(cmr.toServiceDto()) } returns createMemberId
 
 
-
         val result = mockMvc.perform(
             post("/signup")
                 .contentType(APPLICATION_JSON)
@@ -185,8 +182,10 @@ internal class MemberControllerTest {
         val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
         assertThat(readValue.errorCode).isEqualTo(BIND_EXCEPTION_ERROR_CODE)
         assertThat(readValue.message).isEqualTo(BIND_EXCEPTION_MESSAGE)
-        verify (exactly = 0){ memberService.signUp(any()) }
+        verify(exactly = 0) { memberService.signUp(any()) }
     }
+
+
 
 
 
@@ -198,8 +197,6 @@ internal class MemberControllerTest {
         every { memberService.signUp(cmr.toServiceDto()) } returns createMemberId
 
 
-
-
         val result = mockMvc.perform(
             post("/signup")
                 .contentType(APPLICATION_JSON)
@@ -209,14 +206,14 @@ internal class MemberControllerTest {
             .andReturn()
 
 
-
-
         val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
         assertThat(readValue.errorCode).isEqualTo(BIND_EXCEPTION_ERROR_CODE)
         assertThat(readValue.message).isEqualTo(BIND_EXCEPTION_MESSAGE)
         assertThat(result.response.getHeader("location")).isNull()
-        verify (exactly = 0){ memberService.signUp(any()) }
+        verify(exactly = 0) { memberService.signUp(any()) }
     }
+
+
 
 
 
@@ -224,9 +221,8 @@ internal class MemberControllerTest {
     fun `회원가입 실패 - nickname이 없는 경우`() {
         //given
         val createMemberId = 11L
-        val cmr = createMemberRequest(nickname= "       ")
+        val cmr = createMemberRequest(nickname = "       ")
         every { memberService.signUp(cmr.toServiceDto()) } returns createMemberId
-
 
 
         val result = mockMvc.perform(
@@ -238,14 +234,39 @@ internal class MemberControllerTest {
             .andReturn()
 
 
-
         val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
         assertThat(readValue.errorCode).isEqualTo(BIND_EXCEPTION_ERROR_CODE)
         assertThat(readValue.message).isEqualTo(BIND_EXCEPTION_MESSAGE)
         assertThat(result.response.getHeader("location")).isNull()
-        verify (exactly = 0){ memberService.signUp(any()) }
+        verify(exactly = 0) { memberService.signUp(any()) }
     }
 
+
+
+
+
+    @Test
+    fun `회원가입 실패 - 이메일이 중복인 경우`() {
+        //given
+        val cmr = createMemberRequest()
+        every { memberService.signUp(cmr.toServiceDto()) } throws  MemberException(MemberExceptionType.ALREADY_EXIST)
+
+
+        val result = mockMvc.perform(
+            post("/signup")
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(cmr))
+        )
+            .andExpect(status().isConflict)
+            .andReturn()
+
+
+        val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
+        assertThat(readValue.errorCode).isEqualTo(MemberExceptionType.ALREADY_EXIST.errorCode())
+        assertThat(readValue.message).isEqualTo(MemberExceptionType.ALREADY_EXIST.message())
+        assertThat(result.response.getHeader("location")).isNull()
+        verify(exactly = 1) { memberService.signUp(any()) }
+    }
 
 
 
@@ -257,7 +278,10 @@ internal class MemberControllerTest {
         val umr = MemberFixture.updateMemberRequest()
         val memberId = 10L
         every { memberService.update(any(), umr.toServiceDto()) } just runs
-        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.extractToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
         every { jwtService.extractAuthMember(any()) } returns authMember(id = memberId)
 
@@ -274,14 +298,39 @@ internal class MemberControllerTest {
 
 
 
-        verify (exactly = 1){ memberService.update(any(), umr.toServiceDto()) }
+        verify(exactly = 1) { memberService.update(any(), umr.toServiceDto()) }
     }
 
 
+    @Test
+    fun `회원수정 실패 - 없는 회원인 경우`() {
+        //given
+        val umr = MemberFixture.updateMemberRequest()
+        val memberId = 10L
+        every { memberService.update(any(), umr.toServiceDto()) } throws MemberException(MemberExceptionType.NOT_FOUND)
+        every { jwtService.extractToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
+        every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
+        every { jwtService.extractAuthMember(any()) } returns authMember(id = memberId)
+
+
+        val result = mockMvc.perform(
+            put("/member")
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(umr))
+        )
+            .andExpect(status().isNotFound)
+            .andReturn()
 
 
 
-
+        val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
+        assertThat(readValue.errorCode).isEqualTo(MemberExceptionType.NOT_FOUND.errorCode())
+        assertThat(readValue.message).isEqualTo(MemberExceptionType.NOT_FOUND.message())
+        verify(exactly = 1) { memberService.update(any(), umr.toServiceDto()) }
+    }
 
 
     @Test
@@ -290,11 +339,17 @@ internal class MemberControllerTest {
         val umr = MemberFixture.updateMemberRequest()
         val memberId = 10L
         every { memberService.update(any(), umr.toServiceDto()) } just runs
-        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.extractToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
-        every { jwtService.isValid( any()) } returns true
-        every { jwtService.findMemberByTokens( any(), any()) } returns member(id= memberId)
-        every { jwtService.createAccessAndRefreshToken( any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.isValid(any()) } returns true
+        every { jwtService.findMemberByTokens(any(), any()) } returns member(id = memberId)
+        every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
 
 
 
@@ -309,9 +364,8 @@ internal class MemberControllerTest {
 
 
 
-        verify (exactly = 0){ memberService.update(any(), umr.toServiceDto()) }
+        verify(exactly = 0) { memberService.update(any(), umr.toServiceDto()) }
     }
-
 
 
 
@@ -323,9 +377,12 @@ internal class MemberControllerTest {
         val umr = MemberFixture.updateMemberRequest()
         val memberId = 10L
         every { memberService.update(any(), umr.toServiceDto()) } just runs
-        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.extractToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
-        every { jwtService.isValid( any()) } returns false
+        every { jwtService.isValid(any()) } returns false
 
 
 
@@ -340,9 +397,8 @@ internal class MemberControllerTest {
 
 
 
-        verify (exactly = 0){ memberService.update(any(), umr.toServiceDto()) }
+        verify(exactly = 0) { memberService.update(any(), umr.toServiceDto()) }
     }
-
 
 
 
@@ -353,10 +409,13 @@ internal class MemberControllerTest {
         //given
         val memberId = 10L
         val password = "example"
-        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.extractToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
         every { jwtService.extractAuthMember(accessToken(id = memberId)) } returns authMember(id = memberId)
-        every { memberService.delete(memberId , password) } just runs
+        every { memberService.delete(memberId, password) } just runs
 
 
 
@@ -373,7 +432,38 @@ internal class MemberControllerTest {
 
 
 
-        verify (exactly = 1){ memberService.delete(memberId, password) }
+        verify(exactly = 1) { memberService.delete(memberId, password) }
+    }
+
+
+
+    @Test
+    fun `회원탈퇴 실패 - 회원이 없는 경우`() {
+        //given
+        val memberId = 10L
+        val password = "example"
+        every { jwtService.extractToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
+        every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
+        every { jwtService.extractAuthMember(accessToken(id = memberId)) } returns authMember(id = memberId)
+        every { memberService.delete(memberId, password) } throws MemberException(NOT_FOUND)
+
+
+        val result = mockMvc.perform(
+            delete("/member")
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(PasswordDto(password)))
+        )
+            .andExpect(status().isNotFound)
+            .andReturn()
+
+
+        val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
+        assertThat(readValue.errorCode).isEqualTo(NOT_FOUND.errorCode())
+        assertThat(readValue.message).isEqualTo(NOT_FOUND.message())
+        verify(exactly = 1) { memberService.delete(memberId, password) }
     }
 
 
@@ -384,10 +474,13 @@ internal class MemberControllerTest {
         //given
         val memberId = 10L
         val password = "example"
-        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.extractToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
         every { jwtService.extractAuthMember(accessToken(id = memberId)) } returns authMember(id = memberId)
-        every { memberService.delete(memberId , password) } just runs
+        every { memberService.delete(memberId, password) } just runs
 
 
         val result = mockMvc.perform(
@@ -399,12 +492,13 @@ internal class MemberControllerTest {
             .andReturn()
 
 
-
         val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
         assertThat(readValue.errorCode).isEqualTo(BIND_EXCEPTION_ERROR_CODE)
         assertThat(readValue.message).isEqualTo(BIND_EXCEPTION_MESSAGE)
-        verify (exactly = 0){ memberService.delete(memberId, password) }
+        verify(exactly = 0) { memberService.delete(memberId, password) }
     }
+
+
 
 
 
@@ -413,12 +507,13 @@ internal class MemberControllerTest {
         //given
         val memberId = 10L
         val password = "example"
-        every { jwtService.extractToken(any()) } returns TokenDto(accessToken(id = memberId).accessToken, refreshToken().refreshToken)
+        every { jwtService.extractToken(any()) } returns TokenDto(
+            accessToken(id = memberId).accessToken,
+            refreshToken().refreshToken
+        )
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
         every { jwtService.extractAuthMember(accessToken(id = memberId)) } returns authMember(id = memberId)
-        every { memberService.delete(memberId , password) } throws MemberException(UNMATCHED_PASSWORD)
-
-
+        every { memberService.delete(memberId, password) } throws MemberException(UNMATCHED_PASSWORD)
 
 
         val result = mockMvc.perform(
@@ -430,10 +525,8 @@ internal class MemberControllerTest {
             .andReturn()
 
 
-
-
         val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
         assertThat(readValue.errorCode).isEqualTo(UNMATCHED_PASSWORD.errorCode())
-        verify (exactly = 1){ memberService.delete(memberId, password) }
+        verify(exactly = 1) { memberService.delete(memberId, password) }
     }
 }
