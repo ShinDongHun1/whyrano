@@ -148,4 +148,18 @@ class PostService(
             simpleDtos = simplePostDtos                     // 요소에 대한 간단한 정보를 담은 DTO
         )
     }
+
+
+
+
+
+    /**
+     * 게시글 단일 조회
+     *
+     * TODO 구현해야 함
+     */
+    fun findOne(postId: Long) {
+
+        TODO("not implementation")
+    }
 }
