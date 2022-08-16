@@ -4,6 +4,7 @@ import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.post.controller.dto.CreatePostRequest
+import com.whyrano.domain.post.controller.dto.UpdatePostRequest
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.search.PostSearchCond
@@ -83,5 +84,12 @@ object PostFixture {
     ) =
         CreatePostRequest(title = title, content = content, postType = postType)
 
-
+    fun updatePostRequest(
+        title: String? = TITLE,
+        content: String? = CONTENT,
+    ) =
+        UpdatePostRequest(
+            title = title,
+            content = content,
+        )
 }
