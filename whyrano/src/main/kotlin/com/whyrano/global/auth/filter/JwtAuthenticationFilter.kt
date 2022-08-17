@@ -1,5 +1,6 @@
 package com.whyrano.global.auth.filter
 
+import org.springframework.http.HttpMethod
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher
 import javax.servlet.Filter
 import javax.servlet.FilterChain
@@ -13,15 +14,27 @@ import javax.servlet.http.HttpServletResponse
  */
 class JwtAuthenticationFilter(
 
-    uncheckedUrls: List<String> = emptyList(),  // 인증처리 하지 않을 url
+    permitAllUriMap: Map<HttpMethod?, Array<String>> = emptyMap(),  // 인증처리 하지 않을 url
 
     private val jwtAuthenticationManager: JwtAuthenticationManager,
 
     private val jwtAuthenticationFailureManager: JwtAuthenticationFailureManager,
 
-) : Filter {
+    ) : Filter {
 
-    private val DEFAULT_ANT_PATH_REQUEST_MATCHERS: List<AntPathRequestMatcher> = uncheckedUrls.map { AntPathRequestMatcher(it) }
+    private val permitAllUriAntPathRequestMatchers: List<AntPathRequestMatcher>
+
+    init {
+        val temp = mutableListOf<AntPathRequestMatcher>()
+
+        val methods = permitAllUriMap.keys
+        for (method in methods) {
+            val uris = permitAllUriMap[method]
+            val list = uris?.map { AntPathRequestMatcher(it, method?.name) }
+            list?.let { temp.addAll(it) }
+        }
+        permitAllUriAntPathRequestMatchers = temp
+    }
 
 
 
@@ -33,7 +46,7 @@ class JwtAuthenticationFilter(
         val res = response as HttpServletResponse
 
         // permitAll 인 경우에는 토큰을 검사하지 않음
-        for (matcher in DEFAULT_ANT_PATH_REQUEST_MATCHERS) {
+        for (matcher in permitAllUriAntPathRequestMatchers) {
 
             if (matcher.matches(request)) {
 

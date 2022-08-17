@@ -11,6 +11,7 @@ import com.whyrano.global.auth.filter.JwtAuthenticationManager
 import com.whyrano.global.auth.handler.JsonLoginFailureHandler
 import com.whyrano.global.auth.handler.JsonLoginSuccessHandler
 import com.whyrano.global.auth.jwt.JwtService
+import com.whyrano.global.config.PermitAllURI.URI.LOGIN_URI
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.security.access.hierarchicalroles.RoleHierarchy
@@ -31,13 +32,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @Configuration
 class SecurityConfig {
 
-    companion object {
-        const val LOGIN_URL = "/login"
-        const val SIGNUP_URL = "/signup"
-        const val H2_URL = "/h2-console/**"
-        const val ERROR_URL = "/error"
-        private val NO_CHECK_URLS = listOf(LOGIN_URL, SIGNUP_URL, H2_URL, ERROR_URL)
-    }
 
 
 
@@ -50,7 +44,9 @@ class SecurityConfig {
     fun filterChain(http: HttpSecurity): SecurityFilterChain {
         http
             .authorizeRequests()
-            .antMatchers(*NO_CHECK_URLS.toTypedArray()).permitAll()
+            .antMatchers(PermitAllURI.ALL_METHOD.method, *PermitAllURI.ALL_METHOD.uri).permitAll()
+            .antMatchers(PermitAllURI.GET.method, *PermitAllURI.GET.uri).permitAll()
+            .antMatchers(PermitAllURI.POST.method, *PermitAllURI.POST.uri).permitAll()
             .antMatchers("/admin/**").hasRole(ADMIN.name)
             .anyRequest().hasRole(BASIC.name)
 
@@ -96,7 +92,7 @@ class SecurityConfig {
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder)
 
         //== JsonLoginProcessingFilter 설정 ==//
-        val jsonLoginProcessingFilter = JsonLoginProcessingFilter(LOGIN_URL)
+        val jsonLoginProcessingFilter = JsonLoginProcessingFilter(LOGIN_URI.uri)
         jsonLoginProcessingFilter.setAuthenticationManager(ProviderManager(daoAuthenticationProvider)) // ProviderManager는 DaoAuthenticationProvider 사용
         jsonLoginProcessingFilter.setAuthenticationSuccessHandler(jsonLoginSuccessHandler) // 로그인 성공 시 - jsonLoginSuccessHandler에서 처리
         jsonLoginProcessingFilter.setAuthenticationFailureHandler(jsonLoginFailureHandler) // 로그인 실패 시 - jsonLoginFailureHandler에서 처리
@@ -150,7 +146,9 @@ class SecurityConfig {
         checkNotNull(jwtAuthenticationManager) { "jwtAuthenticationManager is null !" }
         checkNotNull(jwtAuthenticationFailureManager) { "jwtAuthenticationFailureManager is null !" }
 
-        return JwtAuthenticationFilter(NO_CHECK_URLS, jwtAuthenticationManager, jwtAuthenticationFailureManager)
+
+
+        return JwtAuthenticationFilter(PermitAllURI.permitAllMap(), jwtAuthenticationManager, jwtAuthenticationFailureManager)
     }
 
 
