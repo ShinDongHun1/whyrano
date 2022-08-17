@@ -1,30 +1,44 @@
 package com.whyrano.domain.post.controller
 
+import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.common.search.SearchResultDto
+import com.whyrano.domain.common.search.SearchResultResponse
 import com.whyrano.domain.member.exception.MemberException
 import com.whyrano.domain.member.exception.MemberExceptionType
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.MemberService
+import com.whyrano.domain.post.controller.response.SimplePostResponse
+import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.exception.PostException
 import com.whyrano.domain.post.exception.PostExceptionType
 import com.whyrano.domain.post.fixture.PostFixture
 import com.whyrano.domain.post.fixture.PostFixture.createPostRequest
+import com.whyrano.domain.post.fixture.PostFixture.postSearchCond
 import com.whyrano.domain.post.repository.PostRepository
 import com.whyrano.domain.post.service.PostService
+import com.whyrano.domain.post.service.dto.SimplePostDto
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.config.SecurityConfig
 import com.whyrano.global.exception.ExceptionController
+import com.whyrano.global.exception.ExceptionController.Companion.BIND_EXCEPTION_ERROR_CODE
+import com.whyrano.global.exception.ExceptionController.Companion.BIND_EXCEPTION_MESSAGE
 import com.whyrano.global.exception.ExceptionResponse
 import io.mockk.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
 import org.springframework.context.annotation.Import
+import org.springframework.data.domain.PageRequest
+import org.springframework.data.domain.Sort
+import org.springframework.data.domain.Sort.Direction.ASC
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
@@ -60,6 +74,9 @@ internal class PostControllerTest {
 
     @Autowired
     private lateinit var wac: WebApplicationContext
+
+    @Autowired
+    private lateinit var springDataWebProperties: SpringDataWebProperties
 
 
 
@@ -645,25 +662,62 @@ internal class PostControllerTest {
     fun `포스트 검색 성공`() {
 
         //given
-        TODO("여기부터 시작!")
+        val pageParam = 10
+        val pageSizeParam = 5
+        val postTypeParam = "NOTICE"
+        val sortCreatedDateParam = ASC
+
+        val postSearchCond = postSearchCond(postType = PostType.valueOf(postTypeParam))
+        val pageable = PageRequest.of(pageParam - 1, pageSizeParam, Sort.by(Sort.Order(ASC, "createdDate")))
+
+        val list = mutableListOf<SimplePostDto>()
+        for (i in 0..pageSizeParam) {
+            list.add(PostFixture.simplePostDto())
+        }
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 30
+        every {
+            postService.search(
+                postSearchCond = postSearchCond,
+                pageable = pageable
+            )
+        } returns SearchResultDto<SimplePostDto>(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam - 1, //페이지는 1부터 시작인데, Service에 넘길때는 1을 빼서 넘기므로, 반환되는 값도 1을 빼야이어야 함
+            currentElementCount = currentElementCount,
+            simpleDtos = list
+        )
+
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+                .param("sort", "createdDate,${sortCreatedDateParam}")
+                .param("page", pageParam.toString())
+                .param("size", pageSizeParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
 
         //then
-    }
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
 
+        assertThat(readValue).isEqualTo(SearchResultResponse(totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam, // 1을 감소시켜 서비스에 전달하므로, 반환은 1을 증가시켜야 함
+            currentElementCount = currentElementCount,
+            simpleDataResponses = list.map { SimplePostResponse.from(it) }
 
+        ))
 
-
-
-    @Test
-    fun `포스트 검색 성공 - 페이지는 1부터 시작`() {
-
-        //given
-
-        //when
-
-        //then
+        verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
     }
 
 
@@ -674,10 +728,60 @@ internal class PostControllerTest {
     fun `포스트 검색 성공 - 페이지가 없는 경우 1페이지 조회`() {
 
         //given
+        val pageSizeParam = 5
+        val postTypeParam = "NOTICE"
+        val sortCreatedDateParam = ASC
+
+        val postSearchCond = postSearchCond(postType = PostType.valueOf(postTypeParam))
+        val pageable = PageRequest.of(0, pageSizeParam, Sort.by(Sort.Order(ASC, "createdDate")))
+
+        val list = mutableListOf<SimplePostDto>()
+        for (i in 0..pageSizeParam) {
+            list.add(PostFixture.simplePostDto())
+        }
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 30
+        every {
+            postService.search(
+                postSearchCond = postSearchCond,
+                pageable = pageable
+            )
+        } returns SearchResultDto<SimplePostDto>(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = 0,
+            currentElementCount = currentElementCount,
+            simpleDtos = list
+        )
+
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+                .param("sort", "createdDate,${sortCreatedDateParam}")
+                .param("size", pageSizeParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
 
         //then
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
+
+        assertThat(readValue).isEqualTo(SearchResultResponse(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = 1,
+            currentElementCount = currentElementCount,
+            simpleDataResponses = list.map { SimplePostResponse.from(it) }
+
+        ))
+
+        verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
     }
 
 
@@ -688,10 +792,61 @@ internal class PostControllerTest {
     fun `포스트 검색 성공 - 페이지가 올바르지 않은 경우(숫자가 아닌 경우 1페이지 조회)`() {
 
         //given
+        val pageSizeParam = 5
+        val postTypeParam = "NOTICE"
+        val sortCreatedDateParam = ASC
+
+        val postSearchCond = postSearchCond(postType = PostType.valueOf(postTypeParam))
+        val pageable = PageRequest.of(0, pageSizeParam, Sort.by(Sort.Order(ASC, "createdDate")))
+
+        val list = mutableListOf<SimplePostDto>()
+        for (i in 0..pageSizeParam) {
+            list.add(PostFixture.simplePostDto())
+        }
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 30
+        every {
+            postService.search(
+                postSearchCond = postSearchCond,
+                pageable = pageable
+            )
+        } returns SearchResultDto<SimplePostDto>(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = 0,
+            currentElementCount = currentElementCount,
+            simpleDtos = list
+        )
+
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+                .param("page", "non number")
+                .param("sort", "createdDate,${sortCreatedDateParam}")
+                .param("size", pageSizeParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
 
         //then
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
+
+        assertThat(readValue).isEqualTo(SearchResultResponse(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = 1,
+            currentElementCount = currentElementCount,
+            simpleDataResponses = list.map { SimplePostResponse.from(it) }
+
+        ))
+
+        verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
     }
 
 
@@ -702,10 +857,61 @@ internal class PostControllerTest {
     fun `포스트 검색 성공 - 페이지가 올바르지 않은 경우(음수인 경우 1페이지 조회)`() {
 
         //given
+        val pageSizeParam = 5
+        val postTypeParam = "NOTICE"
+        val sortCreatedDateParam = ASC
+
+        val postSearchCond = postSearchCond(postType = PostType.valueOf(postTypeParam))
+        val pageable = PageRequest.of(0, pageSizeParam, Sort.by(Sort.Order(ASC, "createdDate")))
+
+        val list = mutableListOf<SimplePostDto>()
+        for (i in 0..pageSizeParam) {
+            list.add(PostFixture.simplePostDto())
+        }
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 30
+        every {
+            postService.search(
+                postSearchCond = postSearchCond,
+                pageable = pageable
+            )
+        } returns SearchResultDto<SimplePostDto>(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = 0,
+            currentElementCount = currentElementCount,
+            simpleDtos = list
+        )
+
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+                .param("page", "-1")
+                .param("sort", "createdDate,${sortCreatedDateParam}")
+                .param("size", pageSizeParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
 
         //then
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
+
+        assertThat(readValue).isEqualTo(SearchResultResponse(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = 1,
+            currentElementCount = currentElementCount,
+            simpleDataResponses = list.map { SimplePostResponse.from(it) }
+
+        ))
+
+        verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
     }
 
 
@@ -716,10 +922,61 @@ internal class PostControllerTest {
     fun `포스트 검색 성공 - 페이지 크기가 없는 경우 기본페이지 크기 적용`() {
 
         //given
+        val pageParam = 10
+        val defaultPageSize = springDataWebProperties.pageable.defaultPageSize
+        val postTypeParam = "NOTICE"
+        val sortCreatedDateParam = ASC
+
+        val postSearchCond = postSearchCond(postType = PostType.valueOf(postTypeParam))
+        val pageable = PageRequest.of(pageParam - 1, defaultPageSize, Sort.by(Sort.Order(ASC, "createdDate")))
+
+        val list = mutableListOf<SimplePostDto>()
+        for (i in 0..defaultPageSize) {
+            list.add(PostFixture.simplePostDto())
+        }
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 20
+        every {
+            postService.search(
+                postSearchCond = postSearchCond,
+                pageable = pageable
+            )
+        } returns SearchResultDto<SimplePostDto>(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam - 1, //페이지는 1부터 시작인데, Service에 넘길때는 1을 빼서 넘기므로, 반환되는 값도 1을 빼야이어야 함
+            currentElementCount = currentElementCount,
+            simpleDtos = list
+        )
+
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+                .param("sort", "createdDate,${sortCreatedDateParam}")
+                .param("page", pageParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
 
         //then
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
+
+        assertThat(readValue).isEqualTo(SearchResultResponse(totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam, // 1을 감소시켜 서비스에 전달하므로, 반환은 1을 증가시켜야 함
+            currentElementCount = currentElementCount,
+            simpleDataResponses = list.map { SimplePostResponse.from(it) }
+
+        ))
+
+        verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
     }
 
 
@@ -727,13 +984,65 @@ internal class PostControllerTest {
 
 
     @Test
-    fun `포스트 검색 성공 - 페이지 크기가 올바르지 않은 경우 기본페이지 크기 적용`() {
+    fun `포스트 검색 성공 - 페이지 크기가 올바르지 않은 경우(문자) 기본페이지 크기 적용`() {
 
         //given
+        val pageParam = 10
+        val defaultPageSize = springDataWebProperties.pageable.defaultPageSize
+        val postTypeParam = "NOTICE"
+        val sortCreatedDateParam = ASC
+
+        val postSearchCond = postSearchCond(postType = PostType.valueOf(postTypeParam))
+        val pageable = PageRequest.of(pageParam - 1, defaultPageSize, Sort.by(Sort.Order(ASC, "createdDate")))
+
+        val list = mutableListOf<SimplePostDto>()
+        for (i in 0..defaultPageSize) {
+            list.add(PostFixture.simplePostDto())
+        }
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 20
+        every {
+            postService.search(
+                postSearchCond = postSearchCond,
+                pageable = pageable
+            )
+        } returns SearchResultDto<SimplePostDto>(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam - 1, //페이지는 1부터 시작인데, Service에 넘길때는 1을 빼서 넘기므로, 반환되는 값도 1을 빼야이어야 함
+            currentElementCount = currentElementCount,
+            simpleDtos = list
+        )
+
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+                .param("pageSize", "string")
+                .param("sort", "createdDate,${sortCreatedDateParam}")
+                .param("page", pageParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
 
         //then
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
+
+        assertThat(readValue).isEqualTo(SearchResultResponse(totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam, // 1을 감소시켜 서비스에 전달하므로, 반환은 1을 증가시켜야 함
+            currentElementCount = currentElementCount,
+            simpleDataResponses = list.map { SimplePostResponse.from(it) }
+
+        ))
+
+        verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
     }
 
 
@@ -744,10 +1053,62 @@ internal class PostControllerTest {
     fun `포스트 검색 성공 - 페이지 크기가 0 이하인 경우 기본페이지 크기 적용`() {
 
         //given
+        val pageParam = 10
+        val defaultPageSize = springDataWebProperties.pageable.defaultPageSize
+        val postTypeParam = "NOTICE"
+        val sortCreatedDateParam = ASC
+
+        val postSearchCond = postSearchCond(postType = PostType.valueOf(postTypeParam))
+        val pageable = PageRequest.of(pageParam - 1, defaultPageSize, Sort.by(Sort.Order(ASC, "createdDate")))
+
+        val list = mutableListOf<SimplePostDto>()
+        for (i in 0..defaultPageSize) {
+            list.add(PostFixture.simplePostDto())
+        }
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 20
+        every {
+            postService.search(
+                postSearchCond = postSearchCond,
+                pageable = pageable
+            )
+        } returns SearchResultDto<SimplePostDto>(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam - 1, //페이지는 1부터 시작인데, Service에 넘길때는 1을 빼서 넘기므로, 반환되는 값도 1을 빼야이어야 함
+            currentElementCount = currentElementCount,
+            simpleDtos = list
+        )
+
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+                .param("pageSize", "-1")
+                .param("sort", "createdDate,${sortCreatedDateParam}")
+                .param("page", pageParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
 
         //then
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
+
+        assertThat(readValue).isEqualTo(SearchResultResponse(totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam, // 1을 감소시켜 서비스에 전달하므로, 반환은 1을 증가시켜야 함
+            currentElementCount = currentElementCount,
+            simpleDataResponses = list.map { SimplePostResponse.from(it) }
+
+        ))
+
+        verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
     }
 
 
@@ -755,13 +1116,28 @@ internal class PostControllerTest {
 
 
     @Test
-    fun `포스트 검색 성공 - 정렬 필드가 올바르지 않은 경우 - 무시`() {
+    @DisplayName("포스트 검색 성공 - 검색하는 Post Type이 올바르지 않은 값이 들어오는 경우 - Binding 예외 발생")
+    fun `포스트 검색 성공 - 검색하는 Post Type이 올바르지 않은 값이 들어오는 경우 - Binding 예외 발생`() {
 
         //given
+        val postTypeParam = "STRANGE"
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn()
+
 
         //then
+        val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
+
+        assertThat(readValue.errorCode).isEqualTo(BIND_EXCEPTION_ERROR_CODE)
+        assertThat(readValue.message).isEqualTo(BIND_EXCEPTION_MESSAGE)
+
+        verify(exactly = 0) { postService.search(any(), any()) }
     }
 
 
@@ -769,26 +1145,68 @@ internal class PostControllerTest {
 
 
     @Test
-    fun `포스트 검색 성공 - 정렬 필드는 올바르나 방향(DESC, ASC)이 올바르지 않은 경우 - 무시`() {
+    @DisplayName("포스트 검색 성공 - 정렬 필드는 올바르나 ASC, DESC가 아닌 aSEC 등과 같이 잘못된 경우 - 정렬 필드는 기본값인 ASC로 초기화")
+    fun `포스트 검색 성공 - 정렬 필드는 올바르나 ASC, DESC가 아닌 aSEC 등과 같이 잘못된 경우 - 정렬 필드는 기본값인 ASC로 초기화`() {
 
         //given
-
-        //when
-
-        //then
-    }
-
-
-
-
-
-    @Test
-    fun `포스트 검색 성공 - 정렬 필드가 없는 경우 - 최근 생성일 순만 적용`() {
-
         //given
+        val pageParam = 10
+        val defaultPageSize = springDataWebProperties.pageable.defaultPageSize
+        val postTypeParam = "NOTICE"
+        val strangeDirection = "aSEC"
+
+        val postSearchCond = postSearchCond(postType = PostType.valueOf(postTypeParam))
+        val pageable = PageRequest.of(
+            pageParam - 1,
+            defaultPageSize,
+            Sort.by(Sort.Order(ASC, "createdDate"), Sort.Order(ASC, strangeDirection))
+        )
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 20
+        every {
+            postService.search(
+                postSearchCond = postSearchCond,
+                pageable = pageable
+            )
+        } returns SearchResultDto(
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam - 1, //페이지는 1부터 시작인데, Service에 넘길때는 1을 빼서 넘기므로, 반환되는 값도 1을 빼야이어야 함
+            currentElementCount = currentElementCount,
+            simpleDtos = emptyList()
+        )
+
 
         //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("postType", postTypeParam)
+                .param("pageSize", "-1")
+                .param("sort", "createdDate,${strangeDirection}")
+                .param("page", pageParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
 
         //then
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
+
+        assertThat(readValue).isEqualTo(
+            SearchResultResponse(
+                totalPage = totalPage,
+                totalElementCount = totalElementCount,
+                currentPage = pageParam, // 1을 감소시켜 서비스에 전달하므로, 반환은 1을 증가시켜야 함
+                currentElementCount = currentElementCount,
+                simpleDataResponses = emptyList<SimplePostDto>()
+
+            )
+        )
+
+        verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
     }
 }
