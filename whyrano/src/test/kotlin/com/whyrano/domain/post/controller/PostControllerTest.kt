@@ -50,7 +50,6 @@ internal class PostControllerTest {
         private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
     }
 
-
     private lateinit var mockMvc: MockMvc
 
     @MockkBean
@@ -111,9 +110,42 @@ internal class PostControllerTest {
 
 
 
+    @Test
+    fun `포스트 생성 성공 - 잘못된 타입이 존재하나, 필요한 모든 필드는 정상인 경우`() {
+
+        //given
+        val createPostId = 11L
+        every { postService.create(any(), any()) } returns createPostId
+        val jsonFormat = """
+            {
+                "postType":"%s",
+                "content":"%s",
+                "title":"%s",
+                "titleddd":"%s"
+            }
+        """
+
+        //when
+        val result = mockMvc.perform(
+            post("/post")
+                .contentType(APPLICATION_JSON)
+                .content(jsonFormat.format("NOTICE", "content", "title", "titleddd"))
+        )
+            .andExpect(status().isCreated)
+            .andReturn()
+
+        //then
+        assertThat(result.response.getHeader("location")).contains("/post/${createPostId}")
+        verify(exactly = 1) { postService.create(any(), any()) }
+    }
+
+
+
+
+
     //== 필드 체크 ==//
     @Test
-    fun `포스트 생성 실패 - 게시물 타입이 없는 경유`() {
+    fun `포스트 생성 실패 - 게시물 타입이 없는 경우`() {
 
         //given
         val jsonFormat = """
@@ -145,7 +177,71 @@ internal class PostControllerTest {
 
 
     @Test
-    fun `포스트 생성 실패 - 제목이 없는 경유`() {
+    fun `포스트 생성 실패 - 게시물 타입이 잘못된 경우 - 예외 발생`() {
+
+        //given
+        val jsonFormat = """
+            {
+                "postType":"%s",
+                "content":"%s",
+                "title":"%s"
+            }
+        """
+
+        //when
+        val result = mockMvc.perform(
+            post("/post")
+                .contentType(APPLICATION_JSON)
+                .content(jsonFormat.format("NOTYPE", "content", "title"))
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn()
+
+        //then
+        val exceptionResponse = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
+
+        assertThat(exceptionResponse.errorCode).isEqualTo(ExceptionController.BIND_EXCEPTION_ERROR_CODE)
+        verify(exactly = 0) { postService.create(any(), any()) }
+    }
+
+
+
+
+
+    @Test
+    fun `포스트 생성 실패 - 잘못된 타입이 존재하는 경우(title 대신 titleddd) - 예외 발생`() {
+
+        //given
+        val jsonFormat = """
+            {
+                "postType":"%s",
+                "content":"%s",
+                "titleddd":"%s"
+            }
+        """
+
+        //when
+        val result = mockMvc.perform(
+            post("/post")
+                .contentType(APPLICATION_JSON)
+                .content(jsonFormat.format("NOTICE", "content", "title"))
+        )
+            .andExpect(status().isBadRequest)
+            .andReturn()
+
+        //then
+        val exceptionResponse = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
+
+        assertThat(exceptionResponse.errorCode).isEqualTo(ExceptionController.BIND_EXCEPTION_ERROR_CODE)
+        verify(exactly = 0) { postService.create(any(), any()) }
+    }
+
+
+
+
+
+    @Test
+    fun `포스트 생성 실패 - 제목이 없는 경우`() {
 
         //given
         val createPostId = 11L
@@ -174,7 +270,7 @@ internal class PostControllerTest {
 
 
     @Test
-    fun `포스트 생성 실패 - 내용이 없는 경유`() {
+    fun `포스트 생성 실패 - 내용이 없는 경우`() {
 
         //given
         val createPostId = 11L
@@ -307,7 +403,7 @@ internal class PostControllerTest {
         val postId = 11L
         val upr = PostFixture.updatePostRequest()
 
-        every { postService.update(writerId = any(), postId = postId , upd = upr.toServiceDto()) } just runs
+        every { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) } just runs
 
         //when
         val result = mockMvc.perform(
@@ -319,7 +415,7 @@ internal class PostControllerTest {
             .andReturn()
 
         //then
-        verify(exactly = 1) { postService.update(writerId = any(), postId = postId , upd = upr.toServiceDto()) }
+        verify(exactly = 1) { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) }
     }
 
 
@@ -333,7 +429,13 @@ internal class PostControllerTest {
         val postId = 11L
         val upr = PostFixture.updatePostRequest()
 
-        every { postService.update(writerId = any(), postId = postId , upd = upr.toServiceDto()) } throws MemberException(MemberExceptionType.NOT_FOUND)
+        every {
+            postService.update(
+                writerId = any(),
+                postId = postId,
+                upd = upr.toServiceDto()
+            )
+        } throws MemberException(MemberExceptionType.NOT_FOUND)
 
         //when
         val result = mockMvc.perform(
@@ -349,7 +451,7 @@ internal class PostControllerTest {
 
         assertThat(exceptionResponse.errorCode).isEqualTo(MemberExceptionType.NOT_FOUND.errorCode())
         assertThat(exceptionResponse.message).isEqualTo(MemberExceptionType.NOT_FOUND.message())
-        verify(exactly = 1) { postService.update(writerId = any(), postId = postId , upd = upr.toServiceDto()) }
+        verify(exactly = 1) { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) }
     }
 
 
@@ -363,7 +465,9 @@ internal class PostControllerTest {
         val postId = 11L
         val upr = PostFixture.updatePostRequest()
 
-        every { postService.update(writerId = any(), postId = postId , upd = upr.toServiceDto()) } throws PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
+        every { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) } throws PostException(
+            PostExceptionType.NO_AUTHORITY_UPDATE_POST
+        )
 
         //when
         val result = mockMvc.perform(
@@ -379,7 +483,7 @@ internal class PostControllerTest {
 
         assertThat(exceptionResponse.errorCode).isEqualTo(PostExceptionType.NO_AUTHORITY_UPDATE_POST.errorCode())
         assertThat(exceptionResponse.message).isEqualTo(PostExceptionType.NO_AUTHORITY_UPDATE_POST.message())
-        verify(exactly = 1) { postService.update(writerId = any(), postId = postId , upd = upr.toServiceDto()) }
+        verify(exactly = 1) { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) }
     }
 
 
@@ -393,7 +497,9 @@ internal class PostControllerTest {
         val postId = 11L
         val upr = PostFixture.updatePostRequest()
 
-        every { postService.update(writerId = any(), postId = postId , upd = upr.toServiceDto()) } throws PostException(PostExceptionType.NOT_FOUND)
+        every { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) } throws PostException(
+            PostExceptionType.NOT_FOUND
+        )
 
         //when
         val result = mockMvc.perform(
@@ -409,7 +515,7 @@ internal class PostControllerTest {
 
         assertThat(exceptionResponse.errorCode).isEqualTo(PostExceptionType.NOT_FOUND.errorCode())
         assertThat(exceptionResponse.message).isEqualTo(PostExceptionType.NOT_FOUND.message())
-        verify(exactly = 1) { postService.update(writerId = any(), postId = postId , upd = upr.toServiceDto()) }
+        verify(exactly = 1) { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) }
     }
 
 
@@ -422,7 +528,7 @@ internal class PostControllerTest {
         //given
         val postId = 11L
 
-        every { postService.delete(writerId = any(), postId = postId ) } just Runs
+        every { postService.delete(writerId = any(), postId = postId) } just Runs
 
         //when
         val result = mockMvc.perform(
@@ -432,7 +538,7 @@ internal class PostControllerTest {
             .andReturn()
 
         //then
-        verify(exactly = 1) { postService.delete(writerId = any(), postId = postId ) }
+        verify(exactly = 1) { postService.delete(writerId = any(), postId = postId) }
     }
 
 
@@ -445,7 +551,12 @@ internal class PostControllerTest {
         //given
         val postId = 11L
 
-        every { postService.delete(writerId = any(), postId = postId ) } throws MemberException(MemberExceptionType.NOT_FOUND)
+        every {
+            postService.delete(
+                writerId = any(),
+                postId = postId
+            )
+        } throws MemberException(MemberExceptionType.NOT_FOUND)
 
         //when
         val result = mockMvc.perform(
@@ -459,7 +570,7 @@ internal class PostControllerTest {
 
         assertThat(exceptionResponse.errorCode).isEqualTo(MemberExceptionType.NOT_FOUND.errorCode())
         assertThat(exceptionResponse.message).isEqualTo(MemberExceptionType.NOT_FOUND.message())
-        verify(exactly = 1) { postService.delete(writerId = any(), postId = postId ) }
+        verify(exactly = 1) { postService.delete(writerId = any(), postId = postId) }
     }
 
 
@@ -472,7 +583,12 @@ internal class PostControllerTest {
         //given
         val postId = 11L
 
-        every { postService.delete(writerId = any(), postId = postId ) } throws PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
+        every {
+            postService.delete(
+                writerId = any(),
+                postId = postId
+            )
+        } throws PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
 
         //when
         val result = mockMvc.perform(
@@ -486,7 +602,7 @@ internal class PostControllerTest {
 
         assertThat(exceptionResponse.errorCode).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST.errorCode())
         assertThat(exceptionResponse.message).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST.message())
-        verify(exactly = 1) { postService.delete(writerId = any(), postId = postId ) }
+        verify(exactly = 1) { postService.delete(writerId = any(), postId = postId) }
     }
 
 
@@ -499,7 +615,12 @@ internal class PostControllerTest {
         //given
         val postId = 11L
 
-        every { postService.delete(writerId = any(), postId = postId ) } throws PostException(PostExceptionType.NOT_FOUND)
+        every {
+            postService.delete(
+                writerId = any(),
+                postId = postId
+            )
+        } throws PostException(PostExceptionType.NOT_FOUND)
 
         //when
         val result = mockMvc.perform(
@@ -513,7 +634,7 @@ internal class PostControllerTest {
 
         assertThat(exceptionResponse.errorCode).isEqualTo(PostExceptionType.NOT_FOUND.errorCode())
         assertThat(exceptionResponse.message).isEqualTo(PostExceptionType.NOT_FOUND.message())
-        verify(exactly = 1) { postService.delete(writerId = any(), postId = postId ) }
+        verify(exactly = 1) { postService.delete(writerId = any(), postId = postId) }
     }
 
 
@@ -524,11 +645,16 @@ internal class PostControllerTest {
     fun `포스트 검색 성공`() {
 
         //given
+        TODO("여기부터 시작!")
 
         //when
 
         //then
     }
+
+
+
+
 
     @Test
     fun `포스트 검색 성공 - 페이지는 1부터 시작`() {
@@ -540,6 +666,10 @@ internal class PostControllerTest {
         //then
     }
 
+
+
+
+
     @Test
     fun `포스트 검색 성공 - 페이지가 없는 경우 1페이지 조회`() {
 
@@ -549,6 +679,10 @@ internal class PostControllerTest {
 
         //then
     }
+
+
+
+
 
     @Test
     fun `포스트 검색 성공 - 페이지가 올바르지 않은 경우(숫자가 아닌 경우 1페이지 조회)`() {
@@ -560,6 +694,10 @@ internal class PostControllerTest {
         //then
     }
 
+
+
+
+
     @Test
     fun `포스트 검색 성공 - 페이지가 올바르지 않은 경우(음수인 경우 1페이지 조회)`() {
 
@@ -569,6 +707,10 @@ internal class PostControllerTest {
 
         //then
     }
+
+
+
+
 
     @Test
     fun `포스트 검색 성공 - 페이지 크기가 없는 경우 기본페이지 크기 적용`() {
@@ -580,6 +722,10 @@ internal class PostControllerTest {
         //then
     }
 
+
+
+
+
     @Test
     fun `포스트 검색 성공 - 페이지 크기가 올바르지 않은 경우 기본페이지 크기 적용`() {
 
@@ -589,6 +735,10 @@ internal class PostControllerTest {
 
         //then
     }
+
+
+
+
 
     @Test
     fun `포스트 검색 성공 - 페이지 크기가 0 이하인 경우 기본페이지 크기 적용`() {
@@ -600,6 +750,10 @@ internal class PostControllerTest {
         //then
     }
 
+
+
+
+
     @Test
     fun `포스트 검색 성공 - 정렬 필드가 올바르지 않은 경우 - 무시`() {
 
@@ -610,6 +764,10 @@ internal class PostControllerTest {
         //then
     }
 
+
+
+
+
     @Test
     fun `포스트 검색 성공 - 정렬 필드는 올바르나 방향(DESC, ASC)이 올바르지 않은 경우 - 무시`() {
 
@@ -619,6 +777,10 @@ internal class PostControllerTest {
 
         //then
     }
+
+
+
+
 
     @Test
     fun `포스트 검색 성공 - 정렬 필드가 없는 경우 - 최근 생성일 순만 적용`() {
