@@ -39,6 +39,7 @@ import org.springframework.context.annotation.Import
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Direction.ASC
+import org.springframework.data.domain.Sort.Direction.DESC
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.context.SecurityContext
@@ -66,14 +67,30 @@ internal class PostControllerTest {
 
     private lateinit var mockMvc: MockMvc
 
+
+
+
+
     @MockkBean
     private lateinit var postService: PostService
+
+
+
+
 
     @MockkBean
     private lateinit var jwtService: JwtService
 
+
+
+
+
     @Autowired
     private lateinit var wac: WebApplicationContext
+
+
+
+
 
     @Autowired
     private lateinit var springDataWebProperties: SpringDataWebProperties
@@ -1109,6 +1126,61 @@ internal class PostControllerTest {
         ))
 
         verify(exactly = 1) { postService.search(postSearchCond = postSearchCond, pageable = pageable) }
+    }
+
+
+
+
+
+    @Test
+    @DisplayName("포스트 검색 성공 - 정렬 조건이 없는 경우 기본값 (createdDate, DESC) 적용")
+    fun `포스트 검색 성공 - 정렬 조건이 없는 경우 기본값 (createdDate, DESC) 적용`() {
+
+        //given
+        val pageParam = 10
+        val defaultPageSize = springDataWebProperties.pageable.defaultPageSize
+        val pageable = PageRequest.of(pageParam - 1, defaultPageSize, Sort.by(Sort.Order(DESC, "createdDate")))
+
+        val list = mutableListOf<SimplePostDto>()
+        for (i in 0..defaultPageSize) {
+            list.add(PostFixture.simplePostDto())
+        }
+
+
+        val totalPage = 10
+        val totalElementCount = 300L
+        val currentElementCount = 20
+        every { postService.search(any(), pageable = pageable) } returns SearchResultDto<SimplePostDto>(
+                                                                                        totalPage = totalPage,
+                                                                                        totalElementCount = totalElementCount,
+                                                                                        currentPage = pageParam - 1, //페이지는 1부터 시작인데, Service에 넘길때는 1을 빼서 넘기므로, 반환되는 값도 1을 빼야이어야 함
+                                                                                        currentElementCount = currentElementCount,
+                                                                                        simpleDtos = list
+                                                                                    )
+
+
+        //when
+        val result = mockMvc.perform(
+            get("/post")
+                .param("page", pageParam.toString())
+        )
+            .andExpect(status().isOk)
+            .andReturn()
+
+
+        //then
+        val typeRef = object : TypeReference<SearchResultResponse<SimplePostResponse>>() {}
+        val readValue = objectMapper.readValue(result.response.contentAsString, typeRef)
+
+        assertThat(readValue).isEqualTo(SearchResultResponse(totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam, // 1을 감소시켜 서비스에 전달하므로, 반환은 1을 증가시켜야 함
+            currentElementCount = currentElementCount,
+            simpleDataResponses = list.map { SimplePostResponse.from(it) }
+
+        ))
+
+        verify(exactly = 1) { postService.search(postSearchCond = any(), pageable = pageable) }
     }
 
 
