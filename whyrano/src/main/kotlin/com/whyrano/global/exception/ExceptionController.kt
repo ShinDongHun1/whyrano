@@ -37,7 +37,7 @@ class ExceptionController {
 
         val exceptionType = ex.exceptionType()
 
-        log.error { "ErrorCode : [${exceptionType.errorCode()}], message : [${exceptionType.message()}]" }
+        log.error { "ErrorCode : [${exceptionType.errorCode()}], message : [${exceptionType.message()}]\nstackTrace : ${ex.stackTraceToString()}" }
 
         return ResponseEntity
             .status(exceptionType.httpStatus())
@@ -51,7 +51,7 @@ class ExceptionController {
     @ExceptionHandler(BindException::class, HttpMessageNotReadableException::class)
     fun handleBindException(ex: Exception): ResponseEntity<ExceptionResponse> {
 
-        log.error { "Json 혹은 요청 파라미터의 형식이 올바르지 않습니다. - message : [${ex.message}], cause : [${ex.cause}]" }
+        log.error { "Json 혹은 요청 파라미터의 형식이 올바르지 않습니다. \n - message : [${ex.message}]\n - cause : [${ex.cause}]\n stackTrace : ${ex.stackTraceToString()}" }
 
         return ResponseEntity
             .status(BIND_EXCEPTION_HTTP_STATUS)
@@ -65,9 +65,7 @@ class ExceptionController {
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ExceptionResponse> {
 
-        log.error { "예측하지 못한 예외 발생 - message : [${ex.message}], cause : [${ex.cause}]" }
-
-        ex.printStackTrace()
+        log.error { "예측하지 못한 예외 발생 - message : [${ex.message}], cause : [${ex.cause}] \n stackTrace : ${ex.stackTraceToString()}" }
 
         return ResponseEntity
             .status(UNEXPECTED_EXCEPTION_HTTP_STATUS)
