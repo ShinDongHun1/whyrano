@@ -1,4 +1,4 @@
-package com.whyrano.domain.post.controller.dto
+package com.whyrano.domain.post.controller.request
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.exc.InvalidFormatException

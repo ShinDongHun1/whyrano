@@ -1,9 +1,8 @@
-package com.whyrano.domain.post.controller.dto
+package com.whyrano.domain.post.controller.request
 
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.service.dto.CreatePostDto
 import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 
 /**

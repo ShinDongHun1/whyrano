@@ -7,6 +7,7 @@ import com.whyrano.domain.post.service.PostService
 import com.whyrano.global.auth.userdetails.AuthMember
 import com.whyrano.global.web.argumentresolver.auth.Auth
 import com.whyrano.global.web.argumentresolver.pageable.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath

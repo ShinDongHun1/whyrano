@@ -3,7 +3,7 @@ package com.whyrano.domain.member.controller
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.ninjasquad.springmockk.MockkBean
-import com.whyrano.domain.member.controller.dto.request.PasswordDto
+import com.whyrano.domain.member.controller.request.PasswordDto
 import com.whyrano.domain.member.exception.MemberException
 import com.whyrano.domain.member.exception.MemberExceptionType
 import com.whyrano.domain.member.exception.MemberExceptionType.NOT_FOUND

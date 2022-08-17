@@ -1,8 +1,8 @@
 package com.whyrano.domain.member.controller
 
-import com.whyrano.domain.member.controller.dto.request.CreateMemberRequest
-import com.whyrano.domain.member.controller.dto.request.PasswordDto
-import com.whyrano.domain.member.controller.dto.request.UpdateMemberRequest
+import com.whyrano.domain.member.controller.request.CreateMemberRequest
+import com.whyrano.domain.member.controller.request.PasswordDto
+import com.whyrano.domain.member.controller.request.UpdateMemberRequest
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.userdetails.AuthMember
 import com.whyrano.global.web.argumentresolver.auth.Auth

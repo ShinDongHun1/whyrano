@@ -1,7 +1,6 @@
-package com.whyrano.domain.member.controller.dto.request
+package com.whyrano.domain.member.controller.request
 
 import javax.validation.constraints.NotBlank
-import javax.validation.constraints.NotEmpty
 
 /**
  * Created by ShinD on 2022/08/13.

@@ -1,4 +1,4 @@
-package com.whyrano.domain.member.controller.dto.request
+package com.whyrano.domain.member.controller.request
 
 import com.whyrano.domain.member.service.dto.UpdateMemberDto
 

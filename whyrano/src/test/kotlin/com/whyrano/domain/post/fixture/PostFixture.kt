@@ -3,8 +3,10 @@ package com.whyrano.domain.post.fixture
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.member
-import com.whyrano.domain.post.controller.dto.CreatePostRequest
-import com.whyrano.domain.post.controller.dto.UpdatePostRequest
+import com.whyrano.domain.member.service.dto.MemberDto
+import com.whyrano.domain.post.controller.request.CreatePostRequest
+import com.whyrano.domain.post.controller.request.UpdatePostRequest
+import com.whyrano.domain.post.controller.response.SimplePostResponse
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.search.PostSearchCond
