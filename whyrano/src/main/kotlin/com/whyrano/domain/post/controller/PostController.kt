@@ -1,7 +1,9 @@
 package com.whyrano.domain.post.controller
 
-import com.whyrano.domain.post.controller.dto.CreatePostRequest
-import com.whyrano.domain.post.controller.dto.UpdatePostRequest
+import com.whyrano.domain.common.search.SearchResultResponse
+import com.whyrano.domain.post.controller.request.CreatePostRequest
+import com.whyrano.domain.post.controller.request.UpdatePostRequest
+import com.whyrano.domain.post.controller.response.SimplePostResponse
 import com.whyrano.domain.post.search.PostSearchCond
 import com.whyrano.domain.post.service.PostService
 import com.whyrano.global.auth.userdetails.AuthMember
@@ -11,7 +13,6 @@ import org.springframework.data.domain.Pageable
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath
-import java.awt.print.Pageable
 import javax.validation.Valid
 
 /**
@@ -120,11 +121,22 @@ class PostController(
      */
     @GetMapping
     fun search(
-        @Auth authMember: AuthMember, // 작성 요청을 보낸 회원
         @ModelAttribute cond: PostSearchCond,
         @Page pageable: Pageable,
-    ): ResponseEntity<Unit> {
+    ): ResponseEntity<SearchResultResponse<SimplePostResponse>> {
 
-        return ResponseEntity.ok().build()
+        // pageable 에는 page가 1이 감소해서 받아짐 (시작 페이지가 1), srd = searchResultDto
+        val srd = postService.search(postSearchCond = cond, pageable = pageable)
+
+        // 응답 객체 생성
+        val searchResultResponse = SearchResultResponse(
+            totalPage = srd.totalPage,
+            totalElementCount = srd.totalElementCount,
+            currentPage = srd.currentPage + 1, // 1을 감소시켜서 전달하므로 반환할때는 1을 증가시켜주어야 함
+            currentElementCount = srd.currentElementCount,
+            simpleDataResponses = srd.simpleDtos.map { SimplePostResponse.from(it) }
+        )
+
+        return ResponseEntity.ok().body(searchResultResponse)
     }
 }
