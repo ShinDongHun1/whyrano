@@ -2,7 +2,6 @@ package com.whyrano.global.config
 
 import org.springframework.http.HttpMethod
 
-
 /**
  * Created by ShinD on 2022/08/17.
  */
@@ -20,8 +19,6 @@ enum class PermitAllURI(val method: HttpMethod?, val uri: Array<String>,) {
             return values().toList().associate { it.method to it.uri }
         }
     }
-
-
     enum class URI(val uri: String) {
         LOGIN_URI("/login"),
         SIGNUP_URI("/signup"),
@@ -31,4 +28,3 @@ enum class PermitAllURI(val method: HttpMethod?, val uri: Array<String>,) {
         ;
     }
 }
-
