@@ -1,5 +1,6 @@
 package com.whyrano.domain.post.fixture
 
+import com.whyrano.domain.member.controller.response.MemberInfoResponse
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.member.fixture.MemberFixture.member
@@ -11,10 +12,12 @@ import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.search.PostSearchCond
 import com.whyrano.domain.post.service.dto.CreatePostDto
+import com.whyrano.domain.post.service.dto.SimplePostDto
 import com.whyrano.domain.post.service.dto.UpdatePostDto
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Order
+import java.time.LocalDateTime
 
 
 /**
@@ -93,5 +96,59 @@ object PostFixture {
         UpdatePostRequest(
             title = title,
             content = content,
+        )
+
+    fun simplePostDto(
+        id: Long = ID,
+        postType: PostType = PostType.QUESTION, // 공지 | 질문
+        title: String = TITLE, // 제목
+        content: String = CONTENT, // 내용
+        answerCount: Int = ANSWER_COUNT, // 답변 수
+        viewCount: Int = VIEW_COUNT, // 조회수
+        likeCount: Int = LIKE_COUNT, // 좋아요 개수
+        commentCount: Int = COMMENT_COUNT, // 댓글 수
+        createdDate: LocalDateTime? = LocalDateTime.now(), // 생성일
+        modifiedDate: LocalDateTime? = LocalDateTime.now(), // 수정일
+        writerDto: MemberDto = MemberFixture.memberDto(), // 작성자 정보
+    ) =
+        SimplePostDto(
+            id = id,
+            postType = postType,
+            title = title,
+            content = content,
+            answerCount = answerCount,
+            viewCount = viewCount,
+            likeCount = likeCount,
+            commentCount = commentCount,
+            createdDate = createdDate,
+            modifiedDate = modifiedDate,
+            writerDto = writerDto
+        )
+
+    fun simplePostResponse(
+        id: Long = ID,
+        postType: PostType = PostType.QUESTION, // 공지 | 질문
+        title: String = TITLE, // 제목
+        content: String = CONTENT, // 내용
+        answerCount: Int = ANSWER_COUNT, // 답변 수
+        viewCount: Int = VIEW_COUNT, // 조회수
+        likeCount: Int = LIKE_COUNT, // 좋아요 개수
+        commentCount: Int = COMMENT_COUNT, // 댓글 수
+        createdDate: LocalDateTime? = LocalDateTime.now(), // 생성일
+        modifiedDate: LocalDateTime? = LocalDateTime.now(), // 수정일
+        writerInfoResponse: MemberInfoResponse = MemberFixture.memberInfoResponse(), // 작성자 정보
+    ) =
+        SimplePostResponse(
+            id = id,
+            postType = postType,
+            title = title,
+            content = content,
+            answerCount = answerCount,
+            viewCount = viewCount,
+            likeCount = likeCount,
+            commentCount = commentCount,
+            createdDate = createdDate.toString(),
+            modifiedDate = modifiedDate.toString(),
+            writerInfo = writerInfoResponse
         )
 }
