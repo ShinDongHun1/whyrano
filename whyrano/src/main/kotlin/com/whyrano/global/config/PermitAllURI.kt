@@ -24,7 +24,7 @@ enum class PermitAllURI(val method: HttpMethod?, val uri: Array<String>,) {
         SIGNUP_URI("/signup"),
         H2_URI("/h2-console/**"),
         ERROR_URI("/error"),
-        POST_SEARCH_URI("/error"),
+        POST_SEARCH_URI("/post"),
         ;
     }
 }
