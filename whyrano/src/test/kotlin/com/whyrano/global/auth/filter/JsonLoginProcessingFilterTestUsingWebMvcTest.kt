@@ -12,8 +12,8 @@ import com.whyrano.domain.member.service.MemberService
 import com.whyrano.domain.post.controller.PostController
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
+import com.whyrano.global.config.PermitAllURI
 import com.whyrano.global.config.SecurityConfig
-import com.whyrano.global.config.SecurityConfig.Companion.LOGIN_URL
 import com.whyrano.global.exception.ExceptionResponse
 import io.mockk.every
 import org.assertj.core.api.Assertions.assertThat
@@ -69,11 +69,12 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
 
 
     @Test
-    @DisplayName("로그인 get 요청인 경우 - 401")
+    @DisplayName("로그인 get 요청인 경우 - 405")
     fun test_login_get_fail_unauthorized() {
+        every { jwtService.extractToken(any()) } returns TokenDto()
         val result = mockMvc
             .perform(
-                get(LOGIN_URL)
+                get(PermitAllURI.URI.LOGIN_URI.uri)
                     .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isMethodNotAllowed)
@@ -90,7 +91,7 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     fun test_login_noJson_fail_unauthorized() {
         mockMvc
             .perform(
-                    post(LOGIN_URL)
+                    post(PermitAllURI.URI.LOGIN_URI.uri)
                     .contentType(APPLICATION_FORM_URLENCODED)
             )
             .andExpect(status().isUnsupportedMediaType)
@@ -103,7 +104,7 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     fun test_login_fail_noContent_unauthorized() {
         mockMvc
             .perform(
-                post(LOGIN_URL)
+                post(PermitAllURI.URI.LOGIN_URI.uri)
                 .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isUnauthorized)
@@ -119,7 +120,7 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
         val hashMap = usernamePasswordHashMap(member.email, member.password)
         mockMvc
             .perform(
-                post(LOGIN_URL)
+                post(PermitAllURI.URI.LOGIN_URI.uri)
                 .contentType(APPLICATION_JSON)
                 .content(
                    objectMapper.writeValueAsString(hashMap)
@@ -143,7 +144,7 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
 
         mockMvc
             .perform(
-                post(LOGIN_URL)
+                post(PermitAllURI.URI.LOGIN_URI.uri)
                 .contentType(APPLICATION_JSON)
                 .content(
                    objectMapper.writeValueAsString(hashMap)
@@ -170,7 +171,7 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
 
         val result = mockMvc
             .perform(
-                post(LOGIN_URL)
+                post(PermitAllURI.URI.LOGIN_URI.uri)
                 .contentType(APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(hashMap))
             ).andReturn()
@@ -179,10 +180,10 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     }
 
 
-    private fun usernamePasswordHashMap(username: String, passwrod: String): HashMap<String, String> {
+    private fun usernamePasswordHashMap(username: String, password: String): HashMap<String, String> {
         val hashMap = HashMap<String, String>()
         hashMap["username"] = username
-        hashMap["password"] = passwrod
+        hashMap["password"] = password
         return hashMap
     }
 }

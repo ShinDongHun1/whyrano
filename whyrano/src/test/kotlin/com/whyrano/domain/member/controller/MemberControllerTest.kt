@@ -409,12 +409,13 @@ internal class MemberControllerTest {
         //given
         val memberId = 10L
         val password = "example"
+        val accessToken = accessToken(id = memberId)
         every { jwtService.extractToken(any()) } returns TokenDto(
-            accessToken(id = memberId).accessToken,
+            accessToken.accessToken,
             refreshToken().refreshToken
         )
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
-        every { jwtService.extractAuthMember(accessToken(id = memberId)) } returns authMember(id = memberId)
+        every { jwtService.extractAuthMember(accessToken) } returns authMember(id = memberId)
         every { memberService.delete(memberId, password) } just runs
 
 
