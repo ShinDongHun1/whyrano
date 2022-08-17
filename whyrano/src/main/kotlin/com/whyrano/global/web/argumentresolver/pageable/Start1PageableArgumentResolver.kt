@@ -1,8 +1,10 @@
 package com.whyrano.global.web.argumentresolver.pageable
 
+import com.querydsl.core.types.Order
 import mu.KotlinLogging
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties
 import org.springframework.core.MethodParameter
+import org.springframework.core.annotation.AnnotationUtils
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Pageable
 import org.springframework.data.domain.Sort
@@ -76,7 +78,10 @@ class Start1PageableArgumentResolver(
         val pageable: Pageable = getPageable(parameter, page, pageSize)
 
         return if (sort.isSorted) { PageRequest.of(pageable.pageNumber, pageable.pageSize, sort) }
-               else { pageable }
+               else {
+            val pageAt = parameter.getParameterAnnotation(Page::class.java)
+
+            PageRequest.of(pageable.pageNumber, pageable.pageSize, Sort.by(pageAt!!.direction, *pageAt.sort))  } //정렬 조건이 없다면 기본값 사용
     }
 
 
