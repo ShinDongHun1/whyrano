@@ -1,17 +1,20 @@
 package com.whyrano.domain.member.fixture
 
 import com.auth0.jwt.algorithms.Algorithm
-import com.whyrano.domain.member.controller.dto.request.CreateMemberRequest
-import com.whyrano.domain.member.controller.dto.request.UpdateMemberRequest
+import com.whyrano.domain.member.controller.request.CreateMemberRequest
+import com.whyrano.domain.member.controller.request.UpdateMemberRequest
+import com.whyrano.domain.member.controller.response.MemberInfoResponse
 import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.service.dto.CreateMemberDto
+import com.whyrano.domain.member.service.dto.MemberDto
 import com.whyrano.domain.member.service.dto.UpdateMemberDto
 import com.whyrano.global.auth.userdetails.AuthMember
 import org.springframework.security.core.userdetails.User
 import org.springframework.security.core.userdetails.UserDetails
+import java.time.LocalDateTime
 
 /**
  * Created by ShinD on 2022/08/09.
@@ -21,6 +24,7 @@ object MemberFixture {
     const val ID = 1L
     const val EMAIL = "default@default.com"
     const val PASSWORD = "defaultPassword123@"
+    const val POINT = 10
     const val NICKNAME = "default_nickname"
     const val PROFILE_IMAGE_PATH = "https://default_profile_image_path.com"
 
@@ -54,7 +58,7 @@ object MemberFixture {
         email: String = EMAIL,
         password: String = PASSWORD,
         nickname: String = NICKNAME,
-        point: Int = 0,
+        point: Int = POINT,
         profileImagePath: String = PROFILE_IMAGE_PATH,
         accessToken: AccessToken? = null,
         refreshToken: RefreshToken? = null,
@@ -113,4 +117,46 @@ object MemberFixture {
         role: Role = Role.BASIC
     ) =
         AuthMember(id= id, email = email, password = password, role = role)
+
+    fun memberDto(
+        id: Long = ID,
+        role: Role = Role.BASIC,
+        email: String = EMAIL,
+        nickname: String = NICKNAME,
+        point: Int = POINT,
+        profileImagePath: String = PROFILE_IMAGE_PATH,
+        createdDate: LocalDateTime? = LocalDateTime.now(),
+        modifiedDate: LocalDateTime? = LocalDateTime.now(),
+    ) =
+        MemberDto(
+            id = id,
+            role = role,
+            email = email,
+            nickname = nickname,
+            point = point,
+            profileImagePath = profileImagePath,
+            createdDate = createdDate,
+            modifiedDate = modifiedDate,
+        )
+
+    fun memberInfoResponse(
+        id: Long = ID,
+        role: Role = Role.BASIC,
+        email: String = EMAIL,
+        nickname: String = NICKNAME,
+        point: Int = POINT,
+        profileImagePath: String = PROFILE_IMAGE_PATH,
+        createdDate: LocalDateTime? = LocalDateTime.now(),
+        modifiedDate: LocalDateTime? = LocalDateTime.now(),
+    ) =
+        MemberInfoResponse(
+            id = id,
+            role = role,
+            email = email,
+            nickname = nickname,
+            point = point,
+            profileImagePath = profileImagePath,
+            createdDate = createdDate.toString(),
+            modifiedDate = modifiedDate.toString(),
+        )
 }

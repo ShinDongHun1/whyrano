@@ -20,4 +20,5 @@ abstract class BaseTimeEntity {
 
     @LastModifiedDate
     var modifiedDate: LocalDateTime? = null
+
 }

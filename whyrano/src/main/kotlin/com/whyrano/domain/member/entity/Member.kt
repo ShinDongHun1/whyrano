@@ -4,6 +4,7 @@ package com.whyrano.domain.member.entity
  * Created by ShinD on 2022/08/09.
  */
 import com.whyrano.domain.common.BaseTimeEntity
+import com.whyrano.domain.member.entity.Role.*
 import javax.persistence.*
 
 @Entity
@@ -46,20 +47,51 @@ class Member(
 
 
 
+
     /**
      * 회원 정보 수정
      */
     fun update(nickname: String?, password: String?, profileImagePath: String?) {
+
         nickname?.let { this.nickname = it }
+
         password?.let { this.password = it }
+
         profileImagePath?.let { this.profileImagePath = it }
     }
+
+
+
+
 
     /**
      * 회원 토큰 업데이트
      */
     fun updateToken(accessToken: AccessToken, refreshToken: RefreshToken) {
+
         this.accessToken = accessToken
         this.refreshToken = refreshToken
     }
+
+
+
+
+
+    /**
+     * 회원 권한 수정
+     */
+    fun changRole(role: Role) {
+
+        this.role = role
+    }
+
+
+
+
+
+    //== 역할 확인 ==//
+    fun isBlack(): Boolean = this.role == BLACK
+    fun isAdmin(): Boolean = this.role == ADMIN
+    fun isBasic(): Boolean = this.role == BASIC
+
 }

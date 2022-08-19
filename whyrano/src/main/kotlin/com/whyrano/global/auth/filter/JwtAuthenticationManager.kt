@@ -24,10 +24,14 @@ import javax.servlet.http.HttpServletResponse
  * Created by ShinD on 2022/08/13.
  */
 class JwtAuthenticationManager(
+
     private val jwtService: JwtService,
+
 ) {
 
     private val log = KotlinLogging.logger {  }
+
+
 
 
 
@@ -41,13 +45,9 @@ class JwtAuthenticationManager(
         val tokenDto = jwtService.extractToken(request)
         if (tokenDto?.accessToken == null || tokenDto.refreshToken == null) throw AuthException(AuthExceptionType.EMPTY_TOKEN)
 
-
-
         // 토큰 추출
         val accessToken = tokenDto.accessToken()
         val refreshToken = tokenDto.refreshToken()
-
-
 
         /**
          * AccessToken이 만료되지 않은 경우
@@ -68,10 +68,10 @@ class JwtAuthenticationManager(
             return
         }
 
-
         // AccessToken이 만료된 경우 토큰 재발급 과정을 거침
         reIssueTokens(refreshToken, accessToken, response)
     }
+
 
 
 
@@ -80,8 +80,11 @@ class JwtAuthenticationManager(
      * 인증 성공 처리
      */
     private fun successAuthentication(authMember: AuthMember) {
+
         val context: SecurityContext = SecurityContextHolder.createEmptyContext()
+
         context.authentication = UsernamePasswordAuthenticationToken(authMember, null, authMember.authorities)
+
         SecurityContextHolder.setContext(context)
     }
 
@@ -104,10 +107,6 @@ class JwtAuthenticationManager(
         // 두 토큰을 가진 회원이 없는 경우 예외 발생
         val member = jwtService.findMemberByTokens(accessToken, refreshToken) ?: throw AuthException(AuthExceptionType.UNMATCHED_MEMBER)
 
-
-
-
-
         /**
          * AccessToken이 만료되었으나, AccessToken과 RefreshToken이 모두 유효한 경우
          */
@@ -120,7 +119,6 @@ class JwtAuthenticationManager(
         // 토큰 재발급 시 들어갈 정보 생성
         val authMember = AuthMember(id = member.id!!, email = member.email, role = member.role)
 
-
         // Http 응답 설정
         setResponse(
             response = response,
@@ -130,6 +128,9 @@ class JwtAuthenticationManager(
             content = tokenToJson(jwtService.createAccessAndRefreshToken(authMember = authMember)) // 토큰 재발급
         )
     }
+
+
+
 
 
     /**
@@ -150,10 +151,11 @@ class JwtAuthenticationManager(
 
 
 
+
+
     /**
      * Jwt를 Json 문자열로 변경
      */
     private fun tokenToJson(tokenDto: TokenDto) =
         JsonLoginSuccessHandler.TOKEN_BODY_FORMAT.format(tokenDto.accessToken, tokenDto.refreshToken)
-
 }

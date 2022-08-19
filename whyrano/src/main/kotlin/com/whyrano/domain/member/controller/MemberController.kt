@@ -1,11 +1,11 @@
 package com.whyrano.domain.member.controller
 
-import com.whyrano.domain.member.controller.dto.request.CreateMemberRequest
-import com.whyrano.domain.member.controller.dto.request.PasswordDto
-import com.whyrano.domain.member.controller.dto.request.UpdateMemberRequest
+import com.whyrano.domain.member.controller.request.CreateMemberRequest
+import com.whyrano.domain.member.controller.request.PasswordDto
+import com.whyrano.domain.member.controller.request.UpdateMemberRequest
 import com.whyrano.domain.member.service.MemberService
 import com.whyrano.global.auth.userdetails.AuthMember
-import com.whyrano.global.web.argumentresolver.Auth
+import com.whyrano.global.web.argumentresolver.auth.Auth
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder.fromCurrentContextPath
@@ -28,12 +28,15 @@ class MemberController(
     ) : ResponseEntity<Unit> {
 
         val memberId = memberService.signUp(cmr.toServiceDto())
+
         val url = fromCurrentContextPath() // http://~~
             .path("/member/{memberId}")    // http://~~/member/{memberId}
             .buildAndExpand(memberId)      // http://~~/member/10
             .toUri()
+
         return ResponseEntity.created(url).build()
     }
+
 
 
 
@@ -46,11 +49,11 @@ class MemberController(
         @Auth authMember: AuthMember,
         @RequestBody umr: UpdateMemberRequest
     ): ResponseEntity<Unit> {
-
+        //TODO 빈칸으로만 들어있는 경우 null이 되도록 수정
         memberService.update(authMember.id, umr.toServiceDto())
+
         return ResponseEntity.ok().build()
     }
-
 
 
 
@@ -66,6 +69,7 @@ class MemberController(
     ): ResponseEntity<Unit> {
 
         memberService.delete(authMember.id, passwordDto.password)
+
         return ResponseEntity.noContent().build()
     }
 }

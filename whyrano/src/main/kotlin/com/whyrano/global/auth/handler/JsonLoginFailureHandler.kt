@@ -19,16 +19,23 @@ import javax.servlet.http.HttpServletResponse
  * Created by ShinD on 2022/08/13.
  */
 class JsonLoginFailureHandler(
+
     private val objectMapper: ObjectMapper,
+
 ) : AuthenticationFailureHandler {
 
     private val log = KotlinLogging.logger {  }
+
+
+
+
 
     override fun onAuthenticationFailure(
         request: HttpServletRequest,
         response: HttpServletResponse,
         exception: AuthenticationException,
     ) {
+
         //예외 정보 가져오기
         when (exception) {
 
@@ -59,6 +66,10 @@ class JsonLoginFailureHandler(
             }
         }
     }
+
+
+
+
 
     private fun setResponse(
         response: HttpServletResponse,

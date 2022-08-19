@@ -2,6 +2,7 @@ package com.whyrano.global.auth.filter
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.member.controller.MemberController
 import com.whyrano.domain.member.entity.AccessToken
 import com.whyrano.domain.member.entity.RefreshToken
 import com.whyrano.domain.member.entity.Role
@@ -12,6 +13,7 @@ import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.fixture.MemberFixture.refreshToken
 import com.whyrano.domain.member.repository.MemberRepository
 import com.whyrano.domain.member.service.MemberService
+import com.whyrano.domain.post.controller.PostController
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_NAME
 import com.whyrano.global.auth.jwt.JwtService.Companion.ACCESS_TOKEN_HEADER_PREFIX
@@ -24,6 +26,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
 import org.springframework.security.core.userdetails.User
 import org.springframework.test.web.servlet.MockMvc
@@ -33,7 +37,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 /**
  * Created by ShinD on 2022/08/11.
  */
-@WebMvcTest
+@WebMvcTest(
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [PostController::class, MemberController::class])]
+)
 @Import(SecurityConfig::class)
 @MockkBean(MemberService::class, MemberRepository::class)
 internal class JwtAuthenticationFilterTest {

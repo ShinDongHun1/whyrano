@@ -2,19 +2,23 @@ package com.whyrano.global.auth.handler
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.ninjasquad.springmockk.MockkBean
+import com.whyrano.domain.member.controller.MemberController
 import com.whyrano.domain.member.fixture.MemberFixture.authMember
 import com.whyrano.domain.member.fixture.MemberFixture.createMemberDto
 import com.whyrano.domain.member.service.MemberService
+import com.whyrano.domain.post.controller.PostController
 import com.whyrano.global.auth.jwt.JwtService
 import com.whyrano.global.auth.jwt.TokenDto
+import com.whyrano.global.config.PermitAllURI
 import com.whyrano.global.config.SecurityConfig
-import com.whyrano.global.config.SecurityConfig.Companion.LOGIN_URL
 import io.mockk.every
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest
+import org.springframework.context.annotation.ComponentScan
+import org.springframework.context.annotation.FilterType
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType.APPLICATION_JSON
 import org.springframework.security.crypto.factory.PasswordEncoderFactories
@@ -26,7 +30,9 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
 /**
  * Created by ShinD on 2022/08/10.
  */
-@WebMvcTest
+@WebMvcTest(
+    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [PostController::class, MemberController::class])]
+)
 @Import(SecurityConfig::class)
 internal class JsonLoginSuccessHandlerTest {
     companion object {
@@ -60,7 +66,7 @@ internal class JsonLoginSuccessHandlerTest {
         //when
         val result = mockMvc
             .perform(
-                post(LOGIN_URL)
+                post(PermitAllURI.URI.LOGIN_URI.uri)
                     .contentType(APPLICATION_JSON)
                     .content(
                         objectMapper.writeValueAsString(hashMap)
@@ -81,10 +87,10 @@ internal class JsonLoginSuccessHandlerTest {
 
 
 
-    private fun usernamePasswordHashMap(username: String, passwrod: String): HashMap<String, String> {
+    private fun usernamePasswordHashMap(username: String, password: String): HashMap<String, String> {
         val hashMap = HashMap<String, String>()
         hashMap["username"] = username
-        hashMap["password"] = passwrod
+        hashMap["password"] = password
         return hashMap
     }
 }

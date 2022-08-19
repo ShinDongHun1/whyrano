@@ -9,7 +9,11 @@ import org.springframework.boot.context.properties.ConstructorBinding
 @ConstructorBinding
 @ConfigurationProperties("jwt")
 data class JwtProperties (
+
     val secretKey: String,
+
     val accessTokenExpirationPeriodDay: Long,
+
     val refreshTokenExpirationPeriodDay: Long,
+
 )

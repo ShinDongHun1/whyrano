@@ -18,17 +18,22 @@ import javax.servlet.http.HttpServletResponse
  * Created by ShinD on 2022/08/09.
  */
 class JsonLoginSuccessHandler(
+
     private val jwtService: JwtService,
+
 ) : AuthenticationSuccessHandler{
 
     private val log = KotlinLogging.logger {  }
 
-    // ObjectMapper는 쓰레드에 안전하긴 하지만, 속도를 생각하면 직접 작성해두는 것이 더 낫다고 판단
     companion object {
+        // ObjectMapper는 쓰레드에 안전하긴 하지만, 속도를 생각하면 직접 작성해두는 것이 더 낫다고 판단
         const val TOKEN_BODY_FORMAT = """
             {"accessToken" :"%s", "refreshToken" : "%s"}
         """
     }
+
+
+
 
 
     override fun onAuthenticationSuccess(
@@ -36,14 +41,19 @@ class JsonLoginSuccessHandler(
         response: HttpServletResponse,
         authentication: Authentication,
     ) {
+
         try {
+
             authentication.principal as AuthMember
-        } catch (e: Exception){
+        }
+        catch (e: Exception){
+
             log.error { "authentication.principal이 AuthMember 타입이 아닙니다." }
+
             e.printStackTrace()
+
             return
         }
-
 
         // 반환 정보 설정
         setResponse(
@@ -54,6 +64,10 @@ class JsonLoginSuccessHandler(
             content =  tokenToJson(jwtService.createAccessAndRefreshToken(authentication.principal as AuthMember))
         )
     }
+
+
+
+
 
     private fun setResponse(
         response: HttpServletResponse,
@@ -67,6 +81,10 @@ class JsonLoginSuccessHandler(
         response.characterEncoding = charset.name()
         response.writer.println(content)
     }
+
+
+
+
 
     private fun tokenToJson(tokenDto: TokenDto): String
         = TOKEN_BODY_FORMAT.format(tokenDto.accessToken, tokenDto.refreshToken)

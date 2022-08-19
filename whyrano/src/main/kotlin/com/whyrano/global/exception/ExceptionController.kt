@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import org.springframework.http.HttpStatus.BAD_REQUEST
 import org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR
 import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
 import org.springframework.validation.BindException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -25,15 +26,18 @@ class ExceptionController {
         val UNEXPECTED_EXCEPTION_HTTP_STATUS = INTERNAL_SERVER_ERROR
     }
 
-
     private val log = KotlinLogging.logger {  }
+
+
 
 
 
     @ExceptionHandler(BaseException::class)
     fun handleBaseException(ex: BaseException): ResponseEntity<ExceptionResponse> {
+
         val exceptionType = ex.exceptionType()
-        log.error { "ErrorCode : [${exceptionType.errorCode()}], message : [${exceptionType.message()}]" }
+
+        log.error { "ErrorCode : [${exceptionType.errorCode()}], message : [${exceptionType.message()}]\nstackTrace : ${ex.stackTraceToString()}" }
 
         return ResponseEntity
             .status(exceptionType.httpStatus())
@@ -42,14 +46,18 @@ class ExceptionController {
 
 
 
-    @ExceptionHandler(BindException::class)
-    fun handleBindException(ex: BindException): ResponseEntity<ExceptionResponse> {
 
-        log.error { "Http 요청 중 채워지지 않은 필드를 가진 요청이 들어왔습니다. - message : [${ex.message}], cause : [${ex.cause}]" }
 
-        return ResponseEntity.status(BIND_EXCEPTION_HTTP_STATUS)
+    @ExceptionHandler(BindException::class, HttpMessageNotReadableException::class)
+    fun handleBindException(ex: Exception): ResponseEntity<ExceptionResponse> {
+
+        log.error { "Json 혹은 요청 파라미터의 형식이 올바르지 않습니다. \n - message : [${ex.message}]\n - cause : [${ex.cause}]\n stackTrace : ${ex.stackTraceToString()}" }
+
+        return ResponseEntity
+            .status(BIND_EXCEPTION_HTTP_STATUS)
             .body(ExceptionResponse(errorCode = BIND_EXCEPTION_ERROR_CODE, message = BIND_EXCEPTION_MESSAGE))
     }
+
 
 
 
@@ -57,14 +65,14 @@ class ExceptionController {
     @ExceptionHandler(Exception::class)
     fun handleException(ex: Exception): ResponseEntity<ExceptionResponse> {
 
-        log.error { "예측하지 못한 예외 발생 - message : [${ex.message}], cause : [${ex.cause}]" }
+        log.error { "예측하지 못한 예외 발생 - message : [${ex.message}], cause : [${ex.cause}] \n stackTrace : ${ex.stackTraceToString()}" }
 
-        ex.printStackTrace()
-
-        return ResponseEntity.status(UNEXPECTED_EXCEPTION_HTTP_STATUS)
+        return ResponseEntity
+            .status(UNEXPECTED_EXCEPTION_HTTP_STATUS)
             .body(ExceptionResponse(errorCode = UNEXPECTED_EXCEPTION_ERROR_CODE, message = UNEXPECTED_EXCEPTION_MESSAGE))
     }
 }
+
 
 
 

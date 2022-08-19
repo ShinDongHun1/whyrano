@@ -15,10 +15,13 @@ import javax.persistence.Embeddable
  */
 @Embeddable
 data class AccessToken (
+
     var accessToken: String? = null,
+
 ) : Token {
 
     companion object {
+
         const val ACCESS_TOKEN_SUBJECT = "AccessToken"
         const val MEMBER_EMAIL_CLAIM = "memberEmail"
         const val MEMBER_ID_CLAIM = "memberId"
@@ -46,12 +49,16 @@ data class AccessToken (
     }
 
 
+
+
     override fun isValid(algorithm: Algorithm) =
         try {
             JWT.require(algorithm).build().verify(accessToken)
             true
         }
         catch (e: Exception) { false }
+
+
 
 
     fun getAuthMember(algorithm: Algorithm): AuthMember? {
@@ -68,6 +75,10 @@ data class AccessToken (
             null // 토큰이 유효하지 않는 등의 예외 발생 시 -> null 반환
         }
     }
+
+
+
+
 
     fun getExpiredDate(algorithm: Algorithm): Date =
         JWT.require(algorithm).build().verify(accessToken).expiresAt
