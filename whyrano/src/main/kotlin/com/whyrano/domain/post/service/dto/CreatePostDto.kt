@@ -12,11 +12,12 @@ data class CreatePostDto(
 
     val title: String,       // 게시글 제목
 
-    val tags: List<TagDto>,
+    val tags: List<TagDto> = emptyList(),
 
     ) {
-    fun toEntity() =
+    fun toEntity(): Post =
         Post(postType = postType , content = content, title = title)
 
-
+    fun getTagEntities() =
+        tags.map(TagDto::toEntity)
 }

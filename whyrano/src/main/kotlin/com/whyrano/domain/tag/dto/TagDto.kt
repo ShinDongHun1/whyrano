@@ -12,6 +12,6 @@ data class TagDto(
     val name: String,
 
 ) {
-    fun toEntity() =
+    fun toEntity(): Tag =
         Tag(id = id, name = name)
 }
