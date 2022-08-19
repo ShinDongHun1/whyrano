@@ -139,8 +139,11 @@ class PostService(
         // post 수정 권한 여부 확인 -> 없다면 예외 발생
         post.checkUpdateAuthority(writer)
 
-        // post 수정
-        post.update(upd.title, upd.content)
+        // post 수정 (모두 덮어쓰기)
+        post.update(title = upd.title, content = upd.content)
+
+        // 태그 달려있는 게시물 조회
+        val savedTaggedPosts = taggedPostRepository.findByPost(post)
 
         // 태그 달려있는 게시물(tagged post) 삭제, 태그는 삭제하지 않음
 

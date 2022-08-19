@@ -70,11 +70,10 @@ class Post(
     /**
      * post 수정
      */
-    fun update(title: String?, content: String?) {
+    fun update(title: String, content: String) {
 
-        title?.let { this.title = it }
-
-        content?.let { this.content = it }
+        this.title = title
+        this.content = content
     }
 
 

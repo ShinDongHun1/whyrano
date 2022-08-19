@@ -1,30 +1,23 @@
 package com.whyrano.domain.post.controller.request
 
 import com.whyrano.domain.post.service.dto.UpdatePostDto
+import com.whyrano.domain.tag.dto.TagDto
+import javax.validation.constraints.NotBlank
 
 /**
  * Created by ShinD on 2022/08/16.
  */
 data class UpdatePostRequest(
 
-    var title: String? = null,       // 게시글 제목
+    @field:NotBlank val content: String,     // 게시글 내용
 
-    var content: String? = null,    // 게시글 내용
+    @field:NotBlank val title: String,       // 게시글 제목
+
+    val tags: List<TagDto> = emptyList(),
 
 ) {
 
-    fun toServiceDto(): UpdatePostDto {
+    fun toServiceDto(): UpdatePostDto =
+        UpdatePostDto(content = content, title = title, tags = tags)
 
-        //공백인 경우 null 반환
-        if (content?.isBlank() == true) {
-            content = null
-        }
-
-        //공백인 경우 null 반환
-        if (title?.isBlank() == true) {
-            title = null
-        }
-
-        return UpdatePostDto(content = content, title = title)
-    }
 }
