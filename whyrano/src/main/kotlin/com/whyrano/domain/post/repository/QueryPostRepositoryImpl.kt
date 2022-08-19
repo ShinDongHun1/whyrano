@@ -4,6 +4,7 @@ import com.querydsl.core.types.Expression
 import com.querydsl.core.types.Order.ASC
 import com.querydsl.core.types.Order.DESC
 import com.querydsl.core.types.OrderSpecifier
+import com.querydsl.core.types.Predicate
 import com.querydsl.core.types.dsl.BooleanExpression
 import com.querydsl.core.types.dsl.Expressions
 import com.querydsl.core.types.dsl.PathBuilder
@@ -14,6 +15,8 @@ import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.entity.QPost.post
 import com.whyrano.domain.post.search.PostSearchCond
+import com.whyrano.domain.tag.entity.QTag.tag
+import com.whyrano.domain.taggedpost.entity.QTaggedPost.taggedPost
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.data.support.PageableExecutionUtils
@@ -43,17 +46,27 @@ class QueryPostRepositoryImpl(
      */
     override fun search(cond: PostSearchCond, pageable: Pageable): Page<Post> {
 
-        val beforeSortQuery = query.selectFrom(post)
+        val beforeSortQuery = query.select(post)
+            .from(post)
 
-            // join 설정
+            // member fetch join
             .join(post.writer, member)
             .fetchJoin()
+
+            // 태그가 붙은 포스트 모두 join
+            .leftJoin(taggedPost)
+            .on(post.id.eq(taggedPost.post.id))
+
+            // 태그가 붙은 포스트와 태그를 조인, 이때 태그 붙은 포스트의 태그 이름이 검색 조건과 일치해야 함.
+            .leftJoin(taggedPost.tag, tag)
+            .distinct()
 
             // 검색 조건 설정
             .where(
                 titleContains(cond.title),
                 contentContains(cond.content),
                 typeEq(cond.postType),
+                tagContains(cond.tag),
             )
 
         // orderBy 설정
@@ -66,15 +79,23 @@ class QueryPostRepositoryImpl(
 
         val countQuery = query.select(post.count())
             .from(post)
+            // 태그가 붙은 포스트 모두 join
+            .leftJoin(taggedPost)
+            .on(post.id.eq(taggedPost.post.id))
+
+            // 태그가 붙은 포스트와 태그를 조인, 이때 태그 붙은 포스트의 태그 이름이 검색 조건과 일치해야 함.
+            .leftJoin(taggedPost.tag, tag)
+            .distinct()
             .where(
                 titleContains(cond.title),
                 contentContains(cond.content),
                 typeEq(cond.postType),
+                tagContains(cond.tag),
             )
+
 
         return PageableExecutionUtils.getPage(contentQuery, pageable) {countQuery.fetchOne()!!}
     }
-
 
 
 
@@ -133,16 +154,35 @@ class QueryPostRepositoryImpl(
 
 
     /**
+     * 태그 검색
+     * 공백, 대소문자 무시하고 처리
+     */
+    private fun tagContains(tag: String?): Predicate? {
+
+        if ( !hasText(tag) ) return null
+
+        val noWhiteStr= tag!!.replace(" ", "").replace("\t", "")
+
+
+        return Expressions.stringTemplate("replace({0},' ','')", taggedPost.tag.name).containsIgnoreCase(noWhiteStr)
+    }
+
+
+
+
+
+
+    /**
      * 제목 검색
-     * 공백 무시하고 처리
+     * 공백, 대소문자 무시하고 처리
      */
     private fun titleContains(title: String?): BooleanExpression? {
 
         if ( !hasText(title) ) return null
 
-        val noWhiteStrUpperCase= title!!.replace(" ", "").replace("\t", "").uppercase()
+        val noWhiteStr= title!!.replace(" ", "").replace("\t", "")
 
-        return Expressions.stringTemplate("replace({0},' ','')", post.title).upper().contains(noWhiteStrUpperCase)
+        return Expressions.stringTemplate("replace({0},' ','')", post.title).containsIgnoreCase(noWhiteStr)
     }
 
 
@@ -151,15 +191,15 @@ class QueryPostRepositoryImpl(
 
     /**
      *  내용 검색
-     *  공백 무시하고 처리
+     *  공백, 대소문자 무시하고 처리
      */
     private fun contentContains(content: String?): BooleanExpression? {
 
         if ( !hasText(content) ) return null
 
-        val noWhiteStrUpperCase= content!!.replace(" ", "").replace("\t", "").uppercase()
+        val noWhiteStr= content!!.replace(" ", "").replace("\t", "")
 
-        return Expressions.stringTemplate("replace({0},' ','')", post.content).upper().contains(noWhiteStrUpperCase)
+        return Expressions.stringTemplate("replace({0},' ','')", post.content).containsIgnoreCase(noWhiteStr)
     }
 
 

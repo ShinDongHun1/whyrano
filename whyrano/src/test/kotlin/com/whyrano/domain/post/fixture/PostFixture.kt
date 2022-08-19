@@ -74,8 +74,9 @@ object PostFixture {
         title: String? = null,
         content: String? = null,
         postType: PostType? = null,
+        tag: String? = null,
     ) =
-        PostSearchCond(title = title, content = content, postType = postType)
+        PostSearchCond(title = title, content = content, postType = postType, tag = tag )
 
 
 

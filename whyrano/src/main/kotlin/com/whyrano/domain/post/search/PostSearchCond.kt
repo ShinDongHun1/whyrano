@@ -13,4 +13,5 @@ data class PostSearchCond(
 
     val postType: PostType? = null,     // 검색할 타입
 
+    val tag: String? = null,
 )
