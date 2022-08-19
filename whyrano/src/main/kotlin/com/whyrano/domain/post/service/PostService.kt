@@ -11,6 +11,9 @@ import com.whyrano.domain.post.search.PostSearchCond
 import com.whyrano.domain.post.service.dto.CreatePostDto
 import com.whyrano.domain.post.service.dto.SimplePostDto
 import com.whyrano.domain.post.service.dto.UpdatePostDto
+import com.whyrano.domain.tag.entity.Tag
+import com.whyrano.domain.tag.repository.TagRepository
+import com.whyrano.domain.taggedpost.repository.TaggedPostRepository
 import org.springframework.data.domain.Pageable
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -26,6 +29,10 @@ class PostService(
     private val memberRepository: MemberRepository,
 
     private val postRepository: PostRepository,
+
+    private val tagRepository: TagRepository,
+
+    private val taggedPostRepository: TaggedPostRepository,
 
 ) {
 
@@ -61,14 +68,50 @@ class PostService(
 
         val post = cpd.toEntity()
 
-        // 작성자 권한 확인 -> 없다면 예외 발생
-        post.checkCreateAuthority(writer)
-
-        // 작성자 설정
+        // 작성자 설정 (내부에서 작성자 권한 확인 -> 없다면 예외 발생)
         post.confirmWriter(writer)
 
+        // 태그 DTO -> 태그로 변환
+        val tags = cpd.getTagEntities()
+        val newTags = mutableListOf<Tag>()
+        val existTags = mutableListOf<Tag>()
+
+        // 새로 생긴 태그와 이미 존재하는 태그 추출 (id 가 없는 것)
+        filteringTags(tags, newTags, existTags)
+
+        // 새로 생긴 태그 저장 (newTags 에 id 세팅됨)
+        val savedTags = tagRepository.saveAll(newTags)
+        existTags.addAll(savedTags)
+
+        //포스트 저장 (post id 값 세팅됨)
+        val savedPost = postRepository.save(post)
+
+        // 게시물에 태그 달기
+        val taggedPosts = savedPost.tagging(existTags)
+        taggedPostRepository.saveAll(taggedPosts)
+
         //저장 후 id 반환
-        return postRepository.save(post).id!!
+        return savedPost.id!!
+    }
+
+
+
+
+
+    /**
+     * 태그 필터링
+     */
+    private fun filteringTags(
+        tags: List<Tag>,
+        newTags: MutableList<Tag>,
+        existTags: MutableList<Tag>,
+    ) {
+        for (tag in tags) {
+            when (tag.isNew) {
+                true -> newTags.add(tag)
+                false -> existTags.add(tag)
+            }
+        }
     }
 
 
@@ -95,8 +138,30 @@ class PostService(
         // post 수정 권한 여부 확인 -> 없다면 예외 발생
         post.checkUpdateAuthority(writer)
 
-        // post 수정
-        post.update(upd.title, upd.content)
+        // post 수정 (모두 덮어쓰기)
+        post.update(title = upd.title, content = upd.content)
+
+        // 태그 달려있는 게시물 조회
+        val savedTaggedPosts = taggedPostRepository.findByPost(post)
+
+        // 태그 달려있는 게시물(tagged post) 삭제, 태그는 삭제하지 않음
+        taggedPostRepository.deleteAllInBatch(savedTaggedPosts)
+
+        // 새로운 태그 저장
+        val tags = upd.getTagEntities()
+        val newTags = mutableListOf<Tag>()
+        val existTags = mutableListOf<Tag>()
+
+        // 새로 생긴 태그와 이미 존재하는 태그 추출 (id 가 없는 것)
+        filteringTags(tags, newTags, existTags)
+
+        // 새로 생긴 태그 저장 (newTags 에 id 세팅됨)
+        val savedTags = tagRepository.saveAll(newTags)
+        existTags.addAll(savedTags)
+
+        // 게시물에 태그 달기
+        val taggedPosts = post.tagging(existTags)
+        taggedPostRepository.saveAll(taggedPosts)
     }
 
 
@@ -116,6 +181,12 @@ class PostService(
 
         // post 삭제 권한 여부 확인 -> 없다면 예외 발생
         post.checkDeleteAuthority(writer)
+
+        // 태그 달려있는 게시물 삭제
+        val savedTaggedPosts = taggedPostRepository.findByPost(post)
+
+        // 태그 달려있는 게시물(tagged post) 삭제, 태그는 삭제하지 않음
+        taggedPostRepository.deleteAllInBatch(savedTaggedPosts)
 
         // post 삭제
         postRepository.delete(post)

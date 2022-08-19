@@ -155,6 +155,7 @@ internal class PostControllerTest {
                 "postType":"%s",
                 "content":"%s",
                 "title":"%s",
+                "tags":[],
                 "titleddd":"%s"
             }
         """

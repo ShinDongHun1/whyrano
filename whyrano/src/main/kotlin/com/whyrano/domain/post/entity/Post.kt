@@ -11,6 +11,8 @@ import com.whyrano.domain.member.entity.Role.BLACK
 import com.whyrano.domain.post.entity.PostType.NOTICE
 import com.whyrano.domain.post.exception.PostException
 import com.whyrano.domain.post.exception.PostExceptionType
+import com.whyrano.domain.tag.entity.Tag
+import com.whyrano.domain.taggedpost.entity.TaggedPost
 import javax.persistence.*
 import javax.persistence.EnumType.STRING
 import javax.persistence.FetchType.LAZY
@@ -57,7 +59,7 @@ class Post(
      * 작성자 설정
      */
     fun confirmWriter(writer: Member) {
-
+        checkCreateAuthority(writer)
         this.writer = writer
     }
 
@@ -68,11 +70,10 @@ class Post(
     /**
      * post 수정
      */
-    fun update(title: String?, content: String?) {
+    fun update(title: String, content: String) {
 
-        title?.let { this.title = it }
-
-        content?.let { this.content = it }
+        this.title = title
+        this.content = content
     }
 
 
@@ -159,4 +160,20 @@ class Post(
      */
     private fun isSameWriter(writer: Member) =
         this.writer!!.id == writer.id
+
+
+
+
+
+    /**
+     * 포스트에 태그 달기
+     */
+    fun tagging(tags: List<Tag>): List<TaggedPost> {
+        checkNotNull(this.id) { "post id is null" }
+        return tags.map {
+            checkNotNull(it.id) { "tag id is null" }
+            TaggedPost(post = this, tag = it)
+        }
+    }
+
 }

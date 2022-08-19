@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.whyrano.domain.post.fixture.PostFixture.updatePostDto
 import com.whyrano.domain.post.fixture.PostFixture.updatePostRequest
+import com.whyrano.domain.tag.fixture.TagFixture
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
@@ -20,7 +21,13 @@ internal class UpdatePostRequestTest {
         private const val JSON_FORMAT = """
             {
                 "content":"%s",
-                "title":"%s"
+                "title":"%s",
+                "tags":[
+                    {"id":"%s", "name":"%s"},
+                    {"id":"%s", "name":"%s"},
+                    {"id":"%s", "name":"%s"},
+                    {"id":"%s", "name":"%s"}
+                ]
             }
         """
     }
@@ -36,10 +43,16 @@ internal class UpdatePostRequestTest {
         //given
         val content = "example content"
         val title = "example title"
+        val newTags = TagFixture.newTagDtos(size = 2)
+        val savedTags = TagFixture.savedTagDtos(size = 2)
+        savedTags.addAll(newTags)
 
-        val upr = updatePostRequest(content = content, title = title)
 
-        val format = JSON_FORMAT.format(content, title)
+        val upr = updatePostRequest(content = content, title = title,    tagDtos = savedTags)
+
+        val format = JSON_FORMAT.format(content, title,
+                savedTags[0].id, savedTags[0].name, savedTags[1].id, savedTags[1].name,
+            newTags[0].id, newTags[0].name, newTags[1].id, newTags[1].name,)
 
 
         //when
@@ -70,66 +83,4 @@ internal class UpdatePostRequestTest {
         assertThat(toServiceDto).isEqualTo(upd)
     }
 
-
-
-
-
-    @Test
-    fun `UpdatePostRequest에서 UpdatePostDto 로 변환 테스트 - 비어있는 경우 null로 변환`() {
-
-        //given
-        val content = ""
-        val title = "example title"
-
-        val createPostRequest = updatePostRequest(content = content, title = title)
-        val upd = updatePostDto(content = null, title = title)
-
-        //when
-        val toServiceDto = createPostRequest.toServiceDto()
-
-        //then
-        assertThat(toServiceDto).isEqualTo(upd)
-    }
-
-
-
-
-
-    @Test
-    fun `UpdatePostRequest에서 UpdatePostDto 로 변환 테스트 - 공백만 있는 경우 null로 변환`() {
-
-        //given
-        val content = "             "
-        val title = "example title"
-
-        val createPostRequest = updatePostRequest(content = content, title = title)
-        val upd = updatePostDto(content = null, title = title)
-
-        //when
-        val toServiceDto = createPostRequest.toServiceDto()
-
-        //then
-        assertThat(toServiceDto).isEqualTo(upd)
-    }
-
-
-
-
-
-    @Test
-    fun `UpdatePostRequest에서 UpdatePostDto 로 변환 테스트 - null인 경우 null로 변환`() {
-
-        //given
-        val content = null
-        val title = "example title"
-
-        val createPostRequest = updatePostRequest(content = content, title = title)
-        val upd = updatePostDto(content = null, title = title)
-
-        //when
-        val toServiceDto = createPostRequest.toServiceDto()
-
-        //then
-        assertThat(toServiceDto).isEqualTo(upd)
-    }
 }

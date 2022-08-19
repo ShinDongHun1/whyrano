@@ -2,6 +2,7 @@ package com.whyrano.domain.post.service.dto
 
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
+import com.whyrano.domain.tag.dto.TagDto
 
 data class CreatePostDto(
 
@@ -11,7 +12,12 @@ data class CreatePostDto(
 
     val title: String,       // 게시글 제목
 
-) {
-    fun toEntity() =
+    val tags: List<TagDto> = emptyList(),
+
+    ) {
+    fun toEntity(): Post =
         Post(postType = postType , content = content, title = title)
+
+    fun getTagEntities() =
+        tags.map(TagDto::toEntity)
 }

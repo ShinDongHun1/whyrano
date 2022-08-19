@@ -20,6 +20,12 @@ import com.whyrano.domain.post.fixture.PostFixture.postSearchCond
 import com.whyrano.domain.post.fixture.PostFixture.updatePostDto
 import com.whyrano.domain.post.repository.PostRepository
 import com.whyrano.domain.post.service.dto.SimplePostDto
+import com.whyrano.domain.tag.entity.Tag
+import com.whyrano.domain.tag.fixture.TagFixture
+import com.whyrano.domain.tag.repository.TagRepository
+import com.whyrano.domain.taggedpost.entity.TaggedPost
+import com.whyrano.domain.taggedpost.fixture.TaggedPostFixture
+import com.whyrano.domain.taggedpost.repository.TaggedPostRepository
 import com.whyrano.global.auth.userdetails.AuthMember
 import com.whyrano.global.config.JpaConfig
 import com.whyrano.global.config.QuerydslConfig
@@ -56,6 +62,8 @@ internal class PostServiceTest {
 
     @MockkBean private lateinit var postRepository: PostRepository
     @MockkBean private lateinit var memberRepository: MemberRepository
+    @MockkBean private lateinit var tagRepository: TagRepository
+    @MockkBean private lateinit var taggedPostRepository: TaggedPostRepository
 
     private lateinit var basicAuthMember: AuthMember // 일반 회원
     private lateinit var adminAuthMember: AuthMember // 관리자
@@ -65,7 +73,7 @@ internal class PostServiceTest {
     @BeforeEach
     fun setUp() {
         //PostService 세팅
-        postService = PostService(memberRepository, postRepository)
+        postService = PostService(memberRepository, postRepository, tagRepository, taggedPostRepository)
 
 
         // 회원들 인증정보 세팅
@@ -88,13 +96,19 @@ internal class PostServiceTest {
 
         //given
         val cpd = createPostDto(postType = QUESTION) // 질문 생성 DTO
-        every { postRepository.save(any()) } returns post()
+        val savedPost = post()
+        val savedTags = TagFixture.savedTags()
+        every { postRepository.save(any()) } returns savedPost
+        every { tagRepository.saveAll<Tag>(any()) } returns savedTags
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = savedPost, tags = savedTags)
 
         //when
         val postId = postService.create(basicAuthMember.id, cpd) // 질문 작성
 
         //then
-        verify (exactly = 1){ postRepository.save(any()) }
+        verify(exactly = 1) { postRepository.save(any()) }
+        verify(exactly = 1) { tagRepository.saveAll<Tag>(any()) }
+        verify(exactly = 1) { taggedPostRepository.saveAll<TaggedPost>(any()) }
     }
 
 
@@ -124,14 +138,19 @@ internal class PostServiceTest {
 
         //given
         val cpd = createPostDto(postType = NOTICE) // 질문 생성 DTO
-        every { postRepository.save(any()) } returns post()
+        val savedPost = post()
+        val savedTags = TagFixture.savedTags()
+        every { postRepository.save(any()) } returns savedPost
+        every { tagRepository.saveAll<Tag>(any()) } returns savedTags
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = savedPost, tags = savedTags)
 
         //when
         val postId = postService.create(adminAuthMember.id, cpd) // 질문 작성
 
         //then
         verify (exactly = 1){ postRepository.save(any()) }
-
+        verify(exactly = 1) { tagRepository.saveAll<Tag>(any()) }
+        verify(exactly = 1) { taggedPostRepository.saveAll<TaggedPost>(any()) }
 
     }
 
@@ -180,11 +199,16 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
-
+        val savedTags = TagFixture.savedTags(3)
+        val post = post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role)
+        every { postRepository.findByIdOrNull(postId) } returns post
+        every { taggedPostRepository.findByPost(any()) } returns emptyList()
+        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { tagRepository.saveAll<Tag>(any()) } returns savedTags
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = post, tags = savedTags)
 
         //when
-        val upd = updatePostDto(title = UPDATE_TITLE, content = null)
+        val upd = updatePostDto(title = UPDATE_TITLE, content = UPDATE_CONTENT)
         postService.update(basicAuthMember.id, postId, upd)
 
 
@@ -222,11 +246,16 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
-
+        val post = post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
+        val savedTags = TagFixture.savedTags(3)
+        every { postRepository.findByIdOrNull(postId) } returns post
+        every { taggedPostRepository.findByPost(any()) } returns emptyList()
+        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { tagRepository.saveAll<Tag>(any()) } returns savedTags
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post= post, tags = savedTags)
 
         //when
-        val upd = updatePostDto(title = UPDATE_TITLE, content = null)
+        val upd = updatePostDto(title = UPDATE_TITLE, content = UPDATE_CONTENT)
         postService.update(adminAuthMember.id, postId, upd)
 
 
@@ -290,14 +319,20 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
-
+        val post = post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
+        val savedTags = TagFixture.savedTags(3)
         val anotherAdminId = 20L
+        every { postRepository.findByIdOrNull(postId) } returns post
         every { memberRepository.findByIdOrNull(anotherAdminId) } returns member(id = anotherAdminId, authority = ADMIN)
+        every { tagRepository.saveAll<Tag>(any()) } returns savedTags
+        every { taggedPostRepository.findByPost(any()) } returns emptyList()
+        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = post, tags = savedTags)
+
 
 
         //when
-        val upd = updatePostDto(title = UPDATE_TITLE, content = null)
+        val upd = updatePostDto(title = UPDATE_TITLE, content = UPDATE_CONTENT)
         postService.update(anotherAdminId, postId, upd)
 
 
@@ -335,9 +370,12 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        val post =
+            post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role)
+        every { postRepository.findByIdOrNull(postId) } returns post
         every { postRepository.delete(any()) } just runs
-
+        every { taggedPostRepository.findByPost(post) } returns emptyList()
+        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
 
 
         //when
@@ -359,7 +397,8 @@ internal class PostServiceTest {
         val postId = 10L
         every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
-
+        every { taggedPostRepository.findByPost(any()) } returns emptyList()
+        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
 
 
         //when
@@ -405,8 +444,13 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role )
+        val post = post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
+
+
+        every { postRepository.findByIdOrNull(postId) } returns post
         every { postRepository.delete(any()) } just runs
+        every { taggedPostRepository.findByPost(any()) } returns emptyList()
+        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
 
 
 
@@ -473,6 +517,8 @@ internal class PostServiceTest {
         val postId = 10L
         every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
+        every { taggedPostRepository.findByPost(any()) } returns emptyList()
+        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
 
         val anotherAdminId = 300L
         every { memberRepository.findByIdOrNull(anotherAdminId) } returns member(id = anotherAdminId, authority = ADMIN)

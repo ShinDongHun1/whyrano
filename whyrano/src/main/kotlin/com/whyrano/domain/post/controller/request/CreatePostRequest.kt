@@ -2,6 +2,7 @@ package com.whyrano.domain.post.controller.request
 
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.service.dto.CreatePostDto
+import com.whyrano.domain.tag.dto.TagDto
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
@@ -14,6 +15,8 @@ data class CreatePostRequest(
     @field:NotBlank val content: String,     // 게시글 내용
 
     @field:NotBlank val title: String,       // 게시글 제목
+
+    val tags: List<TagDto> = emptyList(),
 ) {
 
     fun toServiceDto() =
@@ -21,5 +24,6 @@ data class CreatePostRequest(
             postType = postType,
             content = content,
             title = title,
+            tags = tags,
         )
 }
