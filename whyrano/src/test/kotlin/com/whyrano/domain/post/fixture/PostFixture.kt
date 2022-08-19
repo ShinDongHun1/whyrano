@@ -58,15 +58,16 @@ object PostFixture {
         postType: PostType = PostType.QUESTION,
         title: String = TITLE,
         content: String = CONTENT,
-        tagDtos: List<TagDto> = emptyList()
+        tagDtos: List<TagDto> = emptyList(),
     ) =
             CreatePostDto(title = title, content = content, postType = postType, tags = tagDtos)
 
     fun updatePostDto(
-        title: String? = UPDATE_TITLE,
-        content: String? = UPDATE_CONTENT,
+        title: String = UPDATE_TITLE,
+        content: String = UPDATE_CONTENT,
+        tagDtos: List<TagDto> = emptyList(),
     ) =
-        UpdatePostDto(title = title, content = content)
+        UpdatePostDto(title = title, content = content, tags = tagDtos)
 
 
     fun postSearchCond(
@@ -94,12 +95,14 @@ object PostFixture {
         CreatePostRequest(title = title, content = content, postType = postType, tags = tagDtos)
 
     fun updatePostRequest(
-        title: String? = TITLE,
-        content: String? = CONTENT,
+        title: String = TITLE,
+        content: String = CONTENT,
+        tagDtos: List<TagDto> = emptyList(),
     ) =
         UpdatePostRequest(
             title = title,
             content = content,
+            tags = tagDtos
         )
 
     fun simplePostDto(
