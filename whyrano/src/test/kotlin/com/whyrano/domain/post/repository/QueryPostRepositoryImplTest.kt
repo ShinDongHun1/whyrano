@@ -3,10 +3,14 @@ package com.whyrano.domain.post.repository
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.member.fixture.MemberFixture.member
 import com.whyrano.domain.member.repository.MemberRepository
+import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType.NOTICE
 import com.whyrano.domain.post.entity.PostType.QUESTION
 import com.whyrano.domain.post.fixture.PostFixture.post
 import com.whyrano.domain.post.search.PostSearchCond
+import com.whyrano.domain.tag.entity.Tag
+import com.whyrano.domain.tag.repository.TagRepository
+import com.whyrano.domain.taggedpost.repository.TaggedPostRepository
 import com.whyrano.global.config.JpaConfig
 import com.whyrano.global.config.QuerydslConfig
 import org.assertj.core.api.Assertions.assertThat
@@ -31,6 +35,8 @@ internal class QueryPostRepositoryImplTest {
 
     @Autowired private lateinit var memberRepository: MemberRepository
     @Autowired private lateinit var postRepository: PostRepository
+    @Autowired private lateinit var tagRepository: TagRepository
+    @Autowired private lateinit var taggedPostRepository: TaggedPostRepository
 
     private var member =   member(id = null, email = "email@@", password = "pass", authority = Role.ADMIN)
 
@@ -62,20 +68,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
                 title = "title${it}",
-                content = "content${it}",
-                likeCount = it,
-                viewCount = it,
-                answerCount = it,
-                commentCount = it
+                content = "",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(title = "title"), pageable)
@@ -98,20 +105,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
                 title = "title${it}",
-                content = "content${it}",
-                likeCount = it,
-                viewCount = it,
-                answerCount = it,
-                commentCount = it
+                content = "",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(title = "ti11tle"), pageable)
@@ -133,21 +141,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
-
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
                 title = "title${it}",
-                content = "content${it}",
-                likeCount = it,
-                viewCount = it,
-                answerCount = it,
-                commentCount = it
+                content = "",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(title = "   ti           tl e        "), pageable)
@@ -172,21 +180,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
-
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "       t i t   l  e${it+50}             ",
-                content = "c    on ten t        ${it+50}",
-                likeCount = it + 50,
-                viewCount = it + 50,
-                answerCount = it + 50,
-                commentCount = it + 50,
+                title = "       t i t   l  e${it}",
+                content = "",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(title = "title"), pageable)
@@ -209,20 +217,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "       t i t     l  e${it+50}             ",
-                content = "c    on    te    n t        ${it+50}",
-                likeCount = it + 50,
-                viewCount = it + 50,
-                answerCount = it + 50,
-                commentCount = it + 50,
+                title = "       t i t     l  e${it}",
+                content = "",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(title = "t    i               t   l      e"), pageable)
@@ -246,20 +255,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "t i tLE${it+50}",
-                content = "c    on    te    n t        ${it+50}",
-                likeCount = it + 50,
-                viewCount = it + 50,
-                answerCount = it + 50,
-                commentCount = it + 50,
+                title = "t i tLE${it}",
+                content = "",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(title = "TIt  LE"), pageable)
@@ -282,20 +292,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "가나따fl마 보 슈 썅${it+50}",
-                content = "c    on    te    n t        ${it+50}",
-                likeCount = it + 50,
-                viewCount = it + 50,
-                answerCount = it + 50,
-                commentCount = it + 50,
+                title = "가나따fl마 보 슈 썅${it}",
+                content = "",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(title = "가    나따fL마   보슈썅"), pageable)
@@ -318,20 +329,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "title${it}",
+                title = "",
                 content = "content${it}",
-                likeCount = it,
-                viewCount = it,
-                answerCount = it,
-                commentCount = it
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(content = "content"), pageable)
@@ -357,20 +369,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
-        repeat(3) {
+        val posts = mutableListOf<Post>()
+        repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "title${it}",
+                title = "",
                 content = "content${it}",
-                likeCount = it,
-                viewCount = it,
-                answerCount = it,
-                commentCount = it
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(content = "cont1111ent"), pageable)
@@ -392,20 +405,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "title${it}",
+                title = "",
                 content = "content${it}",
-                likeCount = it,
-                viewCount = it,
-                answerCount = it,
-                commentCount = it
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(content = "   c on   t   e   nt     "), pageable)
@@ -430,20 +444,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "       t i t   l  e${it+50}             ",
-                content = "c    on ten t        ${it+50}",
-                likeCount = it + 50,
-                viewCount = it + 50,
-                answerCount = it + 50,
-                commentCount = it + 50,
+                title = "",
+                content = "c    on ten t       ${it}",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(content = "content"), pageable)
@@ -467,20 +482,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "       t i t     l  e${it+50}             ",
-                content = "c    on    te    n t        ${it+50}",
-                likeCount = it + 50,
-                viewCount = it + 50,
-                answerCount = it + 50,
-                commentCount = it + 50,
+                title = "",
+                content = "c    on    te    n t        ${it}",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(pageCount,  pageSize)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(content  = "c o n te    n t    "), pageable)
@@ -503,20 +519,21 @@ internal class QueryPostRepositoryImplTest {
         val pageCount = 0
         val pageSize = 10
 
+        val posts = mutableListOf<Post>()
         repeat(totalCount) {
             val post = post(
                 id = null,
-                title = "t i tLE${it+50}",
-                content = "c    ON    te    n t        ${it+50}",
-                likeCount = it + 50,
-                viewCount = it + 50,
-                answerCount = it + 50,
-                commentCount = it + 50,
+                title = "",
+                content = "c    ON    te    n t        ${it}",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
             )
             post.confirmWriter(member)
-            postRepository.save(post)
+            posts.add(post)
         }
-        val pageable = PageRequest.of(0, 10)
+        postRepository.saveAllAndFlush(posts)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
         val search = postRepository.search(PostSearchCond(content = "Con   tE    n t        "), pageable)
@@ -532,6 +549,65 @@ internal class QueryPostRepositoryImplTest {
     }
 
 
+
+
+    @Test
+    fun `태그로 검색`() {
+
+        //given
+        val totalCount = 5
+        val pageCount = 0
+        val pageSize = 5
+
+        val posts = mutableListOf<Post>()
+        repeat(totalCount) {
+            val post = post(
+                id = null,
+                title = "",
+                content = "content${it}",
+                likeCount = it, viewCount = it,
+                answerCount = it, commentCount = it
+            )
+            post.confirmWriter(member)
+            posts.add(post)
+        }
+        postRepository.saveAllAndFlush(posts)
+
+        val newTag1 = Tag(name = "TAG")
+        val newTag2 = Tag(name = "NAME IS XXX")
+        val newTag3 = Tag(name = "AAAA AAAA")
+        tagRepository.saveAllAndFlush(listOf(newTag1, newTag2, newTag3))
+
+        val tagging = posts[0].tagging(listOf(newTag1, newTag2))
+        val tagging1 = posts[1].tagging(listOf(newTag3))
+        val tagging2 = posts[2].tagging(listOf(newTag2))
+
+
+        taggedPostRepository.saveAllAndFlush(tagging)
+        taggedPostRepository.saveAllAndFlush(tagging1)
+        taggedPostRepository.saveAllAndFlush(tagging2)
+
+        val pageable = PageRequest.of(pageCount, pageSize)
+
+
+        //when
+        val search = postRepository.search(PostSearchCond(tag = "n A meIs   ", content = "co"), pageable)
+
+
+        //then
+        assertThat(search.totalElements).isEqualTo(2) // 태그된 포스트는 2개
+        assertThat(search.totalPages).isEqualTo(1)
+        assertThat(search.number).isEqualTo(pageCount)
+        assertThat(search.numberOfElements).isEqualTo(2)
+
+        taggedPostRepository.findByPost(search.content[0]).map { it.tag.name }.contains(newTag2.name)
+    }
+
+
+
+
+
+
     @Test
     fun `타입으로 검색 - 공지만 검색`() {
         //given
@@ -543,8 +619,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
             )
             post.confirmWriter(member)
             postRepository.save(post)
@@ -552,12 +628,11 @@ internal class QueryPostRepositoryImplTest {
             val post2 = post(
                 id = null,
                 postType = QUESTION,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
             )
             post2.confirmWriter(member)
             postRepository.save(post2)
-
         }
 
 
@@ -588,8 +663,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
             )
             post.confirmWriter(member)
             postRepository.save(post)
@@ -597,12 +672,11 @@ internal class QueryPostRepositoryImplTest {
             val post2 = post(
                 id = null,
                 postType = QUESTION,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
             )
             post2.confirmWriter(member)
             postRepository.save(post2)
-
         }
 
 
@@ -633,8 +707,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
             )
             post.confirmWriter(member)
             postRepository.save(post)
@@ -642,8 +716,8 @@ internal class QueryPostRepositoryImplTest {
             val post2 = post(
                 id = null,
                 postType = QUESTION,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
             )
             post2.confirmWriter(member)
             postRepository.save(post2)
@@ -685,8 +759,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
             )
             post.confirmWriter(member)
             postRepository.save(post)
@@ -726,8 +800,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
                 viewCount = it
             )
             post.confirmWriter(member)
@@ -767,8 +841,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
                 viewCount = Random().nextInt(4),
                 commentCount =  Random().nextInt(4),
             )
@@ -811,8 +885,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
                 viewCount = Random().nextInt(4),
                 commentCount =  Random().nextInt(4),
             )
@@ -860,8 +934,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
             )
             post.confirmWriter(member)
             postRepository.save(post)
@@ -901,8 +975,8 @@ internal class QueryPostRepositoryImplTest {
             val post = post(
                 id = null,
                 postType = NOTICE,
-                title = " title${it}",
-                content = "content${it}",
+                title = "",
+                content = "",
                 commentCount = it,
             )
             post.confirmWriter(member)
