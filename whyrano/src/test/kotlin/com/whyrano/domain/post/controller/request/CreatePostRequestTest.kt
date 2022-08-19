@@ -6,6 +6,7 @@ import com.fasterxml.jackson.module.kotlin.KotlinModule
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.fixture.PostFixture.createPostDto
 import com.whyrano.domain.post.fixture.PostFixture.createPostRequest
+import com.whyrano.domain.tag.fixture.TagFixture
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -21,7 +22,13 @@ internal class CreatePostRequestTest {
             {
                 "postType":"%s",
                 "content":"%s",
-                "title":"%s"
+                "title":"%s",
+                "tags":[
+                    {"id":"%s", "name":"%s"},
+                    {"id":"%s", "name":"%s"},
+                    {"id":"%s", "name":"%s"},
+                    {"id":"%s", "name":"%s"}
+                ]
             }
         """
     }
@@ -36,10 +43,15 @@ internal class CreatePostRequestTest {
         val postType = "QUESTION"
         val content = "example content"
         val title = "example title"
+        val newTags = TagFixture.newTagDtos(size = 2)
+        val savedTags = TagFixture.savedTagDtos(size = 2)
+        savedTags.addAll(newTags)
 
-        val createPostRequest = createPostRequest(postType = PostType.QUESTION, content = content, title = title)
+        val createPostRequest = createPostRequest(postType = PostType.QUESTION, content = content, title = title, tagDtos = savedTags)
 
-        val format = JSON_FORMAT.format(postType, content, title)
+        val format = JSON_FORMAT.format(postType, content, title,
+            savedTags[0].id, savedTags[0].name, savedTags[1].id, savedTags[1].name,
+            newTags[0].id, newTags[0].name, newTags[1].id, newTags[1].name,)
 
 
         //when
@@ -56,7 +68,9 @@ internal class CreatePostRequestTest {
         val postType = ""
         val content = "example content"
         val title = "example title"
-        val format = JSON_FORMAT.format(postType, content, title)
+        val format = JSON_FORMAT.format(postType, content, title,
+            "","","","",
+            "","","","")
 
 
         //when, then
@@ -73,10 +87,12 @@ internal class CreatePostRequestTest {
         val postType = "question"
         val content = "example content"
         val title = "example title"
-        val format = JSON_FORMAT.format(postType, content, title)
+        val format = JSON_FORMAT.format(postType, content, title,
+            "","","","",
+            "","","","")
 
 
-        val createPostRequest = createPostRequest(postType = PostType.QUESTION, content = content, title = title)
+        val createPostRequest = createPostRequest(postType = PostType.QUESTION, content = content, title = title,)
 
         //when, then
         assertThrows<InvalidFormatException> { objectMapper.readValue(format, CreatePostRequest::class.java) }

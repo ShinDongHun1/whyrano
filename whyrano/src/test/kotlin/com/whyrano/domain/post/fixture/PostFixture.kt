@@ -14,6 +14,7 @@ import com.whyrano.domain.post.search.PostSearchCond
 import com.whyrano.domain.post.service.dto.CreatePostDto
 import com.whyrano.domain.post.service.dto.SimplePostDto
 import com.whyrano.domain.post.service.dto.UpdatePostDto
+import com.whyrano.domain.tag.dto.TagDto
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Order
@@ -37,6 +38,7 @@ object PostFixture {
     const val LIKE_COUNT = 0
 
 
+
     fun post(
         id: Long? = ID,
         postType: PostType = PostType.QUESTION,
@@ -56,8 +58,9 @@ object PostFixture {
         postType: PostType = PostType.QUESTION,
         title: String = TITLE,
         content: String = CONTENT,
+        tagDtos: List<TagDto> = emptyList()
     ) =
-            CreatePostDto(title = title, content = content, postType = postType)
+            CreatePostDto(title = title, content = content, postType = postType, tags = tagDtos)
 
     fun updatePostDto(
         title: String? = UPDATE_TITLE,
@@ -86,8 +89,9 @@ object PostFixture {
         postType: PostType = PostType.QUESTION,
         title: String = TITLE,
         content: String = CONTENT,
+        tagDtos: List<TagDto> = emptyList(),
     ) =
-        CreatePostRequest(title = title, content = content, postType = postType)
+        CreatePostRequest(title = title, content = content, postType = postType, tags = tagDtos)
 
     fun updatePostRequest(
         title: String? = TITLE,
