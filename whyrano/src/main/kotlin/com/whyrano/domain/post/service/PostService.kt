@@ -71,8 +71,30 @@ class PostService(
         // 작성자 설정 (내부에서 작성자 권한 확인 -> 없다면 예외 발생)
         post.confirmWriter(writer)
 
+        // 태그 저장
+        val savedTags = saveTags(cpd.getTagEntities())
+
+        //포스트 저장 (post id 값 세팅됨)
+        val savedPost = postRepository.save(post)
+
+        // 게시물에 태그 달기
+        val taggedPosts = savedPost.tagging(savedTags)
+        taggedPostRepository.saveAll(taggedPosts)
+
+        //저장 후 id 반환
+        return savedPost.id!!
+    }
+
+
+
+
+
+    /**
+     * 태그 저장
+     */
+    private fun saveTags(tags: List<Tag>): MutableList<Tag> {
+
         // 태그 DTO -> 태그로 변환
-        val tags = cpd.getTagEntities()
         val newTags = mutableListOf<Tag>()
         val existTags = mutableListOf<Tag>()
 
@@ -82,16 +104,7 @@ class PostService(
         // 새로 생긴 태그 저장 (newTags 에 id 세팅됨)
         val savedTags = tagRepository.saveAll(newTags)
         existTags.addAll(savedTags)
-
-        //포스트 저장 (post id 값 세팅됨)
-        val savedPost = postRepository.save(post)
-
-        // 게시물에 태그 달기
-        val taggedPosts = savedPost.tagging(existTags)
-        taggedPostRepository.saveAll(taggedPosts)
-
-        //저장 후 id 반환
-        return savedPost.id!!
+        return existTags
     }
 
 
@@ -141,26 +154,14 @@ class PostService(
         // post 수정 (모두 덮어쓰기)
         post.update(title = upd.title, content = upd.content)
 
-        // 태그 달려있는 게시물 조회
-        val savedTaggedPosts = taggedPostRepository.findByPost(post)
-
         // 태그 달려있는 게시물(tagged post) 삭제, 태그는 삭제하지 않음
-        taggedPostRepository.deleteAllInBatch(savedTaggedPosts)
+        taggedPostRepository.deleteAllByPostInBatch(post)
 
         // 새로운 태그 저장
-        val tags = upd.getTagEntities()
-        val newTags = mutableListOf<Tag>()
-        val existTags = mutableListOf<Tag>()
-
-        // 새로 생긴 태그와 이미 존재하는 태그 추출 (id 가 없는 것)
-        filteringTags(tags, newTags, existTags)
-
-        // 새로 생긴 태그 저장 (newTags 에 id 세팅됨)
-        val savedTags = tagRepository.saveAll(newTags)
-        existTags.addAll(savedTags)
+        val saveTags = saveTags(upd.getTagEntities())
 
         // 게시물에 태그 달기
-        val taggedPosts = post.tagging(existTags)
+        val taggedPosts = post.tagging(saveTags)
         taggedPostRepository.saveAll(taggedPosts)
     }
 
@@ -182,11 +183,8 @@ class PostService(
         // post 삭제 권한 여부 확인 -> 없다면 예외 발생
         post.checkDeleteAuthority(writer)
 
-        // 태그 달려있는 게시물 삭제
-        val savedTaggedPosts = taggedPostRepository.findByPost(post)
-
         // 태그 달려있는 게시물(tagged post) 삭제, 태그는 삭제하지 않음
-        taggedPostRepository.deleteAllInBatch(savedTaggedPosts)
+        taggedPostRepository.deleteAllByPostInBatch(post)
 
         // post 삭제
         postRepository.delete(post)

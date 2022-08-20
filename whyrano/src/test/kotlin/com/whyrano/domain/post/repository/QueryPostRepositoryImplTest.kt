@@ -600,7 +600,7 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(2)
 
-        taggedPostRepository.findByPost(search.content[0]).map { it.tag.name }.contains(newTag2.name)
+        taggedPostRepository.findAllByPost(search.content[0]).map { it.tag.name }.contains(newTag2.name)
     }
 
 
