@@ -13,7 +13,8 @@ data class UpdateMemberRequest(
 
     var profileImagePath: String? = null,
 
-) {
+    ) {
+
     fun toServiceDto(): UpdateMemberDto =
         UpdateMemberDto(password, nickname, profileImagePath)
 }

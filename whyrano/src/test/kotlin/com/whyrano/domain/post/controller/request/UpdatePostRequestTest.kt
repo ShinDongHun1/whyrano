@@ -34,8 +34,6 @@ internal class UpdatePostRequestTest {
 
 
 
-
-
     @Test
     fun `Json에서 UpdatePostRequest 로 변환 테스트`() {
 
@@ -48,11 +46,13 @@ internal class UpdatePostRequestTest {
         savedTags.addAll(newTags)
 
 
-        val upr = updatePostRequest(content = content, title = title,    tagDtos = savedTags)
+        val upr = updatePostRequest(content = content, title = title, tagDtos = savedTags)
 
-        val format = JSON_FORMAT.format(content, title,
-                savedTags[0].id, savedTags[0].name, savedTags[1].id, savedTags[1].name,
-            newTags[0].id, newTags[0].name, newTags[1].id, newTags[1].name,)
+        val format = JSON_FORMAT.format(
+            content, title,
+            savedTags[0].id, savedTags[0].name, savedTags[1].id, savedTags[1].name,
+            newTags[0].id, newTags[0].name, newTags[1].id, newTags[1].name,
+        )
 
 
         //when
@@ -61,8 +61,6 @@ internal class UpdatePostRequestTest {
         //then
         assertThat(readValue).isEqualTo(upr)
     }
-
-
 
 
 

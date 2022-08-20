@@ -34,10 +34,7 @@ class PostService(
 
     private val taggedPostRepository: TaggedPostRepository,
 
-) {
-
-
-
+    ) {
 
 
     /**
@@ -52,15 +49,12 @@ class PostService(
      */
 
 
-
-
-
     /**
      * 질문, 공지 작성
      */
     fun create(
         writerId: Long,
-        cpd: CreatePostDto
+        cpd: CreatePostDto,
     ): Long {
 
         // 작성자 정보 조회
@@ -82,10 +76,8 @@ class PostService(
         taggedPostRepository.saveAll(taggedPosts)
 
         //저장 후 id 반환
-        return savedPost.id!!
+        return savedPost.id !!
     }
-
-
 
 
 
@@ -109,8 +101,6 @@ class PostService(
 
 
 
-
-
     /**
      * 태그 필터링
      */
@@ -129,8 +119,6 @@ class PostService(
 
 
 
-
-
     /**
      * 질문, 공지 수정
      *
@@ -139,7 +127,7 @@ class PostService(
     fun update(
         writerId: Long,
         postId: Long,
-        upd: UpdatePostDto
+        upd: UpdatePostDto,
     ) {
 
         // Post 정보 조회
@@ -167,8 +155,6 @@ class PostService(
 
 
 
-
-
     /**
      * 질문, 공지 삭제
      */
@@ -189,8 +175,6 @@ class PostService(
         // post 삭제
         postRepository.delete(post)
     }
-
-
 
 
 
@@ -218,8 +202,6 @@ class PostService(
             simpleDtos = simplePostDtos                     // 요소에 대한 간단한 정보를 담은 DTO
         )
     }
-
-
 
 
 

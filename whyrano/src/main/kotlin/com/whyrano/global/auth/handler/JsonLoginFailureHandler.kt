@@ -22,12 +22,9 @@ class JsonLoginFailureHandler(
 
     private val objectMapper: ObjectMapper,
 
-) : AuthenticationFailureHandler {
+    ) : AuthenticationFailureHandler {
 
-    private val log = KotlinLogging.logger {  }
-
-
-
+    private val log = KotlinLogging.logger { }
 
 
     override fun onAuthenticationFailure(
@@ -47,7 +44,12 @@ class JsonLoginFailureHandler(
                     status = exceptionType.httpStatus(),
                     contentType = APPLICATION_JSON_VALUE,
                     charset = UTF_8,
-                    content = objectMapper.writeValueAsString(ExceptionResponse(errorCode = exceptionType.errorCode(), message = exceptionType.message()))
+                    content = objectMapper.writeValueAsString(
+                        ExceptionResponse(
+                            errorCode = exceptionType.errorCode(),
+                            message = exceptionType.message()
+                        )
+                    )
                 )
             }
 
@@ -61,14 +63,16 @@ class JsonLoginFailureHandler(
                     status = UNAUTHORIZED,
                     contentType = APPLICATION_JSON_VALUE,
                     charset = UTF_8,
-                    content = objectMapper.writeValueAsString(ExceptionResponse(errorCode = ELSE.errorCode(), message = ELSE.message()))
+                    content = objectMapper.writeValueAsString(
+                        ExceptionResponse(
+                            errorCode = ELSE.errorCode(),
+                            message = ELSE.message()
+                        )
+                    )
                 )
             }
         }
     }
-
-
-
 
 
     private fun setResponse(

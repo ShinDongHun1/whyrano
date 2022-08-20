@@ -28,7 +28,7 @@ object AnswerFixture {
         content: String = CONTENT,
         likeCount: Int = LIKE_COUNT,
         writer: Member? = WRITER,
-        post: Post? = POST
+        post: Post? = POST,
 
         ) =
         Answer(
@@ -42,7 +42,7 @@ object AnswerFixture {
     fun createAnswerDto(
         content: String = CONTENT,
 
-    ) = CreateAnswerDto(content = content)
+        ) = CreateAnswerDto(content = content)
 
     fun updateAnswerDto(
         content: String = CONTENT,

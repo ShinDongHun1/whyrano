@@ -20,6 +20,7 @@ import java.time.LocalDateTime
  * Created by ShinD on 2022/08/09.
  */
 object MemberFixture {
+
     val AUTHORITY = Role.BASIC
     const val ID = 1L
     const val EMAIL = "default@default.com"
@@ -33,13 +34,12 @@ object MemberFixture {
     const val UPDATE_PROFILE_IMAGE_PATH = "https://update_default_profile_image_path.com"
 
 
-    val ALGORITHM =  Algorithm.HMAC512("ZG9uZ2h1bi1zaGFycC1kYnJ1YS13ZWItcHJvamVjdC11c2luZy1qd3Qtc2VjcmV0LURvbmdodW4tc3ByaW5nLWJvb3Qtand0LWJhY2stZW5kLWFuZC1qcy1jb2xsYWJv")
-    val SECRRT_KEY =  "ZG9uZ2h1bi1zaGFycC1kYnJ1YS13ZWItcHJvamVjdC11c2luZy1qd3Qtc2VjcmV0LURvbmdodW4tc3ByaW5nLWJvb3Qtand0LWJhY2stZW5kLWFuZC1qcy1jb2xsYWJv"
+    val ALGORITHM =
+        Algorithm.HMAC512("ZG9uZ2h1bi1zaGFycC1kYnJ1YS13ZWItcHJvamVjdC11c2luZy1qd3Qtc2VjcmV0LURvbmdodW4tc3ByaW5nLWJvb3Qtand0LWJhY2stZW5kLWFuZC1qcy1jb2xsYWJv")
+    val SECRRT_KEY =
+        "ZG9uZ2h1bi1zaGFycC1kYnJ1YS13ZWItcHJvamVjdC11c2luZy1qd3Qtc2VjcmV0LURvbmdodW4tc3ByaW5nLWJvb3Qtand0LWJhY2stZW5kLWFuZC1qcy1jb2xsYWJv"
     val ACCESS_TOKEN_EXPIRATION_PERIOED_DAY = 30L
     val REFRESH_TOKEN_EXPIRATION_PERIOED_DAY = 30L
-
-
-
 
 
     fun createMemberDto(
@@ -69,8 +69,7 @@ object MemberFixture {
         password: String = UPDATE_PASSWORD,
         nickname: String = UPDATE_NICKNAME,
         profileImagePath: String = UPDATE_PROFILE_IMAGE_PATH,
-    )
-        = UpdateMemberDto(password, nickname, profileImagePath)
+    ) = UpdateMemberDto(password, nickname, profileImagePath)
 
 
     fun accessToken(
@@ -84,7 +83,7 @@ object MemberFixture {
     fun refreshToken(
         refreshTokenExpirationPeriodDay: Long = REFRESH_TOKEN_EXPIRATION_PERIOED_DAY,
     ) =
-        RefreshToken.create( refreshTokenExpirationPeriodDay, ALGORITHM)
+        RefreshToken.create(refreshTokenExpirationPeriodDay, ALGORITHM)
 
     fun userDetail(
         username: String = EMAIL,
@@ -98,7 +97,7 @@ object MemberFixture {
         email: String = EMAIL,
         password: String = PASSWORD,
         nickname: String = NICKNAME,
-        profileImagePath: String? = PROFILE_IMAGE_PATH
+        profileImagePath: String? = PROFILE_IMAGE_PATH,
     ) =
         CreateMemberRequest(email, password, nickname, profileImagePath)
 
@@ -114,9 +113,9 @@ object MemberFixture {
         id: Long = ID,
         email: String = EMAIL,
         password: String = "SECRET",
-        role: Role = Role.BASIC
+        role: Role = Role.BASIC,
     ) =
-        AuthMember(id= id, email = email, password = password, role = role)
+        AuthMember(id = id, email = email, password = password, role = role)
 
     fun memberDto(
         id: Long = ID,

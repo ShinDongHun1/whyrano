@@ -13,6 +13,7 @@ data class UpdatePostDto(
 
     val tags: List<TagDto> = emptyList(),
 ) {
+
     fun getTagEntities() =
         tags.map(TagDto::toEntity)
 }

@@ -48,10 +48,7 @@ class JsonLoginSuccessHandler(
         }
         catch (e: Exception){
 
-            log.error { "authentication.principal이 AuthMember 타입이 아닙니다." }
-
-            e.printStackTrace()
-
+            log.error { "authentication.principal이 AuthMember 타입이 아닙니다.\nstackTrace : ${e.stackTraceToString()}" }
             return
         }
 

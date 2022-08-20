@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test
 internal class CreateMemberRequestTest {
 
     companion object {
+
         private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
         private var JSON_STRING_FORMAT = """
             {   
@@ -22,8 +23,10 @@ internal class CreateMemberRequestTest {
                 "nickname":"%s",
                 "profileImagePath":"%s"
             }
-        """.replace("\t","").replace("\n","").trim()
+        """.replace("\t", "").replace("\n", "").trim()
     }
+
+
 
     @Test
     fun `Json - CreateMemberRequestTest 변환 테스트`() {
@@ -56,11 +59,13 @@ internal class CreateMemberRequestTest {
     }
 
 
+
     @Test
     fun `CreateMemberRequestTest - CreateMemberRequestDto 변환 테스트`() {
         //given
         val cmr = createMemberRequest()
-        val createMemberDto = createMemberDto(Role.BASIC, cmr.email!!, cmr.password!!, cmr.nickname!!, cmr.profileImagePath)
+        val createMemberDto =
+            createMemberDto(Role.BASIC, cmr.email !!, cmr.password !!, cmr.nickname !!, cmr.profileImagePath)
 
         //when
         val toServiceDto = cmr.toServiceDto()
@@ -68,12 +73,14 @@ internal class CreateMemberRequestTest {
         //then
         assertThat(toServiceDto).isEqualTo(createMemberDto)
     }
+
+
 
     @Test
     fun `CreateMemberRequestTest - CreateMemberRequestDto 변환 테스트 - profileImagePath가 Null인 경우`() {
         //given
         val cmr = createMemberRequest(profileImagePath = null)
-        val createMemberDto = createMemberDto(Role.BASIC, cmr.email!!, cmr.password!!, cmr.nickname!!, null)
+        val createMemberDto = createMemberDto(Role.BASIC, cmr.email !!, cmr.password !!, cmr.nickname !!, null)
 
         //when
         val toServiceDto = cmr.toServiceDto()
@@ -81,6 +88,8 @@ internal class CreateMemberRequestTest {
         //then
         assertThat(toServiceDto).isEqualTo(createMemberDto)
     }
+
+
 
     @Test
     fun `CreateMemberRequestTest - CreateMemberRequestDto 변환 테스트 - profileImagePath가 ""인 경우`() {
@@ -88,7 +97,7 @@ internal class CreateMemberRequestTest {
         val cmr = createMemberRequest(profileImagePath = "")
 
         //""인 경우 null로 바뀌어야 함
-        val createMemberDto = createMemberDto(Role.BASIC, cmr.email!!, cmr.password!!, cmr.nickname!!, null)
+        val createMemberDto = createMemberDto(Role.BASIC, cmr.email !!, cmr.password !!, cmr.nickname !!, null)
 
         //when
         val toServiceDto = cmr.toServiceDto()

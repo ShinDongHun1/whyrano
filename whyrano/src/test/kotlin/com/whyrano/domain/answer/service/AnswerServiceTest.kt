@@ -50,8 +50,6 @@ internal class AnswerServiceTest {
 
 
 
-
-
     @Test
     fun `답글 작성 성공`() {
 
@@ -61,18 +59,16 @@ internal class AnswerServiceTest {
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
         val cad = AnswerFixture.createAnswerDto()
         every { answerRepository.save(any()) } returns answer
-        every { memberRepository.findByIdOrNull(writer.id!!) } returns writer
-        every { postRepository.findByIdOrNull(post.id!!) } returns post
+        every { memberRepository.findByIdOrNull(writer.id !!) } returns writer
+        every { postRepository.findByIdOrNull(post.id !!) } returns post
 
         //when
-        val answerId = answerService.create(writer.id!!, post.id!!, cad)
+        val answerId = answerService.create(writer.id !!, post.id !!, cad)
 
         //then
         assertThat(answerId).isEqualTo(answer.id)
         verify(exactly = 1) { answerRepository.save(any()) }
     }
-
-
 
 
 
@@ -84,20 +80,18 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
         val cad = AnswerFixture.createAnswerDto()
-        every { memberRepository.findByIdOrNull(writer.id!!) } throws MemberException(MemberExceptionType.NOT_FOUND)
+        every { memberRepository.findByIdOrNull(writer.id !!) } throws MemberException(MemberExceptionType.NOT_FOUND)
         every { answerRepository.save(any()) } returns answer
 
         //when
-        val exceptionType = assertThrows<MemberException> { answerService.create(writer.id!!, post.id!!, cad) }
+        val exceptionType = assertThrows<MemberException> { answerService.create(writer.id !!, post.id !!, cad) }
             .exceptionType()
 
         //then
         assertThat(exceptionType).isEqualTo(MemberExceptionType.NOT_FOUND)
-        verify(exactly = 1) { memberRepository.findByIdOrNull(writer.id!!) }
+        verify(exactly = 1) { memberRepository.findByIdOrNull(writer.id !!) }
         verify(exactly = 0) { answerRepository.save(any()) }
     }
-
-
 
 
 
@@ -108,21 +102,19 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
         val cad = AnswerFixture.createAnswerDto()
-        every { memberRepository.findByIdOrNull(writer.id!!) } returns writer
-        every { postRepository.findByIdOrNull(post.id!!) } throws PostException(PostExceptionType.NOT_FOUND)
+        every { memberRepository.findByIdOrNull(writer.id !!) } returns writer
+        every { postRepository.findByIdOrNull(post.id !!) } throws PostException(PostExceptionType.NOT_FOUND)
         every { answerRepository.save(any()) } returns answer
 
         //when
-        val exceptionType = assertThrows<PostException> { answerService.create(writer.id!!, post.id!!, cad) }
+        val exceptionType = assertThrows<PostException> { answerService.create(writer.id !!, post.id !!, cad) }
             .exceptionType()
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NOT_FOUND)
-        verify(exactly = 1) { memberRepository.findByIdOrNull(writer.id!!) }
+        verify(exactly = 1) { memberRepository.findByIdOrNull(writer.id !!) }
         verify(exactly = 0) { answerRepository.save(any()) }
     }
-
-
 
 
 
@@ -133,22 +125,20 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.NOTICE)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
         val cad = AnswerFixture.createAnswerDto()
-        every { memberRepository.findByIdOrNull(writer.id!!) } returns writer
-        every { postRepository.findByIdOrNull(post.id!!) } returns post
+        every { memberRepository.findByIdOrNull(writer.id !!) } returns writer
+        every { postRepository.findByIdOrNull(post.id !!) } returns post
         every { answerRepository.save(any()) } returns answer
 
         //when
-        val exceptionType = assertThrows<AnswerException> { answerService.create(writer.id!!, post.id!!, cad) }
+        val exceptionType = assertThrows<AnswerException> { answerService.create(writer.id !!, post.id !!, cad) }
             .exceptionType()
 
         //then
         assertThat(exceptionType).isEqualTo(AnswerExceptionType.CANNOT_WRITE_IN_NOTICE)
-        verify(exactly = 1) { memberRepository.findByIdOrNull(writer.id!!) }
-        verify(exactly = 1) { postRepository.findByIdOrNull(post.id!!) }
+        verify(exactly = 1) { memberRepository.findByIdOrNull(writer.id !!) }
+        verify(exactly = 1) { postRepository.findByIdOrNull(post.id !!) }
         verify(exactly = 0) { answerRepository.save(any()) }
     }
-
-
 
 
 
@@ -161,21 +151,19 @@ internal class AnswerServiceTest {
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
         val cad = AnswerFixture.createAnswerDto()
 
-        every { memberRepository.findByIdOrNull(writer.id!!) } returns writer
-        every { postRepository.findByIdOrNull(post.id!!) } returns post
+        every { memberRepository.findByIdOrNull(writer.id !!) } returns writer
+        every { postRepository.findByIdOrNull(post.id !!) } returns post
         every { answerRepository.save(any()) } returns answer
 
         //when
-        val exceptionType = assertThrows<AnswerException> { answerService.create(writer.id!!, post.id!!, cad) }
+        val exceptionType = assertThrows<AnswerException> { answerService.create(writer.id !!, post.id !!, cad) }
             .exceptionType()
 
         //then
         assertThat(exceptionType).isEqualTo(AnswerExceptionType.NO_AUTHORITY_WRITE_ANSWER)
-        verify(exactly = 1) { memberRepository.findByIdOrNull(writer.id!!) }
+        verify(exactly = 1) { memberRepository.findByIdOrNull(writer.id !!) }
         verify(exactly = 0) { answerRepository.save(any()) }
     }
-
-
 
 
 
@@ -190,16 +178,14 @@ internal class AnswerServiceTest {
         val updateContent = "update"
         val uad = AnswerFixture.updateAnswerDto(content = updateContent)
 
-        every { answerRepository.findWithWriterByIdAndWriterId(id = answer.id!!, writer.id!!) } returns answer
+        every { answerRepository.findWithWriterByIdAndWriterId(id = answer.id !!, writer.id !!) } returns answer
 
         //when
-        answerService.update(writerId = writer.id!!, answerId = answer.id!!, uad = uad)
+        answerService.update(writerId = writer.id !!, answerId = answer.id !!, uad = uad)
 
         //then
         assertThat(answer.content).isEqualTo(updateContent)
     }
-
-
 
 
 
@@ -214,15 +200,20 @@ internal class AnswerServiceTest {
         val updateContent = "update"
         val uad = AnswerFixture.updateAnswerDto(content = updateContent)
 
-        every { answerRepository.findWithWriterByIdAndWriterId(id = answer.id!!, writer.id!!) } throws AnswerException(
+        every {
+            answerRepository.findWithWriterByIdAndWriterId(
+                id = answer.id !!,
+                writer.id !!
+            )
+        } throws AnswerException(
             AnswerExceptionType.NOT_FOUND
         )
 
         //when
         val exceptionType = assertThrows<AnswerException> {
             answerService.update(
-                writerId = writer.id!!,
-                answerId = answer.id!!,
+                writerId = writer.id !!,
+                answerId = answer.id !!,
                 uad = uad
             )
         }.exceptionType()
@@ -232,8 +223,6 @@ internal class AnswerServiceTest {
         assertThat(answer.content).isNotEqualTo(updateContent)
         assertThat(exceptionType).isEqualTo(AnswerExceptionType.NOT_FOUND)
     }
-
-
 
 
 
@@ -248,13 +237,13 @@ internal class AnswerServiceTest {
         val updateContent = "update"
         val uad = AnswerFixture.updateAnswerDto(content = updateContent)
 
-        every { answerRepository.findWithWriterByIdAndWriterId(id = answer.id!!, writer.id!!) } returns answer
+        every { answerRepository.findWithWriterByIdAndWriterId(id = answer.id !!, writer.id !!) } returns answer
 
         //when
         val exceptionType = assertThrows<AnswerException> {
             answerService.update(
-                writerId = writer.id!!,
-                answerId = answer.id!!,
+                writerId = writer.id !!,
+                answerId = answer.id !!,
                 uad = uad
             )
         }.exceptionType()
@@ -266,8 +255,6 @@ internal class AnswerServiceTest {
 
 
 
-
-
     @Test
     fun `답글 삭제 성공 - 자기 자신의 답글`() {
 
@@ -276,18 +263,16 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
-        every { memberRepository.findByIdOrNull(id = writer.id!!) } returns writer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id !!) } returns answer
+        every { memberRepository.findByIdOrNull(id = writer.id !!) } returns writer
         every { answerRepository.delete(answer) } just runs
 
         //when
-        answerService.delete(writerId = writer.id!!, answerId = answer.id!!)
+        answerService.delete(writerId = writer.id !!, answerId = answer.id !!)
 
         //then
         verify(exactly = 1) { answerRepository.delete(answer) }
     }
-
-
 
 
 
@@ -300,18 +285,16 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
-        every { memberRepository.findByIdOrNull(id = admin.id!!) } returns admin
+        every { answerRepository.findWithWriterAndPostById(id = answer.id !!) } returns answer
+        every { memberRepository.findByIdOrNull(id = admin.id !!) } returns admin
         every { answerRepository.delete(answer) } just runs
 
         //when
-        answerService.delete(writerId = admin.id!!, answerId = answer.id!!)
+        answerService.delete(writerId = admin.id !!, answerId = answer.id !!)
 
         //then
         verify(exactly = 1) { answerRepository.delete(answer) }
     }
-
-
 
 
 
@@ -324,18 +307,16 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
-        every { memberRepository.findByIdOrNull(id = admin.id!!) } returns admin
+        every { answerRepository.findWithWriterAndPostById(id = answer.id !!) } returns answer
+        every { memberRepository.findByIdOrNull(id = admin.id !!) } returns admin
         every { answerRepository.delete(answer) } just runs
 
         //when
-        answerService.delete(writerId = admin.id!!, answerId = answer.id!!)
+        answerService.delete(writerId = admin.id !!, answerId = answer.id !!)
 
         //then
         verify(exactly = 1) { answerRepository.delete(answer) }
     }
-
-
 
 
 
@@ -347,15 +328,15 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
-        every { memberRepository.findByIdOrNull(id = writer.id!!) } throws MemberException(MemberExceptionType.NOT_FOUND)
+        every { answerRepository.findWithWriterAndPostById(id = answer.id !!) } returns answer
+        every { memberRepository.findByIdOrNull(id = writer.id !!) } throws MemberException(MemberExceptionType.NOT_FOUND)
         every { answerRepository.delete(answer) } just runs
 
         //when
         val exceptionType = assertThrows<MemberException> {
             answerService.delete(
-                writerId = writer.id!!,
-                answerId = answer.id!!,
+                writerId = writer.id !!,
+                answerId = answer.id !!,
             )
         }.exceptionType()
 
@@ -363,8 +344,6 @@ internal class AnswerServiceTest {
         verify(exactly = 0) { answerRepository.delete(answer) }
         assertThat(exceptionType).isEqualTo(MemberExceptionType.NOT_FOUND)
     }
-
-
 
 
 
@@ -376,15 +355,17 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } throws AnswerException(AnswerExceptionType.NOT_FOUND)
-        every { memberRepository.findByIdOrNull(id = writer.id!!) } returns writer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id !!) } throws AnswerException(
+            AnswerExceptionType.NOT_FOUND
+        )
+        every { memberRepository.findByIdOrNull(id = writer.id !!) } returns writer
         every { answerRepository.delete(answer) } just runs
 
         //when
         val exceptionType = assertThrows<AnswerException> {
             answerService.delete(
-                writerId = writer.id!!,
-                answerId = answer.id!!,
+                writerId = writer.id !!,
+                answerId = answer.id !!,
             )
         }.exceptionType()
 
@@ -392,8 +373,6 @@ internal class AnswerServiceTest {
         verify(exactly = 0) { answerRepository.delete(answer) }
         assertThat(exceptionType).isEqualTo(AnswerExceptionType.NOT_FOUND)
     }
-
-
 
 
 
@@ -405,15 +384,15 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
-        every { memberRepository.findByIdOrNull(id = writer.id!!) } returns writer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id !!) } returns answer
+        every { memberRepository.findByIdOrNull(id = writer.id !!) } returns writer
         every { answerRepository.delete(answer) } just runs
 
         //when
         val exceptionType = assertThrows<AnswerException> {
             answerService.delete(
-                writerId = writer.id!!,
-                answerId = answer.id!!,
+                writerId = writer.id !!,
+                answerId = answer.id !!,
             )
         }.exceptionType()
 
@@ -421,8 +400,6 @@ internal class AnswerServiceTest {
         verify(exactly = 0) { answerRepository.delete(answer) }
         assertThat(exceptionType).isEqualTo(AnswerExceptionType.NO_AUTHORITY_DELETE_ANSWER)
     }
-
-
 
 
 
@@ -435,15 +412,15 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
-        every { memberRepository.findByIdOrNull(id = anotherMember.id!!) } returns anotherMember
+        every { answerRepository.findWithWriterAndPostById(id = answer.id !!) } returns answer
+        every { memberRepository.findByIdOrNull(id = anotherMember.id !!) } returns anotherMember
         every { answerRepository.delete(answer) } just runs
 
         //when
         val exceptionType = assertThrows<AnswerException> {
             answerService.delete(
-                writerId = anotherMember.id!!,
-                answerId = answer.id!!,
+                writerId = anotherMember.id !!,
+                answerId = answer.id !!,
             )
         }.exceptionType()
 

@@ -15,10 +15,13 @@ internal class Start1PageableArgumentResolverTest {
 
     private lateinit var start1PageableArgumentResolver: Start1PageableArgumentResolver
 
+
+
     @BeforeEach
-    fun setUp(){
+    fun setUp() {
         start1PageableArgumentResolver = Start1PageableArgumentResolver(SpringDataWebProperties())
     }
+
 
 
     @Test
@@ -30,6 +33,8 @@ internal class Start1PageableArgumentResolverTest {
         assertThat(start1PageableArgumentResolver.supportsParameter(MethodParameter.forParameter(parameter))).isTrue
     }
 
+
+
     @Test
     fun `@Page 붙은 다른 타입의 파라미터를 지원하지 않음`() {
         val method = Start1PageableArgumentResolverTest::class.java.methods.first { it.name.equals("testMethod2") }
@@ -38,6 +43,8 @@ internal class Start1PageableArgumentResolverTest {
 
         assertThat(start1PageableArgumentResolver.supportsParameter(MethodParameter.forParameter(parameter))).isFalse
     }
+
+
 
     @Test
     fun `@Page 안붙은 Pageable 파라미터를 지원하지 않음`() {
@@ -53,8 +60,10 @@ internal class Start1PageableArgumentResolverTest {
 
     fun testMethod(@Page pageable: Pageable) {
     }
+
     fun testMethod2(@Page any: Any) {
     }
+
     fun testMethod3(pageable: Pageable) {
     }
 }

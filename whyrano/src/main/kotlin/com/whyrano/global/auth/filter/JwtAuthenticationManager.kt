@@ -27,11 +27,9 @@ class JwtAuthenticationManager(
 
     private val jwtService: JwtService,
 
-) {
+    ) {
 
-    private val log = KotlinLogging.logger {  }
-
-
+    private val log = KotlinLogging.logger { }
 
 
 
@@ -56,7 +54,8 @@ class JwtAuthenticationManager(
         if (jwtService.isValidMoreThanMinute(accessToken = accessToken, minute = 5)) {
 
             // UserDetails 이 없는 경우 오류
-            val authMember = jwtService.extractAuthMember(accessToken) ?: throw AuthException(AuthExceptionType.BAD_TOKEN)
+            val authMember =
+                jwtService.extractAuthMember(accessToken) ?: throw AuthException(AuthExceptionType.BAD_TOKEN)
 
             // 인증 성공
             successAuthentication(authMember)
@@ -74,8 +73,6 @@ class JwtAuthenticationManager(
 
 
 
-
-
     /**
      * 인증 성공 처리
      */
@@ -90,8 +87,6 @@ class JwtAuthenticationManager(
 
 
 
-
-
     /**
      * 토큰 재발급 과정
      */
@@ -102,10 +97,11 @@ class JwtAuthenticationManager(
     ) {
 
         // refreshToken 도 만료된 경우 예외 발생
-        if (!jwtService.isValid(refreshToken)) throw AuthException(AuthExceptionType.ALL_TOKEN_INVALID)
+        if (! jwtService.isValid(refreshToken)) throw AuthException(AuthExceptionType.ALL_TOKEN_INVALID)
 
         // 두 토큰을 가진 회원이 없는 경우 예외 발생
-        val member = jwtService.findMemberByTokens(accessToken, refreshToken) ?: throw AuthException(AuthExceptionType.UNMATCHED_MEMBER)
+        val member = jwtService.findMemberByTokens(accessToken, refreshToken)
+            ?: throw AuthException(AuthExceptionType.UNMATCHED_MEMBER)
 
         /**
          * AccessToken이 만료되었으나, AccessToken과 RefreshToken이 모두 유효한 경우
@@ -117,7 +113,7 @@ class JwtAuthenticationManager(
         }
 
         // 토큰 재발급 시 들어갈 정보 생성
-        val authMember = AuthMember(id = member.id!!, email = member.email, role = member.role)
+        val authMember = AuthMember(id = member.id !!, email = member.email, role = member.role)
 
         // Http 응답 설정
         setResponse(
@@ -128,8 +124,6 @@ class JwtAuthenticationManager(
             content = tokenToJson(jwtService.createAccessAndRefreshToken(authMember = authMember)) // 토큰 재발급
         )
     }
-
-
 
 
 
@@ -148,8 +142,6 @@ class JwtAuthenticationManager(
         response.characterEncoding = charset.name()
         response.writer.println(content)
     }
-
-
 
 
 

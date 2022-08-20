@@ -23,14 +23,21 @@ class TaggedPostRepositoryTest {
 
     @Autowired
     private lateinit var taggedPostRepository: TaggedPostRepository
+
+
+
     @Autowired
     private lateinit var postRepository: PostRepository
+
+
+
     @Autowired
     private lateinit var tagRepository: TagRepository
+
+
+
     @Autowired
     private lateinit var memberRepository: MemberRepository
-
-
 
 
 
@@ -61,8 +68,6 @@ class TaggedPostRepositoryTest {
 
 
 
-
-
     @Test
     fun `findByPost 동작`() {
 
@@ -87,8 +92,6 @@ class TaggedPostRepositoryTest {
         assertThat(savedTaggedPost.size).isEqualTo(tags.size)
         savedTaggedPost.forEach { assertThat(it.post.id).isEqualTo(post.id) }
     }
-
-
 
 
 
@@ -119,6 +122,8 @@ class TaggedPostRepositoryTest {
         //then
         assertThat(taggedPostRepository.findAllByPost(post).size).isEqualTo(0)
     }
+
+
 
     @Test
     fun `deleteAllByPostInBatch 동작2`() {

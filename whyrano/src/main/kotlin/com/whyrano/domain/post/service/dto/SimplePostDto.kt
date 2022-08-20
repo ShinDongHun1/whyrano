@@ -35,9 +35,10 @@ data class SimplePostDto(
 ) {
 
     companion object {
+
         fun from(post: Post) =
             SimplePostDto(
-                id = post.id!!,
+                id = post.id !!,
                 postType = post.postType,
                 title = post.title,
                 content = post.content,
@@ -47,7 +48,7 @@ data class SimplePostDto(
                 commentCount = post.commentCount.get(),
                 createdDate = post.createdDate,
                 modifiedDate = post.modifiedDate,
-                writerDto = MemberDto.from(post.writer!!)
+                writerDto = MemberDto.from(post.writer !!)
             )
     }
 }

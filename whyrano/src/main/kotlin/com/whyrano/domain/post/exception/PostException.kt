@@ -5,11 +5,11 @@ import com.whyrano.global.exception.BaseException
 /**
  * Created by ShinD on 2022/08/14.
  */
-class PostException (
+class PostException(
 
-    private val exceptionType: PostExceptionType
+    private val exceptionType: PostExceptionType,
 
-) : BaseException(){
+    ) : BaseException() {
 
     override fun exceptionType() = exceptionType
 }

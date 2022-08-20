@@ -31,10 +31,7 @@ class QueryPostRepositoryImpl(
 
     private val query: JPAQueryFactory,
 
-) : QueryPostRepository {
-
-
-
+    ) : QueryPostRepository {
 
 
     /**
@@ -94,9 +91,8 @@ class QueryPostRepositoryImpl(
             )
 
 
-        return PageableExecutionUtils.getPage(contentQuery, pageable) {countQuery.fetchOne()!!}
+        return PageableExecutionUtils.getPage(contentQuery, pageable) { countQuery.fetchOne() !! }
     }
-
 
 
 
@@ -113,20 +109,21 @@ class QueryPostRepositoryImpl(
 
         for (o in pageable.sort) {
 
-            val pathBuilder =  PathBuilder(post.type, post.metadata)
+            val pathBuilder = PathBuilder(post.type, post.metadata)
 
             // 해당 필드가 존재하지 않으면 무시
-            if ( ! checkFieldExist(post.type, o.property)) continue
+            if (! checkFieldExist(post.type, o.property)) continue
 
             beforeSortQuery.orderBy(
-                OrderSpecifier(if (o.isAscending) ASC else DESC, pathBuilder.get(o.property) as Expression<out Comparable<*>>)
+                OrderSpecifier(
+                    if (o.isAscending) ASC else DESC,
+                    pathBuilder.get(o.property) as Expression<out Comparable<*>>
+                )
             )
         }
 
         return beforeSortQuery
     }
-
-
 
 
 
@@ -151,24 +148,19 @@ class QueryPostRepositoryImpl(
 
 
 
-
-
     /**
      * 태그 검색
      * 공백, 대소문자 무시하고 처리
      */
     private fun tagContains(tag: String?): Predicate? {
 
-        if ( !hasText(tag) ) return null
+        if (! hasText(tag)) return null
 
-        val noWhiteStr= tag!!.replace(" ", "").replace("\t", "")
+        val noWhiteStr = tag !!.replace(" ", "").replace("\t", "")
 
 
         return Expressions.stringTemplate("replace({0},' ','')", taggedPost.tag.name).containsIgnoreCase(noWhiteStr)
     }
-
-
-
 
 
 
@@ -178,14 +170,12 @@ class QueryPostRepositoryImpl(
      */
     private fun titleContains(title: String?): BooleanExpression? {
 
-        if ( !hasText(title) ) return null
+        if (! hasText(title)) return null
 
-        val noWhiteStr= title!!.replace(" ", "").replace("\t", "")
+        val noWhiteStr = title !!.replace(" ", "").replace("\t", "")
 
         return Expressions.stringTemplate("replace({0},' ','')", post.title).containsIgnoreCase(noWhiteStr)
     }
-
-
 
 
 
@@ -195,14 +185,12 @@ class QueryPostRepositoryImpl(
      */
     private fun contentContains(content: String?): BooleanExpression? {
 
-        if ( !hasText(content) ) return null
+        if (! hasText(content)) return null
 
-        val noWhiteStr= content!!.replace(" ", "").replace("\t", "")
+        val noWhiteStr = content !!.replace(" ", "").replace("\t", "")
 
         return Expressions.stringTemplate("replace({0},' ','')", post.content).containsIgnoreCase(noWhiteStr)
     }
-
-
 
 
 

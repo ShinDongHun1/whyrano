@@ -56,12 +56,14 @@ internal class MemberControllerTest {
 
 
 
-
     @Autowired
     private lateinit var mockMvc: MockMvc
 
+
+
     @MockkBean
     private lateinit var memberService: MemberService
+
 
 
     @MockkBean
@@ -69,14 +71,10 @@ internal class MemberControllerTest {
 
 
 
-
-
     @BeforeEach
     fun setUp() {
         ReflectionTestUtils.setField(mockMvc, "defaultResponseCharacterEncoding", UTF_8)
     }
-
-
 
 
 
@@ -105,8 +103,6 @@ internal class MemberControllerTest {
 
 
 
-
-
     @Test
     fun `회원가입 성공 - profile 이미지 경로가 ""인 경우`() {
         //given
@@ -132,8 +128,6 @@ internal class MemberControllerTest {
 
 
 
-
-
     @Test
     fun `회원가입 성공 - profile 이미지 경로가 null인 경우`() {
         //given
@@ -156,8 +150,6 @@ internal class MemberControllerTest {
         assertThat(result.response.getHeader("location")).contains("/member/${createMemberId}")
         verify(exactly = 1) { memberService.signUp(any()) }
     }
-
-
 
 
 
@@ -187,8 +179,6 @@ internal class MemberControllerTest {
 
 
 
-
-
     @Test
     fun `회원가입 실패 - password가 없는 경우`() {
         //given
@@ -212,8 +202,6 @@ internal class MemberControllerTest {
         assertThat(result.response.getHeader("location")).isNull()
         verify(exactly = 0) { memberService.signUp(any()) }
     }
-
-
 
 
 
@@ -243,13 +231,11 @@ internal class MemberControllerTest {
 
 
 
-
-
     @Test
     fun `회원가입 실패 - 이메일이 중복인 경우`() {
         //given
         val cmr = createMemberRequest()
-        every { memberService.signUp(cmr.toServiceDto()) } throws  MemberException(MemberExceptionType.ALREADY_EXIST)
+        every { memberService.signUp(cmr.toServiceDto()) } throws MemberException(MemberExceptionType.ALREADY_EXIST)
 
 
         val result = mockMvc.perform(
@@ -267,8 +253,6 @@ internal class MemberControllerTest {
         assertThat(result.response.getHeader("location")).isNull()
         verify(exactly = 1) { memberService.signUp(any()) }
     }
-
-
 
 
 
@@ -302,6 +286,7 @@ internal class MemberControllerTest {
     }
 
 
+
     @Test
     fun `회원수정 실패 - 없는 회원인 경우`() {
         //given
@@ -325,12 +310,12 @@ internal class MemberControllerTest {
             .andReturn()
 
 
-
         val readValue = objectMapper.readValue(result.response.contentAsString, ExceptionResponse::class.java)
         assertThat(readValue.errorCode).isEqualTo(MemberExceptionType.NOT_FOUND.errorCode())
         assertThat(readValue.message).isEqualTo(MemberExceptionType.NOT_FOUND.message())
         verify(exactly = 1) { memberService.update(any(), umr.toServiceDto()) }
     }
+
 
 
     @Test
@@ -369,8 +354,6 @@ internal class MemberControllerTest {
 
 
 
-
-
     @Test
     fun `회원수정 실패 - AccessToken이 만료, RefreshToken도 만료된 경우`() {
         //given
@@ -399,8 +382,6 @@ internal class MemberControllerTest {
 
         verify(exactly = 0) { memberService.update(any(), umr.toServiceDto()) }
     }
-
-
 
 
 
@@ -469,7 +450,6 @@ internal class MemberControllerTest {
 
 
 
-
     @Test
     fun `회원탈퇴 실패 - 비밀번호가 없는 경우`() {
         //given
@@ -498,8 +478,6 @@ internal class MemberControllerTest {
         assertThat(readValue.message).isEqualTo(BIND_EXCEPTION_MESSAGE)
         verify(exactly = 0) { memberService.delete(memberId, password) }
     }
-
-
 
 
 

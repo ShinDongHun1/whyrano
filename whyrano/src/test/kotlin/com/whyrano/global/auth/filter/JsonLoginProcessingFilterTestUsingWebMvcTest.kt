@@ -43,28 +43,34 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * 확실히 얘가 빠르다
  */
 @WebMvcTest(
-    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [PostController::class, MemberController::class])]
+    excludeFilters = [ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = [PostController::class, MemberController::class]
+    )]
 )
 @Import(SecurityConfig::class)
 internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
-    
+
     companion object {
+
         private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
         private var passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
     }
 
+
+
     @Autowired
     private lateinit var mockMvc: MockMvc
+
+
 
     @MockkBean
     private lateinit var memberService: MemberService
 
+
+
     @MockkBean
     private lateinit var jwtService: JwtService
-
-
-
-
 
 
 
@@ -86,12 +92,13 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
     }
 
 
+
     @Test
     @DisplayName("로그인시 json이 아닌 경우 - 415")
     fun test_login_noJson_fail_unauthorized() {
         mockMvc
             .perform(
-                    post(PermitAllURI.URI.LOGIN_URI.uri)
+                post(PermitAllURI.URI.LOGIN_URI.uri)
                     .contentType(APPLICATION_FORM_URLENCODED)
             )
             .andExpect(status().isUnsupportedMediaType)
@@ -105,10 +112,12 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
         mockMvc
             .perform(
                 post(PermitAllURI.URI.LOGIN_URI.uri)
-                .contentType(APPLICATION_JSON)
+                    .contentType(APPLICATION_JSON)
             )
             .andExpect(status().isUnauthorized)
     }
+
+
 
     @Test
     @DisplayName("로그인 시 아이디가 일치하지 않는 경우- 401")
@@ -121,20 +130,21 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
         mockMvc
             .perform(
                 post(PermitAllURI.URI.LOGIN_URI.uri)
-                .contentType(APPLICATION_JSON)
-                .content(
-                   objectMapper.writeValueAsString(hashMap)
-                )
+                    .contentType(APPLICATION_JSON)
+                    .content(
+                        objectMapper.writeValueAsString(hashMap)
+                    )
             )
             .andExpect(status().isUnauthorized)
     }
+
 
 
     @Test
     @DisplayName("로그인 시 비밀번호가 일치하지 않는 경우- 401")
     fun test_login_fail_notMatchPassword_unauthorized() {
 
-        val member =  MemberFixture.createMemberDto()
+        val member = MemberFixture.createMemberDto()
         every { memberService.loadUserByUsername(any()) }.throws(UsernameNotFoundException("D"))
 
         val noMatchPassword = member.password + "12345"
@@ -145,13 +155,14 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
         mockMvc
             .perform(
                 post(PermitAllURI.URI.LOGIN_URI.uri)
-                .contentType(APPLICATION_JSON)
-                .content(
-                   objectMapper.writeValueAsString(hashMap)
-                )
+                    .contentType(APPLICATION_JSON)
+                    .content(
+                        objectMapper.writeValueAsString(hashMap)
+                    )
             )
             .andExpect(status().isUnauthorized)
     }
+
 
 
     @Test
@@ -163,7 +174,10 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
         every { memberService.loadUserByUsername(member.email) } returns authMember(password = member.password)
 
 
-        every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto(accessToken().accessToken, refreshToken().refreshToken)
+        every { jwtService.createAccessAndRefreshToken(any()) } returns TokenDto(
+            accessToken().accessToken,
+            refreshToken().refreshToken
+        )
 
 
         val hashMap = usernamePasswordHashMap(memberDto.email, memberDto.password)
@@ -172,11 +186,11 @@ internal class JsonLoginProcessingFilterTestUsingWebMvcTest {
         val result = mockMvc
             .perform(
                 post(PermitAllURI.URI.LOGIN_URI.uri)
-                .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(hashMap))
+                    .contentType(APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(hashMap))
             ).andReturn()
 
-        assertThat( HttpStatus.valueOf(result.response.status).is4xxClientError ).isFalse
+        assertThat(HttpStatus.valueOf(result.response.status).is4xxClientError).isFalse
     }
 
 

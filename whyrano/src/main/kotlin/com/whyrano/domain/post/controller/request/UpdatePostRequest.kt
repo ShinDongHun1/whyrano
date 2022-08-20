@@ -15,7 +15,7 @@ data class UpdatePostRequest(
 
     val tags: List<TagDto> = emptyList(),
 
-) {
+    ) {
 
     fun toServiceDto(): UpdatePostDto =
         UpdatePostDto(content = content, title = title, tags = tags)

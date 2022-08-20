@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 /**
  * Created by ShinD on 2022/08/19.
  */
-interface TagRepository : JpaRepository<Tag, Long>{
+interface TagRepository : JpaRepository<Tag, Long> {
 }

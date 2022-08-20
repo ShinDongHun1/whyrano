@@ -7,6 +7,6 @@ import javax.validation.constraints.NotBlank
  */
 data class PasswordDto(
 
-    @field:NotBlank val password: String
+    @field:NotBlank val password: String,
 
-)
+    )

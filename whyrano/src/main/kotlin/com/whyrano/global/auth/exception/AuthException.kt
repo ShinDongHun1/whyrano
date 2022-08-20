@@ -10,7 +10,7 @@ class AuthException(
 
     private val authExceptionType: AuthExceptionType,
 
-) : AuthenticationException(authExceptionType.message()) {
+    ) : AuthenticationException(authExceptionType.message()) {
 
     fun exceptionType(): BaseExceptionType = authExceptionType
 }

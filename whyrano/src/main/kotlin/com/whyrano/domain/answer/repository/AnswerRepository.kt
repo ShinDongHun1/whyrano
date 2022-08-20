@@ -7,11 +7,12 @@ import org.springframework.data.jpa.repository.JpaRepository
 /**
  * Created by ShinD on 2022/08/20.
  */
-interface AnswerRepository : JpaRepository<Answer, Long>{
+interface AnswerRepository : JpaRepository<Answer, Long> {
 
     // 답변 수정 시 사용
     @EntityGraph(attributePaths = ["writer"])
     fun findWithWriterByIdAndWriterId(id: Long, writerId: Long): Answer?
+
 
 
     /**

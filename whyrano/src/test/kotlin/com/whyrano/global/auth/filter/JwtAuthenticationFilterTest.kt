@@ -38,7 +38,10 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * Created by ShinD on 2022/08/11.
  */
 @WebMvcTest(
-    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [PostController::class, MemberController::class])]
+    excludeFilters = [ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = [PostController::class, MemberController::class]
+    )]
 )
 @Import(SecurityConfig::class)
 @MockkBean(MemberService::class, MemberRepository::class)
@@ -46,17 +49,21 @@ internal class JwtAuthenticationFilterTest {
 
 
     companion object {
+
         private val objectMapper = ObjectMapper()
-        private val userDetails = User.builder().username("USERNAME").password("PASSWORD").roles(Role.BASIC.name).build()
+        private val userDetails =
+            User.builder().username("USERNAME").password("PASSWORD").roles(Role.BASIC.name).build()
     }
+
 
 
     @Autowired
     private lateinit var mockMvc: MockMvc
 
+
+
     @MockkBean
     private lateinit var jwtService: JwtService
-
 
 
 
@@ -67,6 +74,8 @@ internal class JwtAuthenticationFilterTest {
             .perform(get("/h2-console"))
             .andExpect(status().isNotFound)
     }
+
+
 
     @Test
     @DisplayName("토큰이 존재하지 않는 경우 401")
@@ -80,6 +89,7 @@ internal class JwtAuthenticationFilterTest {
     }
 
 
+
     @Test
     @DisplayName("Access 토큰 하나만 존재하는 경우 401")
     fun test_only_access_token_403() {
@@ -89,15 +99,17 @@ internal class JwtAuthenticationFilterTest {
 
 
         mockMvc
-            .perform(get("/test")
-                .header(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + tokenDto.accessToken)
+            .perform(
+                get("/test")
+                    .header(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + tokenDto.accessToken)
             )
             .andExpect(status().isUnauthorized)
     }
 
 
-    private fun createTokenDto(accessToken: AccessToken? = null, refreshToken: RefreshToken? = null): TokenDto
-        = TokenDto(accessToken = accessToken?.accessToken, refreshToken =refreshToken?.refreshToken)
+    private fun createTokenDto(accessToken: AccessToken? = null, refreshToken: RefreshToken? = null): TokenDto =
+        TokenDto(accessToken = accessToken?.accessToken, refreshToken = refreshToken?.refreshToken)
+
 
 
     @Test
@@ -109,12 +121,12 @@ internal class JwtAuthenticationFilterTest {
 
 
         mockMvc
-            .perform(get("/test")
-                .header(REFRESH_TOKEN_HEADER_NAME,   tokenDto.refreshToken)
+            .perform(
+                get("/test")
+                    .header(REFRESH_TOKEN_HEADER_NAME, tokenDto.refreshToken)
             )
             .andExpect(status().isUnauthorized)
     }
-
 
 
 
@@ -127,19 +139,21 @@ internal class JwtAuthenticationFilterTest {
 
 
         mockMvc
-            .perform(get("/test")
-                .header(ACCESS_TOKEN_HEADER_NAME,  tokenDto.accessToken)
-                .header(REFRESH_TOKEN_HEADER_NAME,   tokenDto.refreshToken)
+            .perform(
+                get("/test")
+                    .header(ACCESS_TOKEN_HEADER_NAME, tokenDto.accessToken)
+                    .header(REFRESH_TOKEN_HEADER_NAME, tokenDto.refreshToken)
             )
             .andExpect(status().isUnauthorized)
     }
+
 
 
     @Test
     @DisplayName("Access 토큰이 만료된 경우 - (AccessToken,RefreshToken 모두 정상 ) - 200에 토큰 재발급")
     fun `Access 토큰이 만료된 경우 - (AccessToken,RefreshToken 모두 정상 ) - 200에 토큰 재발급`() {
         //given
-        val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = -1),  refreshToken())
+        val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = - 1), refreshToken())
         every { jwtService.extractToken(any()) } returns tokenDto
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
         every { jwtService.isValid(any()) } returns true //RefreshToken은 만료되지 않음
@@ -163,12 +177,14 @@ internal class JwtAuthenticationFilterTest {
 
 
 
-
     @Test
     @DisplayName("Access 토큰이 만료된 경우, Refresh 토큰도 만료되었을 때 - 401")
     fun `Access 토큰이 만료된 경우, Refresh 토큰도 만료되었을 때 - 401`() {
         //given
-        val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = -1),  refreshToken(refreshTokenExpirationPeriodDay = -1))
+        val tokenDto = createTokenDto(
+            accessToken(accessTokenExpirationPeriodDay = - 1),
+            refreshToken(refreshTokenExpirationPeriodDay = - 1)
+        )
         every { jwtService.extractToken(any()) } returns tokenDto
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
         every { jwtService.isValid(any()) } returns false // refresh Token의 만료
@@ -184,15 +200,11 @@ internal class JwtAuthenticationFilterTest {
 
 
 
-
-
-
-
     @Test
     @DisplayName("Access 토큰이 만료된 경우 - (AccessToken 정상, RefreshToken이 회원의 것과 다를 때 ) - 401")
     fun `Access 토큰이 만료된 경우 - (AccessToken 정상, RefreshToken이 회원의 것과 다를 때 ) - 401`() {
         //given
-        val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = -1),  refreshToken())
+        val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = - 1), refreshToken())
         every { jwtService.extractToken(any()) } returns tokenDto
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
         every { jwtService.isValid(any()) } returns true
@@ -208,14 +220,15 @@ internal class JwtAuthenticationFilterTest {
     }
 
 
+
     @Test
     @DisplayName("Access 토큰이 만료된 경우 - (AccessToken, RefreshToken 모두 회원의 것과 다를 때 ) - 401")
     fun `Access 토큰이 만료된 경우 - (AccessToken, RefreshToken 모두 회원의 것과 다를 때 ) - 401`() {
         //given
-        val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = -1),  refreshToken())
+        val tokenDto = createTokenDto(accessToken(accessTokenExpirationPeriodDay = - 1), refreshToken())
         every { jwtService.extractToken(any()) } returns tokenDto
-        every { jwtService.isValidMoreThanMinute(any(), any()) }  returns false
-        every { jwtService.isValid(any()) }  returns false
+        every { jwtService.isValidMoreThanMinute(any(), any()) } returns false
+        every { jwtService.isValid(any()) } returns false
 
         mockMvc
             .perform(
@@ -228,12 +241,11 @@ internal class JwtAuthenticationFilterTest {
 
 
 
-
     @Test
     @DisplayName("Access 토큰이 만료되지 않은 경우 - Userdetail이 정상인 경우 -> 인증 성공 (404)")
     fun `Access 토큰이 만료되지 않은 경우 - Userdetail이 정상인 경우 - 인증 성공 (404)`() {
         //given
-        val tokenDto = createTokenDto(accessToken(),  refreshToken())
+        val tokenDto = createTokenDto(accessToken(), refreshToken())
         every { jwtService.extractToken(any()) } returns tokenDto
         every { jwtService.isValidMoreThanMinute(any(), any()) } returns true
         every { jwtService.extractAuthMember(any()) } returns authMember()

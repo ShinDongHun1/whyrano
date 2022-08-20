@@ -32,20 +32,21 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
  * Created by ShinD on 2022/08/10.
  */
 @ExtendWith(MockKExtension::class)
-internal class JwtServiceImplTest{
-
-
+internal class JwtServiceImplTest {
 
 
     @MockK
     private lateinit var memberRepository: MemberRepository
+
     @MockK
     private lateinit var jwtProperties: JwtProperties
 
-    private lateinit var algorithm: Algorithm
-
     @MockkBean
     private lateinit var jwtService: JwtService
+
+    private lateinit var algorithm: Algorithm
+
+
 
 
     @BeforeEach
@@ -79,7 +80,8 @@ internal class JwtServiceImplTest{
                 Date(
                     MILLISECONDS.convert(jwtProperties.accessTokenExpirationPeriodDay, DAYS)
                         .plus(currentTimeMillis())
-                        .minus(MILLISECONDS.convert(1, DAYS )))
+                        .minus(MILLISECONDS.convert(1, DAYS))
+                )
             )
 
         // RefreshToken 만료일 검증
@@ -88,7 +90,8 @@ internal class JwtServiceImplTest{
                 Date(
                     MILLISECONDS.convert(jwtProperties.refreshTokenExpirationPeriodDay, DAYS)
                         .plus(currentTimeMillis())
-                        .minus(MILLISECONDS.convert(1, DAYS )))
+                        .minus(MILLISECONDS.convert(1, DAYS))
+                )
             )
     }
 
@@ -109,8 +112,8 @@ internal class JwtServiceImplTest{
 
 
         //when, then
-        assertThat(jwtService.extractAuthMember(accessToken)!!.username).isEqualTo(member.username)
-        assertThat(jwtService.extractAuthMember(accessToken)!!.authorities).isEqualTo(member.authorities)
+        assertThat(jwtService.extractAuthMember(accessToken) !!.username).isEqualTo(member.username)
+        assertThat(jwtService.extractAuthMember(accessToken) !!.authorities).isEqualTo(member.authorities)
     }
 
 
@@ -119,15 +122,14 @@ internal class JwtServiceImplTest{
     @DisplayName("Token 유효성 검사 성공")
     fun test_isValid_success() {
         //given
-        val invalidToken = RefreshToken.create( -1, algorithm)
-        val validToken = RefreshToken.create( 1, algorithm)
+        val invalidToken = RefreshToken.create(- 1, algorithm)
+        val validToken = RefreshToken.create(1, algorithm)
 
 
         //when, then
         assertThat(jwtService.isValid(invalidToken)).isFalse
         assertThat(jwtService.isValid(validToken)).isTrue
     }
-
 
 
 
@@ -147,9 +149,11 @@ internal class JwtServiceImplTest{
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()
-        mockHttpServletRequest.addHeader(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken!!)
-        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken.refreshToken!!)
-
+        mockHttpServletRequest.addHeader(
+            ACCESS_TOKEN_HEADER_NAME,
+            ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken !!
+        )
+        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken.refreshToken !!)
 
 
         //when
@@ -157,7 +161,7 @@ internal class JwtServiceImplTest{
 
 
         //then
-        extractToken!!
+        extractToken !!
         assertThat(extractToken.accessToken).isNotNull
         assertThat(extractToken.refreshToken).isNotNull
     }
@@ -171,8 +175,7 @@ internal class JwtServiceImplTest{
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()
-        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken.refreshToken!!)
-
+        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken.refreshToken !!)
 
 
         //when
@@ -182,6 +185,8 @@ internal class JwtServiceImplTest{
         //then
         assertThat(extractToken).isNull()
     }
+
+
 
     @Test
     @DisplayName("request로부터 토큰 추출 실패 - Refresh Token이 없는 경우")
@@ -198,8 +203,10 @@ internal class JwtServiceImplTest{
 
 
         val mockHttpServletRequest = MockHttpServletRequest()
-        mockHttpServletRequest.addHeader(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken!!)
-
+        mockHttpServletRequest.addHeader(
+            ACCESS_TOKEN_HEADER_NAME,
+            ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken !!
+        )
 
 
         //when
@@ -209,6 +216,7 @@ internal class JwtServiceImplTest{
         //then
         assertThat(extractToken).isNull()
     }
+
 
 
     @Test
@@ -225,6 +233,8 @@ internal class JwtServiceImplTest{
         //then
         assertThat(extractToken).isNull()
     }
+
+
 
     @Test
     @DisplayName("request로부터 토큰 추출 실패 - AccessToken 앞에 Bearer이 없는 경우")
@@ -243,9 +253,8 @@ internal class JwtServiceImplTest{
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()
-        mockHttpServletRequest.addHeader(ACCESS_TOKEN_HEADER_NAME,   accessToken.accessToken!!)
-        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken.refreshToken!!)
-
+        mockHttpServletRequest.addHeader(ACCESS_TOKEN_HEADER_NAME, accessToken.accessToken !!)
+        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken.refreshToken !!)
 
 
         //when
@@ -255,6 +264,9 @@ internal class JwtServiceImplTest{
         //then
         assertThat(extractToken).isNull()
     }
+
+
+
     @Test
     @DisplayName("request로부터 토큰 추출 실패 - AccessToken의 HeaderName이 Authorization이 아닌 경우")
     fun `request로부터 토큰 추출 실패 - AccessToken의 HeaderName이 Authorization이 아닌 경우`() {
@@ -272,9 +284,11 @@ internal class JwtServiceImplTest{
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()
-        mockHttpServletRequest.addHeader(ACCESS_TOKEN_HEADER_NAME+"NO", ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken!!)
-        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken.refreshToken!!)
-
+        mockHttpServletRequest.addHeader(
+            ACCESS_TOKEN_HEADER_NAME + "NO",
+            ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken !!
+        )
+        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME, refreshToken.refreshToken !!)
 
 
         //when
@@ -284,6 +298,8 @@ internal class JwtServiceImplTest{
         //then
         assertThat(extractToken).isNull()
     }
+
+
 
     @Test
     @DisplayName("request로부터 토큰 추출 실패 - RefreshToken HeaderName이 RefreshToken이 아닌 경우")
@@ -302,9 +318,11 @@ internal class JwtServiceImplTest{
         val refreshToken = RefreshToken.create(jwtProperties.refreshTokenExpirationPeriodDay, algorithm)
 
         val mockHttpServletRequest = MockHttpServletRequest()
-        mockHttpServletRequest.addHeader(ACCESS_TOKEN_HEADER_NAME, ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken!!)
-        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME+"NO", refreshToken.refreshToken!!)
-
+        mockHttpServletRequest.addHeader(
+            ACCESS_TOKEN_HEADER_NAME,
+            ACCESS_TOKEN_HEADER_PREFIX + accessToken.accessToken !!
+        )
+        mockHttpServletRequest.addHeader(REFRESH_TOKEN_HEADER_NAME + "NO", refreshToken.refreshToken !!)
 
 
         //when

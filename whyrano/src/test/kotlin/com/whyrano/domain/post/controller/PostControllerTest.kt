@@ -69,12 +69,8 @@ internal class PostControllerTest {
 
 
 
-
-
     @MockkBean
     private lateinit var postService: PostService
-
-
 
 
 
@@ -83,19 +79,13 @@ internal class PostControllerTest {
 
 
 
-
-
     @Autowired
     private lateinit var wac: WebApplicationContext
 
 
 
-
-
     @Autowired
     private lateinit var springDataWebProperties: SpringDataWebProperties
-
-
 
 
 
@@ -112,8 +102,6 @@ internal class PostControllerTest {
         context.authentication = UsernamePasswordAuthenticationToken(authMember, null, authMember.authorities)
         SecurityContextHolder.setContext(context)
     }
-
-
 
 
 
@@ -139,8 +127,6 @@ internal class PostControllerTest {
         assertThat(result.response.getHeader("location")).contains("/post/${createPostId}")
         verify(exactly = 1) { postService.create(any(), cpr.toServiceDto()) }
     }
-
-
 
 
 
@@ -176,8 +162,6 @@ internal class PostControllerTest {
 
 
 
-
-
     //== 필드 체크 ==//
     @Test
     fun `포스트 생성 실패 - 게시물 타입이 없는 경우`() {
@@ -206,8 +190,6 @@ internal class PostControllerTest {
         assertThat(exceptionResponse.errorCode).isEqualTo(ExceptionController.BIND_EXCEPTION_ERROR_CODE)
         verify(exactly = 0) { postService.create(any(), any()) }
     }
-
-
 
 
 
@@ -241,8 +223,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 생성 실패 - 잘못된 타입이 존재하는 경우(title 대신 titleddd) - 예외 발생`() {
 
@@ -273,8 +253,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 생성 실패 - 제목이 없는 경우`() {
 
@@ -299,8 +277,6 @@ internal class PostControllerTest {
         assertThat(exceptionResponse.errorCode).isEqualTo(ExceptionController.BIND_EXCEPTION_ERROR_CODE)
         verify(exactly = 0) { postService.create(any(), any()) }
     }
-
-
 
 
 
@@ -331,8 +307,6 @@ internal class PostControllerTest {
 
 
 
-
-
     //== 서비스단의 예외 발생 ==//
     @Test
     fun `포스트 생성 실패 - 회원이 없는 경우`() {
@@ -358,8 +332,6 @@ internal class PostControllerTest {
         assertThat(exceptionResponse.message).isEqualTo(MemberExceptionType.NOT_FOUND.message())
         verify(exactly = 1) { postService.create(any(), any()) }
     }
-
-
 
 
 
@@ -395,8 +367,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 생성 실패 - 공지를 올릴 권한이 없는 경우`() {
 
@@ -429,8 +399,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 수정 성공`() {
 
@@ -452,8 +420,6 @@ internal class PostControllerTest {
         //then
         verify(exactly = 1) { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) }
     }
-
-
 
 
 
@@ -491,8 +457,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 수정 실패 - 권한이 없는 경우`() {
 
@@ -520,8 +484,6 @@ internal class PostControllerTest {
         assertThat(exceptionResponse.message).isEqualTo(PostExceptionType.NO_AUTHORITY_UPDATE_POST.message())
         verify(exactly = 1) { postService.update(writerId = any(), postId = postId, upd = upr.toServiceDto()) }
     }
-
-
 
 
 
@@ -555,8 +517,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 삭제 성공`() {
 
@@ -575,8 +535,6 @@ internal class PostControllerTest {
         //then
         verify(exactly = 1) { postService.delete(writerId = any(), postId = postId) }
     }
-
-
 
 
 
@@ -610,8 +568,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 삭제 실패 - 권한이 없는 경우`() {
 
@@ -639,8 +595,6 @@ internal class PostControllerTest {
         assertThat(exceptionResponse.message).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST.message())
         verify(exactly = 1) { postService.delete(writerId = any(), postId = postId) }
     }
-
-
 
 
 
@@ -674,8 +628,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 검색 성공`() {
 
@@ -689,7 +641,7 @@ internal class PostControllerTest {
         val pageable = PageRequest.of(pageParam - 1, pageSizeParam, Sort.by(Sort.Order(ASC, "createdDate")))
 
         val list = mutableListOf<SimplePostDto>()
-        for (i in 0..pageSizeParam) {
+        for (i in 0 .. pageSizeParam) {
             list.add(PostFixture.simplePostDto())
         }
 
@@ -740,8 +692,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 검색 성공 - 페이지가 없는 경우 1페이지 조회`() {
 
@@ -754,7 +704,7 @@ internal class PostControllerTest {
         val pageable = PageRequest.of(0, pageSizeParam, Sort.by(Sort.Order(ASC, "createdDate")))
 
         val list = mutableListOf<SimplePostDto>()
-        for (i in 0..pageSizeParam) {
+        for (i in 0 .. pageSizeParam) {
             list.add(PostFixture.simplePostDto())
         }
 
@@ -804,8 +754,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 검색 성공 - 페이지가 올바르지 않은 경우(숫자가 아닌 경우 1페이지 조회)`() {
 
@@ -818,7 +766,7 @@ internal class PostControllerTest {
         val pageable = PageRequest.of(0, pageSizeParam, Sort.by(Sort.Order(ASC, "createdDate")))
 
         val list = mutableListOf<SimplePostDto>()
-        for (i in 0..pageSizeParam) {
+        for (i in 0 .. pageSizeParam) {
             list.add(PostFixture.simplePostDto())
         }
 
@@ -869,8 +817,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 검색 성공 - 페이지가 올바르지 않은 경우(음수인 경우 1페이지 조회)`() {
 
@@ -883,7 +829,7 @@ internal class PostControllerTest {
         val pageable = PageRequest.of(0, pageSizeParam, Sort.by(Sort.Order(ASC, "createdDate")))
 
         val list = mutableListOf<SimplePostDto>()
-        for (i in 0..pageSizeParam) {
+        for (i in 0 .. pageSizeParam) {
             list.add(PostFixture.simplePostDto())
         }
 
@@ -934,8 +880,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 검색 성공 - 페이지 크기가 없는 경우 기본페이지 크기 적용`() {
 
@@ -949,7 +893,7 @@ internal class PostControllerTest {
         val pageable = PageRequest.of(pageParam - 1, defaultPageSize, Sort.by(Sort.Order(ASC, "createdDate")))
 
         val list = mutableListOf<SimplePostDto>()
-        for (i in 0..defaultPageSize) {
+        for (i in 0 .. defaultPageSize) {
             list.add(PostFixture.simplePostDto())
         }
 
@@ -999,8 +943,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 검색 성공 - 페이지 크기가 올바르지 않은 경우(문자) 기본페이지 크기 적용`() {
 
@@ -1014,7 +956,7 @@ internal class PostControllerTest {
         val pageable = PageRequest.of(pageParam - 1, defaultPageSize, Sort.by(Sort.Order(ASC, "createdDate")))
 
         val list = mutableListOf<SimplePostDto>()
-        for (i in 0..defaultPageSize) {
+        for (i in 0 .. defaultPageSize) {
             list.add(PostFixture.simplePostDto())
         }
 
@@ -1065,8 +1007,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     fun `포스트 검색 성공 - 페이지 크기가 0 이하인 경우 기본페이지 크기 적용`() {
 
@@ -1080,7 +1020,7 @@ internal class PostControllerTest {
         val pageable = PageRequest.of(pageParam - 1, defaultPageSize, Sort.by(Sort.Order(ASC, "createdDate")))
 
         val list = mutableListOf<SimplePostDto>()
-        for (i in 0..defaultPageSize) {
+        for (i in 0 .. defaultPageSize) {
             list.add(PostFixture.simplePostDto())
         }
 
@@ -1131,8 +1071,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     @DisplayName("포스트 검색 성공 - 정렬 조건이 없는 경우 기본값 (createdDate, DESC) 적용")
     fun `포스트 검색 성공 - 정렬 조건이 없는 경우 기본값 (createdDate, DESC) 적용`() {
@@ -1143,7 +1081,7 @@ internal class PostControllerTest {
         val pageable = PageRequest.of(pageParam - 1, defaultPageSize, Sort.by(Sort.Order(DESC, "createdDate")))
 
         val list = mutableListOf<SimplePostDto>()
-        for (i in 0..defaultPageSize) {
+        for (i in 0 .. defaultPageSize) {
             list.add(PostFixture.simplePostDto())
         }
 
@@ -1152,12 +1090,12 @@ internal class PostControllerTest {
         val totalElementCount = 300L
         val currentElementCount = 20
         every { postService.search(any(), pageable = pageable) } returns SearchResultDto<SimplePostDto>(
-                                                                                        totalPage = totalPage,
-                                                                                        totalElementCount = totalElementCount,
-                                                                                        currentPage = pageParam - 1, //페이지는 1부터 시작인데, Service에 넘길때는 1을 빼서 넘기므로, 반환되는 값도 1을 빼야이어야 함
-                                                                                        currentElementCount = currentElementCount,
-                                                                                        simpleDtos = list
-                                                                                    )
+            totalPage = totalPage,
+            totalElementCount = totalElementCount,
+            currentPage = pageParam - 1, //페이지는 1부터 시작인데, Service에 넘길때는 1을 빼서 넘기므로, 반환되는 값도 1을 빼야이어야 함
+            currentElementCount = currentElementCount,
+            simpleDtos = list
+        )
 
 
         //when
@@ -1186,8 +1124,6 @@ internal class PostControllerTest {
 
 
 
-
-
     @Test
     @DisplayName("포스트 검색 성공 - 검색하는 Post Type이 올바르지 않은 값이 들어오는 경우 - Binding 예외 발생")
     fun `포스트 검색 성공 - 검색하는 Post Type이 올바르지 않은 값이 들어오는 경우 - Binding 예외 발생`() {
@@ -1212,8 +1148,6 @@ internal class PostControllerTest {
 
         verify(exactly = 0) { postService.search(any(), any()) }
     }
-
-
 
 
 

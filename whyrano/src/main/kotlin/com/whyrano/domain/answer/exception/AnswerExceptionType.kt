@@ -12,9 +12,9 @@ enum class AnswerExceptionType(
 
     private val httpStatus: HttpStatus,
 
-    private val message: String
+    private val message: String,
 
-) : BaseExceptionType {
+    ) : BaseExceptionType {
 
     CANNOT_WRITE_IN_NOTICE(1300, HttpStatus.BAD_REQUEST, "공지에는 답변을 작성하실 수 없습니다.\n 댓글만 작성 가능합니다."),
     NO_AUTHORITY_WRITE_ANSWER(1301, HttpStatus.FORBIDDEN, "답변을 작성할 권한이 없습니다. (블랙리스트)"),

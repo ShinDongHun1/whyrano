@@ -12,8 +12,8 @@ import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
 import java.util.concurrent.atomic.AtomicInteger
 import javax.persistence.*
-import javax.persistence.FetchType.*
-import javax.persistence.GenerationType.*
+import javax.persistence.FetchType.LAZY
+import javax.persistence.GenerationType.IDENTITY
 
 @Entity
 @Table(name = "ANSWER")
@@ -57,8 +57,6 @@ class Answer(
 
 
 
-
-
     /**
      * 수정
      */
@@ -73,16 +71,12 @@ class Answer(
 
 
 
-
-
     /**
      * 수정 가능성 확인
      * 작성자가 블랙리스트만 아니면 됨
      */
     private fun isUpdatable() =
-        writer!!.role != Role.BLACK
-
-
+        writer !!.role != Role.BLACK
 
 
 
@@ -95,7 +89,7 @@ class Answer(
      */
     fun canDeletedBy(member: Member): Boolean {
 
-        return when(member.role) {
+        return when (member.role) {
             // 어드민인 경우 가능
             Role.ADMIN -> true
 
@@ -103,7 +97,7 @@ class Answer(
             Role.BLACK -> false
 
             // 이외 경우 자기 자신이 쓴 답변인 경우 가능
-            else -> writer!!.id!! == member.id
+            else -> writer !!.id !! == member.id
         }
     }
 }

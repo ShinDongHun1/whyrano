@@ -17,6 +17,7 @@ import org.junit.jupiter.api.assertThrows
 internal class CreatePostRequestTest {
 
     companion object {
+
         private val objectMapper = ObjectMapper().registerModule(KotlinModule.Builder().build())
         private const val JSON_FORMAT = """
             {
@@ -35,7 +36,6 @@ internal class CreatePostRequestTest {
 
 
 
-
     @Test
     fun `json에서 CreatePostRequest로 변환 테스트`() {
 
@@ -47,11 +47,14 @@ internal class CreatePostRequestTest {
         val savedTags = TagFixture.savedTagDtos(size = 2)
         savedTags.addAll(newTags)
 
-        val createPostRequest = createPostRequest(postType = PostType.QUESTION, content = content, title = title, tagDtos = savedTags)
+        val createPostRequest =
+            createPostRequest(postType = PostType.QUESTION, content = content, title = title, tagDtos = savedTags)
 
-        val format = JSON_FORMAT.format(postType, content, title,
+        val format = JSON_FORMAT.format(
+            postType, content, title,
             savedTags[0].id, savedTags[0].name, savedTags[1].id, savedTags[1].name,
-            newTags[0].id, newTags[0].name, newTags[1].id, newTags[1].name,)
+            newTags[0].id, newTags[0].name, newTags[1].id, newTags[1].name,
+        )
 
 
         //when
@@ -61,6 +64,8 @@ internal class CreatePostRequestTest {
         assertThat(readValue).isEqualTo(createPostRequest)
     }
 
+
+
     @Test
     fun `json에서 CreatePostRequest로 변환 테스트 - 타입이 ""인 경우 예외`() {
 
@@ -68,15 +73,16 @@ internal class CreatePostRequestTest {
         val postType = ""
         val content = "example content"
         val title = "example title"
-        val format = JSON_FORMAT.format(postType, content, title,
-            "","","","",
-            "","","","")
+        val format = JSON_FORMAT.format(
+            postType, content, title,
+            "", "", "", "",
+            "", "", "", ""
+        )
 
 
         //when, then
         assertThrows<InvalidFormatException> { objectMapper.readValue(format, CreatePostRequest::class.java) }
     }
-
 
 
 
@@ -87,17 +93,18 @@ internal class CreatePostRequestTest {
         val postType = "question"
         val content = "example content"
         val title = "example title"
-        val format = JSON_FORMAT.format(postType, content, title,
-            "","","","",
-            "","","","")
+        val format = JSON_FORMAT.format(
+            postType, content, title,
+            "", "", "", "",
+            "", "", "", ""
+        )
 
 
-        val createPostRequest = createPostRequest(postType = PostType.QUESTION, content = content, title = title,)
+        val createPostRequest = createPostRequest(postType = PostType.QUESTION, content = content, title = title)
 
         //when, then
         assertThrows<InvalidFormatException> { objectMapper.readValue(format, CreatePostRequest::class.java) }
     }
-
 
 
 

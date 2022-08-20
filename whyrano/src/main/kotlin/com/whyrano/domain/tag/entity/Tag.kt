@@ -15,7 +15,7 @@ class Tag(
     val id: Long? = null,
 
     @Column(name = "name", nullable = false, unique = true)
-    var name: String    // 태그 이름 (중복 불가능)
+    var name: String,    // 태그 이름 (중복 불가능)
 
 ) : BaseTimeEntity() {
 

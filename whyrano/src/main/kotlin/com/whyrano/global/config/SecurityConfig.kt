@@ -33,10 +33,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 class SecurityConfig {
 
 
-
-
-
-
     /**
      * Security 관련 설정
      */
@@ -65,8 +61,6 @@ class SecurityConfig {
 
         return http.build()
     }
-
-
 
 
 
@@ -102,13 +96,11 @@ class SecurityConfig {
 
 
 
-
-
     /**
      * Json 로그인 성공시 처리 - JWT 발급
      */
     @Bean
-    fun jsonLoginSuccessHandler(jwtService: JwtService? = null): JsonLoginSuccessHandler{
+    fun jsonLoginSuccessHandler(jwtService: JwtService? = null): JsonLoginSuccessHandler {
 
         checkNotNull(jwtService) { "jwtService is null !" }
 
@@ -117,13 +109,11 @@ class SecurityConfig {
 
 
 
-
-
     /**
      * Json 로그인 실패시 처리 - 예외 메세지 가공 후 반환
      */
     @Bean
-    fun jsonLoginFailureHandler(objectMapper: ObjectMapper? =null): JsonLoginFailureHandler {
+    fun jsonLoginFailureHandler(objectMapper: ObjectMapper? = null): JsonLoginFailureHandler {
 
         checkNotNull(objectMapper) { "objectMapper is null !" }
 
@@ -132,26 +122,24 @@ class SecurityConfig {
 
 
 
-
-
     /**
      * JWT를 사용하여 회원 인증을 진행하는 필터
      */
     @Bean
     fun jwtAuthenticationFilter(
-       jwtAuthenticationManager: JwtAuthenticationManager? = null,
-       jwtAuthenticationFailureManager: JwtAuthenticationFailureManager? = null,
+        jwtAuthenticationManager: JwtAuthenticationManager? = null,
+        jwtAuthenticationFailureManager: JwtAuthenticationFailureManager? = null,
     ): JwtAuthenticationFilter {
 
         checkNotNull(jwtAuthenticationManager) { "jwtAuthenticationManager is null !" }
         checkNotNull(jwtAuthenticationFailureManager) { "jwtAuthenticationFailureManager is null !" }
 
-
-
-        return JwtAuthenticationFilter(PermitAllURI.permitAllMap(), jwtAuthenticationManager, jwtAuthenticationFailureManager)
+        return JwtAuthenticationFilter(
+            PermitAllURI.permitAllMap(),
+            jwtAuthenticationManager,
+            jwtAuthenticationFailureManager
+        )
     }
-
-
 
 
 
@@ -159,7 +147,7 @@ class SecurityConfig {
      * JWT를 사용하여 실제 인증을 처리
      */
     @Bean
-    fun jwtAuthenticationManager(jwtService: JwtService? = null) :JwtAuthenticationManager {
+    fun jwtAuthenticationManager(jwtService: JwtService? = null): JwtAuthenticationManager {
 
         checkNotNull(jwtService) { "jwtService is null !" }
 
@@ -168,20 +156,16 @@ class SecurityConfig {
 
 
 
-
-
     /**
      * JWT 인증 실패 시 처리
      */
     @Bean
-    fun jwtAuthenticationFailureManager(objectMapper: ObjectMapper? = null) :JwtAuthenticationFailureManager {
+    fun jwtAuthenticationFailureManager(objectMapper: ObjectMapper? = null): JwtAuthenticationFailureManager {
 
         checkNotNull(objectMapper) { "objectMapper is null !" }
 
         return JwtAuthenticationFailureManager(objectMapper)
     }
-
-
 
 
 
@@ -203,18 +187,14 @@ class SecurityConfig {
 
 
 
-
-
     /**
      * https://velog.io/@gkdud583/HttpSecurity-WebSecurity%EC%9D%98-%EC%B0%A8%EC%9D%B4
      * WebSecurity - 인증,인가 모두 처리 X
      * HttpSecurity - antMatchers에 있는 endpoint에 대한 '인증'을 무시한다.
      */
     @Bean
-    fun webSecurityCustomizer(): WebSecurityCustomizer
-            = WebSecurityCustomizer { it.ignoring().antMatchers("/images/**", "/js/**", "/webjars/**") }
-
-
+    fun webSecurityCustomizer(): WebSecurityCustomizer =
+        WebSecurityCustomizer { it.ignoring().antMatchers("/images/**", "/js/**", "/webjars/**") }
 
 
 

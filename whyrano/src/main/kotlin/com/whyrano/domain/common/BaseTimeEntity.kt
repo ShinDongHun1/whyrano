@@ -18,6 +18,8 @@ abstract class BaseTimeEntity {
     @CreatedDate
     var createdDate: LocalDateTime? = null
 
+
+
     @LastModifiedDate
     var modifiedDate: LocalDateTime? = null
 

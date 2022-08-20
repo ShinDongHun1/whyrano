@@ -33,12 +33,18 @@ import java.util.*
 @DataJpaTest
 internal class QueryPostRepositoryImplTest {
 
-    @Autowired private lateinit var memberRepository: MemberRepository
-    @Autowired private lateinit var postRepository: PostRepository
-    @Autowired private lateinit var tagRepository: TagRepository
-    @Autowired private lateinit var taggedPostRepository: TaggedPostRepository
+    @Autowired
+    private lateinit var memberRepository: MemberRepository
+    @Autowired
+    private lateinit var postRepository: PostRepository
+    @Autowired
+    private lateinit var tagRepository: TagRepository
+    @Autowired
+    private lateinit var taggedPostRepository: TaggedPostRepository
 
-    private var member =   member(id = null, email = "email@@", password = "pass", authority = Role.ADMIN)
+    private var member = member(id = null, email = "email@@", password = "pass", authority = Role.ADMIN)
+
+
 
     /**
      * 제목으로 검색
@@ -94,8 +100,10 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.title }.forEach{assertThat(it).contains("title")}
+        search.content.map { it.title }.forEach { assertThat(it).contains("title") }
     }
+
+
 
     @Test
     fun `제목으로 검색 - 아무것도 포함되지 않은 경우 `() {
@@ -133,6 +141,8 @@ internal class QueryPostRepositoryImplTest {
 
     }
 
+
+
     @Test
     fun `제목으로 검색 - 검색 조건에 공백이 있으며 실제 문자열에는 공백이 없는 경우`() {
 
@@ -167,7 +177,7 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.title }.forEach{assertThat(it).contains("title")}
+        search.content.map { it.title }.forEach { assertThat(it).contains("title") }
     }
 
 
@@ -206,8 +216,10 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.title }.forEach{assertThat(it).contains("       t i t   l  e")}
+        search.content.map { it.title }.forEach { assertThat(it).contains("       t i t   l  e") }
     }
+
+
 
     @Test
     fun `제목으로 검색 - 검색조건과 실제 문자열에 공백이 있는 경우`() {
@@ -243,8 +255,9 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.title }.forEach{assertThat(it).contains("       t i t     l  e")}
+        search.content.map { it.title }.forEach { assertThat(it).contains("       t i t     l  e") }
     }
+
 
 
     @Test
@@ -281,8 +294,10 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.title }.forEach{assertThat(it).contains("t i tLE")}
+        search.content.map { it.title }.forEach { assertThat(it).contains("t i tLE") }
     }
+
+
 
     @Test
     fun `제목으로 검색 - 한글의 경우`() {
@@ -317,8 +332,9 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.totalPages).isEqualTo(1)
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
-        search.content.map { it.title }.forEach{assertThat(it).contains("가나따fl마 보 슈 썅")}
+        search.content.map { it.title }.forEach { assertThat(it).contains("가나따fl마 보 슈 썅") }
     }
+
 
 
     @Test
@@ -355,9 +371,8 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.content }.forEach{assertThat(it).contains("content")}
+        search.content.map { it.content }.forEach { assertThat(it).contains("content") }
     }
-
 
 
 
@@ -397,6 +412,8 @@ internal class QueryPostRepositoryImplTest {
 
     }
 
+
+
     @Test
     fun `내용으로 검색 - 검색 조건에 공백이 있으며 실제 문자열에는 공백이 없는 경우`() {
 
@@ -431,7 +448,7 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.content }.forEach{assertThat(it).contains("content")}
+        search.content.map { it.content }.forEach { assertThat(it).contains("content") }
     }
 
 
@@ -470,8 +487,9 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(pageSize)
 
-        search.content.map { it.content }.forEach{assertThat(it).contains("c    on ten t       ")}
+        search.content.map { it.content }.forEach { assertThat(it).contains("c    on ten t       ") }
     }
+
 
 
     @Test
@@ -499,7 +517,7 @@ internal class QueryPostRepositoryImplTest {
         val pageable = PageRequest.of(pageCount, pageSize)
 
         //when
-        val search = postRepository.search(PostSearchCond(content  = "c o n te    n t    "), pageable)
+        val search = postRepository.search(PostSearchCond(content = "c o n te    n t    "), pageable)
 
 
         //then
@@ -508,8 +526,10 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.content }.forEach{assertThat(it).contains("c    on    te    n t        ")}
+        search.content.map { it.content }.forEach { assertThat(it).contains("c    on    te    n t        ") }
     }
+
+
 
     @Test
     fun `내용으로 검색 - 대소문자 구분 X`() {
@@ -545,9 +565,8 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.content }.forEach{assertThat(it).contains("c    ON    te    n t        ")}
+        search.content.map { it.content }.forEach { assertThat(it).contains("c    ON    te    n t        ") }
     }
-
 
 
 
@@ -605,9 +624,6 @@ internal class QueryPostRepositoryImplTest {
 
 
 
-
-
-
     @Test
     fun `타입으로 검색 - 공지만 검색`() {
         //given
@@ -636,11 +652,11 @@ internal class QueryPostRepositoryImplTest {
         }
 
 
-        val pageable = PageRequest.of(pageCount,  pageSize)
+        val pageable = PageRequest.of(pageCount, pageSize)
 
 
         //when
-        val search = postRepository.search(PostSearchCond(postType  = NOTICE), pageable)
+        val search = postRepository.search(PostSearchCond(postType = NOTICE), pageable)
 
 
         //then
@@ -649,8 +665,10 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.postType }.forEach{assertThat(it).isEqualTo(NOTICE)}
+        search.content.map { it.postType }.forEach { assertThat(it).isEqualTo(NOTICE) }
     }
+
+
 
     @Test
     fun `타입으로 검색 - 질문만 검색`() {
@@ -680,11 +698,11 @@ internal class QueryPostRepositoryImplTest {
         }
 
 
-        val pageable = PageRequest.of(pageCount,  pageSize)
+        val pageable = PageRequest.of(pageCount, pageSize)
 
 
         //when
-        val search = postRepository.search(PostSearchCond(postType  = QUESTION), pageable)
+        val search = postRepository.search(PostSearchCond(postType = QUESTION), pageable)
 
 
         //then
@@ -693,8 +711,10 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
 
-        search.content.map { it.postType }.forEach{assertThat(it).isEqualTo(QUESTION)}
+        search.content.map { it.postType }.forEach { assertThat(it).isEqualTo(QUESTION) }
     }
+
+
 
     @Test
     fun `타입으로 검색 - 설정하지 않으면 모두 검색`() {
@@ -724,8 +744,7 @@ internal class QueryPostRepositoryImplTest {
         }
 
 
-
-        val pageable = PageRequest.of(pageCount,  pageSize)
+        val pageable = PageRequest.of(pageCount, pageSize)
 
 
         //when
@@ -738,6 +757,7 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(10)
     }
+
 
 
     /**
@@ -767,7 +787,7 @@ internal class QueryPostRepositoryImplTest {
         }
 
 
-        val pageable = PageRequest.of(pageCount,  pageSize, Sort.by(ASC, "createdDate"))
+        val pageable = PageRequest.of(pageCount, pageSize, Sort.by(ASC, "createdDate"))
 
 
         //when
@@ -780,11 +800,10 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(15)
 
-        for (i in 1 until  totalCount) {
-            assertThat(search.content[i].createdDate).isAfter(search.content[i-1].createdDate)
+        for (i in 1 until totalCount) {
+            assertThat(search.content[i].createdDate).isAfter(search.content[i - 1].createdDate)
         }
     }
-
 
 
 
@@ -807,7 +826,7 @@ internal class QueryPostRepositoryImplTest {
             post.confirmWriter(member)
             postRepository.save(post)
         }
-        val pageable = PageRequest.of(pageCount,  pageSize, Sort.by(DESC, "createdDate"))
+        val pageable = PageRequest.of(pageCount, pageSize, Sort.by(DESC, "createdDate"))
 
 
         //when
@@ -820,8 +839,8 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(15)
 
-        for (i in 1 until  totalCount) {
-            assertThat(search.content[i].createdDate).isBefore(search.content[i-1].createdDate)
+        for (i in 1 until totalCount) {
+            assertThat(search.content[i].createdDate).isBefore(search.content[i - 1].createdDate)
             //0 이 제일 큼 (제일 먼저 생성됨)
             //totalCount 가 제일 작음 (제일 나중에 생성됨 )
         }
@@ -844,12 +863,13 @@ internal class QueryPostRepositoryImplTest {
                 title = "",
                 content = "",
                 viewCount = Random().nextInt(4),
-                commentCount =  Random().nextInt(4),
+                commentCount = Random().nextInt(4),
             )
             post.confirmWriter(member)
             postRepository.save(post)
         }
-        val pageable = PageRequest.of(pageCount,  pageSize, Sort.by(Order(ASC, "viewCount"), Order(DESC, "commentCount")))
+        val pageable =
+            PageRequest.of(pageCount, pageSize, Sort.by(Order(ASC, "viewCount"), Order(DESC, "commentCount")))
 
 
         //when
@@ -862,16 +882,18 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(15)
 
-        for (i in 1 until  totalCount) {
+        for (i in 1 until totalCount) {
             //조회수 오름차순, 즉 0이 제일 작음
-            assertThat(search.content[i-1].viewCount.get()).isLessThanOrEqualTo(search.content[i].viewCount.get())
+            assertThat(search.content[i - 1].viewCount.get()).isLessThanOrEqualTo(search.content[i].viewCount.get())
 
-            if (search.content[i-1].viewCount == search.content[i].viewCount) {
+            if (search.content[i - 1].viewCount == search.content[i].viewCount) {
                 //댓글수 내림차순, 즉 0이 제일 큼
-                assertThat(search.content[i-1].commentCount.get()).isGreaterThanOrEqualTo(search.content[i].commentCount.get())
+                assertThat(search.content[i - 1].commentCount.get()).isGreaterThanOrEqualTo(search.content[i].commentCount.get())
             }
         }
     }
+
+
 
     @Test
     fun `댓글수 내림차순, 조회수 오름차순 정렬`() {
@@ -888,12 +910,13 @@ internal class QueryPostRepositoryImplTest {
                 title = "",
                 content = "",
                 viewCount = Random().nextInt(4),
-                commentCount =  Random().nextInt(4),
+                commentCount = Random().nextInt(4),
             )
             post.confirmWriter(member)
             postRepository.save(post)
         }
-        val pageable = PageRequest.of(pageCount,  pageSize, Sort.by( Order(DESC, "commentCount"), Order(ASC, "viewCount")))
+        val pageable =
+            PageRequest.of(pageCount, pageSize, Sort.by(Order(DESC, "commentCount"), Order(ASC, "viewCount")))
 
 
         //when
@@ -906,19 +929,17 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(15)
 
-        for (i in 1 until  totalCount) {
+        for (i in 1 until totalCount) {
             //댓글수 내림차순, 즉 0이 제일 큼
-            assertThat(search.content[i-1].commentCount.get()).isGreaterThanOrEqualTo(search.content[i].commentCount.get())
+            assertThat(search.content[i - 1].commentCount.get()).isGreaterThanOrEqualTo(search.content[i].commentCount.get())
 
 
-            if (search.content[i-1].commentCount == search.content[i].commentCount) {
+            if (search.content[i - 1].commentCount == search.content[i].commentCount) {
                 //조회수 오름차순, 즉 0이 제일 작음
-                assertThat(search.content[i-1].viewCount.get()).isLessThanOrEqualTo(search.content[i].viewCount.get())
+                assertThat(search.content[i - 1].viewCount.get()).isLessThanOrEqualTo(search.content[i].viewCount.get())
             }
         }
     }
-
-
 
 
 
@@ -942,7 +963,7 @@ internal class QueryPostRepositoryImplTest {
         }
 
 
-        val pageable = PageRequest.of(pageCount,  pageSize)
+        val pageable = PageRequest.of(pageCount, pageSize)
 
 
         //when
@@ -955,11 +976,10 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(5)
 
-        for (i in 1 until  totalCount) {
-            assertThat(search.content[i].createdDate).isAfter(search.content[i-1].createdDate)
+        for (i in 1 until totalCount) {
+            assertThat(search.content[i].createdDate).isAfter(search.content[i - 1].createdDate)
         }
     }
-
 
 
 
@@ -984,7 +1004,8 @@ internal class QueryPostRepositoryImplTest {
         }
 
 
-        val pageable = PageRequest.of(pageCount,  pageSize, Sort.by(Order(ASC, "commentCount"), Order(ASC, "createdDatㅇㅂㅈㅇㅈㅂe")))
+        val pageable =
+            PageRequest.of(pageCount, pageSize, Sort.by(Order(ASC, "commentCount"), Order(ASC, "createdDatㅇㅂㅈㅇㅈㅂe")))
 
 
         //when
@@ -997,9 +1018,9 @@ internal class QueryPostRepositoryImplTest {
         assertThat(search.number).isEqualTo(pageCount)
         assertThat(search.numberOfElements).isEqualTo(15)
 
-        for (i in 1 until  totalCount) {
+        for (i in 1 until totalCount) {
             //댓글수 내림차순, 즉 0이 제일 큼
-            assertThat(search.content[i].createdDate).isAfter(search.content[i-1].createdDate)
+            assertThat(search.content[i].createdDate).isAfter(search.content[i - 1].createdDate)
         }
     }
 }

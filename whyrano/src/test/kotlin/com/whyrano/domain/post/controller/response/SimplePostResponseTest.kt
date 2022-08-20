@@ -15,6 +15,7 @@ internal class SimplePostResponseTest {
 
 
     companion object {
+
         private val objectMapper = ObjectMapper()
         private val JSON_FORMAT = """
         {
@@ -41,6 +42,8 @@ internal class SimplePostResponseTest {
         """.trimIndent()
     }
 
+
+
     @Test
     fun `SimplePostDto 에서 SimplePostResponse로 변환`() {
 
@@ -52,9 +55,15 @@ internal class SimplePostResponseTest {
         val from = SimplePostResponse.from(spd)
 
         //then
-        val simplePostResponse = PostFixture.simplePostResponse(createdDate = spd.createdDate, modifiedDate = spd.modifiedDate, writerInfoResponse = memberInfoResponse(createdDate = md.createdDate, modifiedDate = md.modifiedDate))
+        val simplePostResponse = PostFixture.simplePostResponse(
+            createdDate = spd.createdDate,
+            modifiedDate = spd.modifiedDate,
+            writerInfoResponse = memberInfoResponse(createdDate = md.createdDate, modifiedDate = md.modifiedDate)
+        )
         Assertions.assertThat(from).isEqualTo(simplePostResponse)
     }
+
+
 
     @Test
     fun `SimplePostResponse로 에서 JSON 변환`() {
@@ -66,14 +75,18 @@ internal class SimplePostResponseTest {
         val writeValueAsString = objectMapper.writeValueAsString(spr)
 
         //then
-        assertThat(writeValueAsString).isEqualTo(JSON_FORMAT.replace("\t", "")
-                                                            .replace(" ", "")
-                                                            .replace("\n", "")
-                                                            .format(spr.id, spr.postType, spr.title, spr.content,
-                                                                    spr.answerCount, spr.viewCount, spr.likeCount,
-                                                                    spr.commentCount, spr.createdDate, spr.modifiedDate,
-                                                                    spr.writerInfo.id, spr.writerInfo.role, spr.writerInfo.email,
-                                                                    spr.writerInfo.nickname, spr.writerInfo.point, spr.writerInfo.profileImagePath,
-                                                                    spr.writerInfo.createdDate, spr.writerInfo.modifiedDate))
+        assertThat(writeValueAsString).isEqualTo(
+            JSON_FORMAT.replace("\t", "")
+                .replace(" ", "")
+                .replace("\n", "")
+                .format(
+                    spr.id, spr.postType, spr.title, spr.content,
+                    spr.answerCount, spr.viewCount, spr.likeCount,
+                    spr.commentCount, spr.createdDate, spr.modifiedDate,
+                    spr.writerInfo.id, spr.writerInfo.role, spr.writerInfo.email,
+                    spr.writerInfo.nickname, spr.writerInfo.point, spr.writerInfo.profileImagePath,
+                    spr.writerInfo.createdDate, spr.writerInfo.modifiedDate
+                )
+        )
     }
 }

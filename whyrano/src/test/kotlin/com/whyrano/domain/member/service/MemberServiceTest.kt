@@ -24,7 +24,7 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories
  */
 @DataJpaTest
 @MockkBean(QueryPostRepository::class)
-internal class MemberServiceTest{
+internal class MemberServiceTest {
 
     @Autowired
     private lateinit var memberRepository: MemberRepository
@@ -32,6 +32,7 @@ internal class MemberServiceTest{
     private lateinit var memberService: MemberService
 
     private val passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
+
 
 
     @BeforeEach
@@ -53,8 +54,9 @@ internal class MemberServiceTest{
         //then
         val findMember = memberRepository.findByEmail(createMemberDto.email)
         assertThat(findMember?.id).isNotNull
-        assertThat(findMember!!.nickname).isEqualTo(createMemberDto.nickname)
+        assertThat(findMember !!.nickname).isEqualTo(createMemberDto.nickname)
     }
+
 
 
     @Test
@@ -68,9 +70,10 @@ internal class MemberServiceTest{
 
         //then
         val findMember = memberRepository.findByEmail(createMemberDto.email)
-        assertThat(findMember!!.password).isNotEqualTo(createMemberDto.password)
-        assertThat( passwordEncoder.matches(createMemberDto.password, findMember.password) ).isTrue
+        assertThat(findMember !!.password).isNotEqualTo(createMemberDto.password)
+        assertThat(passwordEncoder.matches(createMemberDto.password, findMember.password)).isTrue
     }
+
 
 
     @Test
@@ -87,6 +90,7 @@ internal class MemberServiceTest{
     }
 
 
+
     @Test
     @DisplayName("회원 수정 성공")
     fun test_update_success() {
@@ -97,17 +101,19 @@ internal class MemberServiceTest{
 
         //when
         val updateMemberDto = MemberFixture.updateMemberDto()
-        memberService.update(member.id!!, updateMemberDto)
+        memberService.update(member.id !!, updateMemberDto)
 
 
         //then
         val findMember = memberRepository.findByEmail(createMemberDto.email)
-        assertThat(findMember!!.nickname).isEqualTo(updateMemberDto.nickname)
+        assertThat(findMember !!.nickname).isEqualTo(updateMemberDto.nickname)
         assertThat(findMember.profileImagePath).isEqualTo(updateMemberDto.profileImagePath)
 
-        assertThat( passwordEncoder.matches(createMemberDto.password, findMember.password) ).isFalse
-        assertThat( passwordEncoder.matches(updateMemberDto.password, findMember.password) ).isTrue
+        assertThat(passwordEncoder.matches(createMemberDto.password, findMember.password)).isFalse
+        assertThat(passwordEncoder.matches(updateMemberDto.password, findMember.password)).isTrue
     }
+
+
 
     @Test
     @DisplayName("회원 수정시 비밀번호 암호화")
@@ -119,20 +125,22 @@ internal class MemberServiceTest{
 
         //when
         val updateMemberDto = MemberFixture.updateMemberDto(password = "UPDATE!!!!!")
-        memberService.update(member.id!!, updateMemberDto)
+        memberService.update(member.id !!, updateMemberDto)
 
 
         //then
-        val findMember = memberRepository.findByEmail(createMemberDto.email)!!
+        val findMember = memberRepository.findByEmail(createMemberDto.email) !!
 
-        assertThat( passwordEncoder.matches(createMemberDto.password, findMember.password) ).isFalse
-        assertThat( passwordEncoder.matches(updateMemberDto.password, findMember.password) ).isTrue
+        assertThat(passwordEncoder.matches(createMemberDto.password, findMember.password)).isFalse
+        assertThat(passwordEncoder.matches(updateMemberDto.password, findMember.password)).isTrue
     }
 
     private fun createMember(createMemberDto: CreateMemberDto): Member {
         memberService.signUp(createMemberDto)
-        return memberRepository.findByEmail(createMemberDto.email)!!
+        return memberRepository.findByEmail(createMemberDto.email) !!
     }
+
+
 
     @Test
     @DisplayName("회원 수정 실패 - 없는 회원")
@@ -142,11 +150,14 @@ internal class MemberServiceTest{
         val noExistId = 1L
 
         //when
-        val exceptionType = assertThrows(MemberException::class.java) { memberService.update(noExistId, updateMemberDto) }
+        val exceptionType =
+            assertThrows(MemberException::class.java) { memberService.update(noExistId, updateMemberDto) }
                 .exceptionType()
 
         assertThat(exceptionType).isEqualTo(MemberExceptionType.NOT_FOUND)
     }
+
+
 
     @Test
     @DisplayName("회원 삭제 성공")
@@ -156,12 +167,14 @@ internal class MemberServiceTest{
         val member = createMember(createMemberDto)
 
         //when
-        memberService.delete(member.id!!, createMemberDto.password)
+        memberService.delete(member.id !!, createMemberDto.password)
 
         //then
         assertThat(memberRepository.findByEmail(member.email)).isNull()
 
     }
+
+
 
     @Test
     @DisplayName("회원 삭제 실패 - 비밀번호 불일치")
@@ -172,7 +185,7 @@ internal class MemberServiceTest{
 
         //when, then
         val exceptionType = assertThrows(MemberException::class.java) {
-            memberService.delete(member.id!!, createMemberDto.password + "!!!!!")
+            memberService.delete(member.id !!, createMemberDto.password + "!!!!!")
         }.exceptionType()
 
         assertThat(exceptionType).isEqualTo(MemberExceptionType.UNMATCHED_PASSWORD)

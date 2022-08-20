@@ -49,12 +49,9 @@ class Post(
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "writer", nullable = false)
-    var writer: Member? = null // 작성자
+    var writer: Member? = null, // 작성자
 
 ) : BaseTimeEntity() {
-
-
-
 
 
     /**
@@ -64,8 +61,6 @@ class Post(
         checkCreateAuthority(writer)
         this.writer = writer
     }
-
-
 
 
 
@@ -80,8 +75,6 @@ class Post(
 
 
 
-
-
     /**
      * post 생성 권한 확인
      *
@@ -90,15 +83,13 @@ class Post(
      */
     fun checkCreateAuthority(writer: Member) {
 
-        when(postType) {
+        when (postType) {
 
             NOTICE -> if (writer.role != Role.ADMIN) throw PostException(PostExceptionType.NO_AUTHORITY_CREATE_NOTICE)
 
             PostType.QUESTION -> if (writer.role == BLACK) throw PostException(PostExceptionType.NO_AUTHORITY_CREATE_QUESTION)
         }
     }
-
-
 
 
 
@@ -118,14 +109,12 @@ class Post(
         when (this.postType) {
 
             // 공지의 경우 관리자가 아니면 수정 불가능
-            NOTICE ->  if ( ! writer.isAdmin() ) throw PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
+            NOTICE -> if (! writer.isAdmin()) throw PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
 
             // 일반 질문은 작성자만 수정 가능
-            else ->  if ( ! isSameWriter(writer) ) throw PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
+            else -> if (! isSameWriter(writer)) throw PostException(PostExceptionType.NO_AUTHORITY_UPDATE_POST)
         }
     }
-
-
 
 
 
@@ -145,15 +134,13 @@ class Post(
         when (this.postType) {
 
             // 공지의 경우 관리자가 아니면 삭제 불가능
-            NOTICE ->  if ( ! writer.isAdmin() ) throw PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
+            NOTICE -> if (! writer.isAdmin()) throw PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
 
             else ->
                 // 작성자가 아니고, 관리자도 아닌 경우 삭제 불가능
-                if ( ! isSameWriter(writer) && ! writer.isAdmin() ) throw PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
+                if (! isSameWriter(writer) && ! writer.isAdmin()) throw PostException(PostExceptionType.NO_AUTHORITY_DELETE_POST)
         }
     }
-
-
 
 
 
@@ -161,9 +148,7 @@ class Post(
      * 동일한 작성자인지 확인
      */
     private fun isSameWriter(writer: Member) =
-        this.writer!!.id == writer.id
-
-
+        this.writer !!.id == writer.id
 
 
 
@@ -180,14 +165,14 @@ class Post(
 
 
 
-
-
     /**
      * 답변 수 1 늘리기
      */
     fun plusAnswerCount() {
         this.answerCount.incrementAndGet()
     }
+
+
 
     /**
      * 답변 수 1 줄이기

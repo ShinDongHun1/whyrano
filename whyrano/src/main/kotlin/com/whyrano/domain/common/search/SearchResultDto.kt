@@ -13,6 +13,6 @@ data class SearchResultDto<T>(
 
     val currentElementCount: Int,  // 현재 페이지에 요소가 몇개 들어있는지
 
-    val simpleDtos: List<T> = emptyList()
+    val simpleDtos: List<T> = emptyList(),
 
-)
+    )

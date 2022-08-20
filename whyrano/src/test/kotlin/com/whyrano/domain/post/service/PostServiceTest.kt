@@ -60,14 +60,19 @@ internal class PostServiceTest {
 
     private lateinit var postService: PostService
 
-    @MockkBean private lateinit var postRepository: PostRepository
-    @MockkBean private lateinit var memberRepository: MemberRepository
-    @MockkBean private lateinit var tagRepository: TagRepository
-    @MockkBean private lateinit var taggedPostRepository: TaggedPostRepository
+    @MockkBean
+    private lateinit var postRepository: PostRepository
+    @MockkBean
+    private lateinit var memberRepository: MemberRepository
+    @MockkBean
+    private lateinit var tagRepository: TagRepository
+    @MockkBean
+    private lateinit var taggedPostRepository: TaggedPostRepository
 
     private lateinit var basicAuthMember: AuthMember // 일반 회원
     private lateinit var adminAuthMember: AuthMember // 관리자
     private lateinit var blackAuthMember: AuthMember // 블랙리스트
+
 
 
     @BeforeEach
@@ -78,14 +83,26 @@ internal class PostServiceTest {
 
         // 회원들 인증정보 세팅
         basicAuthMember = MemberFixture.authMember(id = 1L, email = "basic@example.com", role = BASIC)
-        adminAuthMember =MemberFixture.authMember(id = 2L,  email = "admin@example.com", role = ADMIN)
-        blackAuthMember = MemberFixture.authMember(id = 3L,  email = "black@example.com", role = BLACK)
+        adminAuthMember = MemberFixture.authMember(id = 2L, email = "admin@example.com", role = ADMIN)
+        blackAuthMember = MemberFixture.authMember(id = 3L, email = "black@example.com", role = BLACK)
 
 
         // 회원들 DB에 저장
-        every { memberRepository.findByIdOrNull(basicAuthMember.id) } returns member(id = basicAuthMember.id, authority = BASIC, email = "basic@example.com")
-        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = ADMIN, email = "admin@example.com")
-        every { memberRepository.findByIdOrNull(blackAuthMember.id) } returns member(id = blackAuthMember.id, authority = BLACK, email = "black@example.com")
+        every { memberRepository.findByIdOrNull(basicAuthMember.id) } returns member(
+            id = basicAuthMember.id,
+            authority = BASIC,
+            email = "basic@example.com"
+        )
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(
+            id = adminAuthMember.id,
+            authority = ADMIN,
+            email = "admin@example.com"
+        )
+        every { memberRepository.findByIdOrNull(blackAuthMember.id) } returns member(
+            id = blackAuthMember.id,
+            authority = BLACK,
+            email = "black@example.com"
+        )
 
     }
 
@@ -100,7 +117,10 @@ internal class PostServiceTest {
         val savedTags = TagFixture.savedTags()
         every { postRepository.save(any()) } returns savedPost
         every { tagRepository.saveAll<Tag>(any()) } returns savedTags
-        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = savedPost, tags = savedTags)
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(
+            post = savedPost,
+            tags = savedTags
+        )
 
         //when
         val postId = postService.create(basicAuthMember.id, cpd) // 질문 작성
@@ -110,7 +130,6 @@ internal class PostServiceTest {
         verify(exactly = 1) { tagRepository.saveAll<Tag>(any()) }
         verify(exactly = 1) { taggedPostRepository.saveAll<TaggedPost>(any()) }
     }
-
 
 
 
@@ -127,9 +146,8 @@ internal class PostServiceTest {
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_CREATE_QUESTION)
 
-        verify (exactly = 0){ postRepository.save(any()) }
+        verify(exactly = 0) { postRepository.save(any()) }
     }
-
 
 
 
@@ -142,18 +160,20 @@ internal class PostServiceTest {
         val savedTags = TagFixture.savedTags()
         every { postRepository.save(any()) } returns savedPost
         every { tagRepository.saveAll<Tag>(any()) } returns savedTags
-        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = savedPost, tags = savedTags)
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(
+            post = savedPost,
+            tags = savedTags
+        )
 
         //when
         val postId = postService.create(adminAuthMember.id, cpd) // 질문 작성
 
         //then
-        verify (exactly = 1){ postRepository.save(any()) }
+        verify(exactly = 1) { postRepository.save(any()) }
         verify(exactly = 1) { tagRepository.saveAll<Tag>(any()) }
         verify(exactly = 1) { taggedPostRepository.saveAll<TaggedPost>(any()) }
 
     }
-
 
 
 
@@ -169,9 +189,8 @@ internal class PostServiceTest {
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_CREATE_NOTICE)
-        verify (exactly = 0){ postRepository.save(any()) }
+        verify(exactly = 0) { postRepository.save(any()) }
     }
-
 
 
 
@@ -187,10 +206,8 @@ internal class PostServiceTest {
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_CREATE_NOTICE)
-        verify (exactly = 0){ postRepository.save(any()) }
+        verify(exactly = 0) { postRepository.save(any()) }
     }
-
-
 
 
 
@@ -200,11 +217,15 @@ internal class PostServiceTest {
         //given
         val postId = 10L
         val savedTags = TagFixture.savedTags(3)
-        val post = post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role)
+        val post =
+            post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role)
         every { postRepository.findByIdOrNull(postId) } returns post
         every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
         every { tagRepository.saveAll<Tag>(any()) } returns savedTags
-        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = post, tags = savedTags)
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(
+            post = post,
+            tags = savedTags
+        )
 
         //when
         val upd = updatePostDto(title = UPDATE_TITLE, content = UPDATE_CONTENT)
@@ -222,7 +243,12 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId,postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(
+            id = postId,
+            postType = QUESTION,
+            writerId = basicAuthMember.id,
+            writerRole = basicAuthMember.role
+        )
 
 
         //when
@@ -238,19 +264,21 @@ internal class PostServiceTest {
 
 
 
-
-
     @Test
     fun `공지 수정 성공 - 자신(관리자)의 공지`() {
 
         //given
         val postId = 10L
-        val post = post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
+        val post =
+            post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
         val savedTags = TagFixture.savedTags(3)
         every { postRepository.findByIdOrNull(postId) } returns post
         every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
         every { tagRepository.saveAll<Tag>(any()) } returns savedTags
-        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post= post, tags = savedTags)
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(
+            post = post,
+            tags = savedTags
+        )
 
         //when
         val upd = updatePostDto(title = UPDATE_TITLE, content = UPDATE_CONTENT)
@@ -263,15 +291,21 @@ internal class PostServiceTest {
 
 
 
-
-
     @Test
     fun `공지 수정 실패 - 자신의 공지이나 관리자 자격을 박탈당한 경우 ( 블랙리스트 )`() {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
-        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BLACK) //회원 권한 변경
+        every { postRepository.findByIdOrNull(postId) } returns post(
+            id = postId,
+            postType = NOTICE,
+            writerId = adminAuthMember.id,
+            writerRole = basicAuthMember.role
+        )
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(
+            id = adminAuthMember.id,
+            authority = BLACK
+        ) //회원 권한 변경
 
 
         //when
@@ -287,16 +321,21 @@ internal class PostServiceTest {
 
 
 
-
-
-
     @Test
     fun `공지 수정 실패 - 자신의 공지이나 관리자 자격을 박탈당한 경우 ( 일반 회원 )`() {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
-        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BASIC) //회원 권한 변경
+        every { postRepository.findByIdOrNull(postId) } returns post(
+            id = postId,
+            postType = NOTICE,
+            writerId = adminAuthMember.id,
+            writerRole = basicAuthMember.role
+        )
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(
+            id = adminAuthMember.id,
+            authority = BASIC
+        ) //회원 권한 변경
 
 
         //when
@@ -317,15 +356,18 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        val post = post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
+        val post =
+            post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
         val savedTags = TagFixture.savedTags(3)
         val anotherAdminId = 20L
         every { postRepository.findByIdOrNull(postId) } returns post
         every { memberRepository.findByIdOrNull(anotherAdminId) } returns member(id = anotherAdminId, authority = ADMIN)
         every { tagRepository.saveAll<Tag>(any()) } returns savedTags
         every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
-        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = post, tags = savedTags)
-
+        every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(
+            post = post,
+            tags = savedTags
+        )
 
 
         //when
@@ -336,8 +378,6 @@ internal class PostServiceTest {
         //then
         verify(exactly = 1) { memberRepository.findByIdOrNull(anotherAdminId) }
     }
-
-
 
 
 
@@ -359,9 +399,6 @@ internal class PostServiceTest {
 
 
 
-
-
-
     @Test
     fun `질문 삭제 성공 - 자신의 게시물인 경우 - 작성된 댓글 & 대댓글 모두 제거`() {
 
@@ -375,10 +412,10 @@ internal class PostServiceTest {
 
 
         //when
-        postService.delete(basicAuthMember.id!!, postId)
+        postService.delete(basicAuthMember.id !!, postId)
 
         //then
-        verify( exactly =  1 ) { postRepository.delete(any()) }
+        verify(exactly = 1) { postRepository.delete(any()) }
 
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
@@ -391,19 +428,25 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(
+            id = postId,
+            postType = QUESTION,
+            writerId = basicAuthMember.id,
+            writerRole = basicAuthMember.role
+        )
         every { postRepository.delete(any()) } just runs
         every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
 
 
         //when
-        postService.delete(adminAuthMember.id!!, postId)
+        postService.delete(adminAuthMember.id !!, postId)
 
         //then
-        verify( exactly =  1 ) { postRepository.delete(any()) }
+        verify(exactly = 1) { postRepository.delete(any()) }
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
     }
+
 
 
     @Test
@@ -411,13 +454,16 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(
+            id = postId,
+            postType = QUESTION,
+            writerId = basicAuthMember.id,
+            writerRole = basicAuthMember.role
+        )
         every { postRepository.delete(any()) } just runs
 
         val anotherBasicId = 200L
         every { memberRepository.findByIdOrNull(anotherBasicId) } returns member(id = anotherBasicId, authority = BASIC)
-
-
 
 
         //when
@@ -426,11 +472,9 @@ internal class PostServiceTest {
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST)
-        verify (exactly = 0) { postRepository.delete(any()) }
+        verify(exactly = 0) { postRepository.delete(any()) }
 
     }
-
-
 
 
 
@@ -439,7 +483,8 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        val post = post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
+        val post =
+            post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
 
 
         every { postRepository.findByIdOrNull(postId) } returns post
@@ -447,17 +492,15 @@ internal class PostServiceTest {
         every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
 
 
-
         //when
-        postService.delete(adminAuthMember.id!!, postId)
+        postService.delete(adminAuthMember.id !!, postId)
 
         //then
-        verify( exactly =  1 ) { postRepository.delete(any()) }
+        verify(exactly = 1) { postRepository.delete(any()) }
 
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
     }
-
 
 
 
@@ -466,19 +509,27 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(
+            id = postId,
+            postType = NOTICE,
+            writerId = adminAuthMember.id,
+            writerRole = basicAuthMember.role
+        )
         every { postRepository.delete(any()) } just runs
 
-        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BASIC)
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(
+            id = adminAuthMember.id,
+            authority = BASIC
+        )
 
 
         //when
         val exceptionType =
-            assertThrows<PostException> { postService.delete(adminAuthMember.id!!, postId) }.exceptionType()
+            assertThrows<PostException> { postService.delete(adminAuthMember.id !!, postId) }.exceptionType()
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST)
-        verify( exactly =  0 ) { postRepository.delete(any()) }
+        verify(exactly = 0) { postRepository.delete(any()) }
     }
 
 
@@ -488,20 +539,29 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = blackAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(
+            id = postId,
+            postType = NOTICE,
+            writerId = adminAuthMember.id,
+            writerRole = blackAuthMember.role
+        )
         every { postRepository.delete(any()) } just runs
 
-        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(id = adminAuthMember.id, authority = BLACK)
+        every { memberRepository.findByIdOrNull(adminAuthMember.id) } returns member(
+            id = adminAuthMember.id,
+            authority = BLACK
+        )
 
 
         //when
         val exceptionType =
-            assertThrows<PostException> { postService.delete(adminAuthMember.id!!, postId) }.exceptionType()
+            assertThrows<PostException> { postService.delete(adminAuthMember.id !!, postId) }.exceptionType()
 
         //then
         assertThat(exceptionType).isEqualTo(PostExceptionType.NO_AUTHORITY_DELETE_POST)
-        verify( exactly =  0 ) { postRepository.delete(any()) }
+        verify(exactly = 0) { postRepository.delete(any()) }
     }
+
 
 
     @Test
@@ -509,7 +569,12 @@ internal class PostServiceTest {
 
         //given
         val postId = 10L
-        every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
+        every { postRepository.findByIdOrNull(postId) } returns post(
+            id = postId,
+            postType = NOTICE,
+            writerId = basicAuthMember.id,
+            writerRole = basicAuthMember.role
+        )
         every { postRepository.delete(any()) } just runs
         every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
         val anotherAdminId = 300L
@@ -519,10 +584,11 @@ internal class PostServiceTest {
         postService.delete(anotherAdminId, postId)
 
         //then
-        verify( exactly =  1 ) { postRepository.delete(any()) }
+        verify(exactly = 1) { postRepository.delete(any()) }
 
         //TODO 댓글, 대댓글 모두 제거하는지 구현해야 함
     }
+
 
 
     @Test
@@ -560,6 +626,7 @@ internal class PostServiceTest {
     }
 
 
+
     @Test
     fun `게시글 검색 - 결과 1개인 경우`() {
         //given
@@ -594,6 +661,8 @@ internal class PostServiceTest {
         assertThat(result).isEqualTo(expectedResult)
         assertThat(result.currentElementCount).isEqualTo(1)
     }
+
+
 
     @Test
     fun `게시글 검색 - 결과 0개인 경우`() {

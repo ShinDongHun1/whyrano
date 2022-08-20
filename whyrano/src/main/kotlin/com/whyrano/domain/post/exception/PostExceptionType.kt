@@ -6,15 +6,15 @@ import org.springframework.http.HttpStatus
 /**
  * Created by ShinD on 2022/08/14.
  */
-enum class PostExceptionType (
+enum class PostExceptionType(
 
     private val errorCode: Int,
 
     private val httpStatus: HttpStatus,
 
-    private val message: String
+    private val message: String,
 
-) : BaseExceptionType {
+    ) : BaseExceptionType {
 
     NO_AUTHORITY_CREATE_QUESTION(1200, HttpStatus.FORBIDDEN, "게시물을 작성할 권한이 없습니다. (블랙리스트)"),
     NO_AUTHORITY_CREATE_NOTICE(1201, HttpStatus.FORBIDDEN, "공지를 작성할 권한이 없습니다. (관리지만 가능합니다.)"),

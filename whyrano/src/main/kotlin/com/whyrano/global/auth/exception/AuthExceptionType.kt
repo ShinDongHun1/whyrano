@@ -12,9 +12,9 @@ enum class AuthExceptionType(
 
     private val httpStatus: HttpStatus,
 
-    private val message: String
+    private val message: String,
 
-) : BaseExceptionType{
+    ) : BaseExceptionType {
 
     //== Json 로그인 관련 ==//
     NOT_ALLOWED_LOGIN_METHOD(1100, HttpStatus.METHOD_NOT_ALLOWED, "요청이 POST가 아닙니다."),
@@ -23,11 +23,13 @@ enum class AuthExceptionType(
     NOT_FOUND_MEMBER(1103, HttpStatus.UNAUTHORIZED, "유저 정보가 없습니다."),
 
 
+
     //== JWT 인증 관련 ==//
     EMPTY_TOKEN(1104, HttpStatus.UNAUTHORIZED, "토큰이 존재하지 않습니다."),
     BAD_TOKEN(1105, HttpStatus.UNAUTHORIZED, "잘못된 토큰입니다."), //토큰에 인증정보가 포함되지 않음.
     ALL_TOKEN_INVALID(1106, HttpStatus.UNAUTHORIZED, "AccessToken과 RefreshToken 모두 만료되었습니다. 다시 로그인을 진행해 주세요."),
     UNMATCHED_MEMBER(1107, HttpStatus.UNAUTHORIZED, "두 토큰을 가진 유저 정보가 없습니다."),
+
 
 
     //== 이외 예측하지 못한 오류 ==//

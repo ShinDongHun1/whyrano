@@ -11,7 +11,7 @@ import javax.persistence.*
 @Table(
     name = "MEMBER",
     uniqueConstraints = [UniqueConstraint(columnNames = ["email"], name = "unique_email")]
-    )
+)
 class Member(
 
     @Id @Column(name = "member_id")
@@ -43,9 +43,7 @@ class Member(
     @Column(nullable = true)
     var refreshToken: RefreshToken? = null, // refresh token 내용 (JWT)
 
-    ) : BaseTimeEntity() {
-
-
+) : BaseTimeEntity() {
 
 
     /**
@@ -62,8 +60,6 @@ class Member(
 
 
 
-
-
     /**
      * 회원 토큰 업데이트
      */
@@ -75,8 +71,6 @@ class Member(
 
 
 
-
-
     /**
      * 회원 권한 수정
      */
@@ -84,8 +78,6 @@ class Member(
 
         this.role = role
     }
-
-
 
 
 

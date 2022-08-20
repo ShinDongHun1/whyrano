@@ -15,8 +15,9 @@ data class CreatePostDto(
     val tags: List<TagDto> = emptyList(),
 
     ) {
+
     fun toEntity(): Post =
-        Post(postType = postType , content = content, title = title)
+        Post(postType = postType, content = content, title = title)
 
     fun getTagEntities() =
         tags.map(TagDto::toEntity)

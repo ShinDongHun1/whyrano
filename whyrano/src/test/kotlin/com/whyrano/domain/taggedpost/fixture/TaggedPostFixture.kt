@@ -20,5 +20,5 @@ object TaggedPostFixture {
         post: Post,
         tags: List<Tag>,
     ): List<TaggedPost> =
-        IntStream.range(0, tags.size).mapToObj{ TaggedPost(id = it.toLong(), post = post, tag = tags[it]) }.toList()
+        IntStream.range(0, tags.size).mapToObj { TaggedPost(id = it.toLong(), post = post, tag = tags[it]) }.toList()
 }

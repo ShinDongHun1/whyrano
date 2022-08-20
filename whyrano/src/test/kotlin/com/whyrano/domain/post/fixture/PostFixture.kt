@@ -40,7 +40,6 @@ object PostFixture {
     const val LIKE_COUNT = 0
 
 
-
     fun post(
         id: Long? = ID,
         postType: PostType = PostType.QUESTION,
@@ -53,10 +52,11 @@ object PostFixture {
         writerId: Long = MemberFixture.ID,
         writerRole: Role = Role.BLACK,
     ) =
-        Post(id = id, postType = postType,
+        Post(
+            id = id, postType = postType,
             title = title, content = content,
             answerCount = AtomicInteger(answerCount), viewCount = AtomicInteger(viewCount),
-            commentCount = AtomicInteger(commentCount),likeCount = AtomicInteger(likeCount),
+            commentCount = AtomicInteger(commentCount), likeCount = AtomicInteger(likeCount),
             writer = member(id = writerId, authority = writerRole)
         )
 
@@ -67,7 +67,7 @@ object PostFixture {
         content: String = CONTENT,
         tagDtos: List<TagDto> = emptyList(),
     ) =
-            CreatePostDto(title = title, content = content, postType = postType, tags = tagDtos)
+        CreatePostDto(title = title, content = content, postType = postType, tags = tagDtos)
 
     fun updatePostDto(
         title: String = UPDATE_TITLE,
@@ -83,14 +83,13 @@ object PostFixture {
         postType: PostType? = null,
         tag: String? = null,
     ) =
-        PostSearchCond(title = title, content = content, postType = postType, tag = tag )
-
+        PostSearchCond(title = title, content = content, postType = postType, tag = tag)
 
 
     fun postPageable(
         page: Int = 0,
         size: Int = 0,
-        orders: List<Order> = emptyList()
+        orders: List<Order> = emptyList(),
     ) =
         PageRequest.of(page, size, Sort.by(orders))
 

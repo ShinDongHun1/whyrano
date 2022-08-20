@@ -37,9 +37,6 @@ class JwtAuthenticationFilter(
     }
 
 
-
-
-
     override fun doFilter(request: ServletRequest, response: ServletResponse, chain: FilterChain) {
 
         val req = request as HttpServletRequest
@@ -58,8 +55,7 @@ class JwtAuthenticationFilter(
 
             //인증 진행
             jwtAuthenticationManager.authenticateWithTokens(req, res, chain)
-        }
-        catch (ex: Exception) {
+        } catch (ex: Exception) {
 
             //예외 시 후처리
             jwtAuthenticationFailureManager.failureAuthentication(res, ex)

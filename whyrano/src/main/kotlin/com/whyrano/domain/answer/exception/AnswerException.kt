@@ -1,6 +1,5 @@
 package com.whyrano.domain.answer.exception
 
-import com.whyrano.domain.member.exception.MemberExceptionType
 import com.whyrano.global.exception.BaseException
 
 /**
@@ -8,9 +7,9 @@ import com.whyrano.global.exception.BaseException
  */
 class AnswerException(
 
-    private val exceptionType: AnswerExceptionType
+    private val exceptionType: AnswerExceptionType,
 
-) : BaseException() {
+    ) : BaseException() {
 
     override fun exceptionType() = exceptionType
 }

@@ -25,7 +25,7 @@ class PostController(
 
     private val postService: PostService,
 
-) {
+    ) {
 
 
     /**
@@ -51,8 +51,6 @@ class PostController(
 
 
 
-
-
     /**
      * 게시물 수정
      */
@@ -68,8 +66,6 @@ class PostController(
 
         return ResponseEntity.ok().build()
     }
-
-
 
 
 
@@ -89,8 +85,6 @@ class PostController(
 
 
 
-
-
     /**
      * 게시물 단일 조회
      */
@@ -104,8 +98,6 @@ class PostController(
 
         return ResponseEntity.ok().build()
     }
-
-
 
 
 

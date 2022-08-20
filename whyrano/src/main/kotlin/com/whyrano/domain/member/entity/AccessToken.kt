@@ -4,21 +4,21 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.auth0.jwt.exceptions.JWTVerificationException
 import com.whyrano.global.auth.userdetails.AuthMember
-import java.lang.System.*
+import java.lang.System.currentTimeMillis
 import java.util.*
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeUnit.*
+import java.util.concurrent.TimeUnit.DAYS
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.persistence.Embeddable
 
 /**
  * Created by ShinD on 2022/08/10.
  */
 @Embeddable
-data class AccessToken (
+data class AccessToken(
 
     var accessToken: String? = null,
 
-) : Token {
+    ) : Token {
 
     companion object {
 
@@ -26,6 +26,8 @@ data class AccessToken (
         const val MEMBER_EMAIL_CLAIM = "memberEmail"
         const val MEMBER_ID_CLAIM = "memberId"
         const val MEMBER_ROLE_CLAIM = "memberRole"
+
+
 
         //== 정적 팩터리 메서드 ==//
         fun create(
@@ -49,25 +51,24 @@ data class AccessToken (
     }
 
 
-
-
     override fun isValid(algorithm: Algorithm) =
         try {
             JWT.require(algorithm).build().verify(accessToken)
             true
         }
-        catch (e: Exception) { false }
-
-
+        catch (e: Exception) {
+            false
+        }
 
 
     fun getAuthMember(algorithm: Algorithm): AuthMember? {
         return try {
 
-            val jwt          =   JWT.require(algorithm).build().verify(accessToken)
-            val id           =   jwt.getClaim(MEMBER_ID_CLAIM).toString().replace("\"", "")
-            val email        =   jwt.getClaim(MEMBER_EMAIL_CLAIM).toString().replace("\"", "") // ""hui@na.com"" 이런 식으로 반환되어 이를 제거함
-            val role         =   jwt.getClaim(MEMBER_ROLE_CLAIM).toString().replace("\"", "")
+            val jwt = JWT.require(algorithm).build().verify(accessToken)
+            val id = jwt.getClaim(MEMBER_ID_CLAIM).toString().replace("\"", "")
+            val email =
+                jwt.getClaim(MEMBER_EMAIL_CLAIM).toString().replace("\"", "") // ""hui@na.com"" 이런 식으로 반환되어 이를 제거함
+            val role = jwt.getClaim(MEMBER_ROLE_CLAIM).toString().replace("\"", "")
 
             AuthMember(id = id.toLong(), email = email, role = Role.valueOf(role))
         }
@@ -75,9 +76,6 @@ data class AccessToken (
             null // 토큰이 유효하지 않는 등의 예외 발생 시 -> null 반환
         }
     }
-
-
-
 
 
     fun getExpiredDate(algorithm: Algorithm): Date =

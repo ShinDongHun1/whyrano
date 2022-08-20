@@ -31,24 +31,35 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
  * Created by ShinD on 2022/08/10.
  */
 @WebMvcTest(
-    excludeFilters = [ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, classes = [PostController::class, MemberController::class])]
+    excludeFilters = [ComponentScan.Filter(
+        type = FilterType.ASSIGNABLE_TYPE,
+        classes = [PostController::class, MemberController::class]
+    )]
 )
 @Import(SecurityConfig::class)
 internal class JsonLoginSuccessHandlerTest {
+
     companion object {
+
         private val objectMapper = ObjectMapper()
         private var passwordEncoder: PasswordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder()
     }
 
 
+
     @Autowired
     private lateinit var mockMvc: MockMvc
+
+
 
     @MockkBean
     private lateinit var memberService: MemberService
 
+
+
     @MockkBean
     private lateinit var jwtService: JwtService
+
 
 
     @Test
@@ -84,7 +95,6 @@ internal class JsonLoginSuccessHandlerTest {
         assertThat(tokens.accessToken()).isNotNull
 
     }
-
 
 
     private fun usernamePasswordHashMap(username: String, password: String): HashMap<String, String> {

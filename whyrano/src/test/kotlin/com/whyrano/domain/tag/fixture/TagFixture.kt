@@ -2,7 +2,6 @@ package com.whyrano.domain.tag.fixture
 
 import com.whyrano.domain.tag.dto.TagDto
 import com.whyrano.domain.tag.entity.Tag
-import java.util.stream.IntStream
 
 /**
  * Created by ShinD on 2022/08/19.
@@ -13,12 +12,12 @@ object TagFixture {
     private const val ID = 11L
     fun tagDto(
         id: Long? = ID,
-        name: String = NAME
+        name: String = NAME,
     ) =
-        TagDto(id= id, name = name)
+        TagDto(id = id, name = name)
 
     fun newTags(
-        size: Int = 3
+        size: Int = 3,
     ): MutableList<Tag> {
         val result = mutableListOf<Tag>()
         for (i in 0 until size) {
@@ -28,7 +27,7 @@ object TagFixture {
     }
 
     fun savedTags(
-        size: Int = 3
+        size: Int = 3,
     ): MutableList<Tag> {
         val result = mutableListOf<Tag>()
         for (i in 0 until size) {

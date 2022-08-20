@@ -13,6 +13,7 @@ internal class AccessTokenTest {
     private val algorithm = Algorithm.HMAC512("jwtProperties.secretKey")
 
 
+
     @Test
     fun `AccessToken 권한, 이메일 생성 성공`() {
 
@@ -28,7 +29,7 @@ internal class AccessTokenTest {
 
         val extractedUserDetails = accessToken.getAuthMember(algorithm)
 
-        assertThat(authMember!!.email).isEqualTo(authMember.username)
+        assertThat(authMember !!.email).isEqualTo(authMember.username)
         assertThat(authMember.authorities).containsAll(authMember.authorities)
     }
 }

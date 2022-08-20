@@ -10,22 +10,25 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
 /**
+ * 인증된 회원 정보 가져오는데 사용
+ *
  * Created by ShinD on 2022/08/13.
  */
 @Component
 class AuthMemberArgumentResolver : HandlerMethodArgumentResolver {
 
+
     override fun supportsParameter(parameter: MethodParameter): Boolean {
 
+        // @Auth 붙어있는지 여부
         val hasAuthAnnotation = parameter.hasParameterAnnotation(Auth::class.java)
 
+        // AuthMember에 할당 가능한지 여부
         val hasAuthMemberType = AuthMember::class.java.isAssignableFrom(parameter.parameterType)
 
+        // @Auth authMember: AuthMember
         return hasAuthAnnotation && hasAuthMemberType
     }
-
-
-
 
 
     override fun resolveArgument(
@@ -35,10 +38,13 @@ class AuthMemberArgumentResolver : HandlerMethodArgumentResolver {
         binderFactory: WebDataBinderFactory?,
     ): AuthMember? {
 
+        //SecurityContext 로부터 인증 정보 가져오기
         val authentication = SecurityContextHolder.getContext().authentication
 
-        if(authentication == null || !authentication.isAuthenticated ) return null
+        // 인증 정보가 없는 경우 null 반환
+        if (authentication == null || ! authentication.isAuthenticated) return null
 
+        // 인증 객체 반환
         return authentication.principal as AuthMember
     }
 }

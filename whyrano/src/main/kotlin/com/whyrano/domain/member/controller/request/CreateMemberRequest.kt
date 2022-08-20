@@ -23,6 +23,11 @@ data class CreateMemberRequest(
             return CreateMemberDto(email = email, password = password, nickname = nickname, profileImagePath = null)
         }
 
-        return CreateMemberDto(email = email, password = password, nickname = nickname, profileImagePath = profileImagePath)
+        return CreateMemberDto(
+            email = email,
+            password = password,
+            nickname = nickname,
+            profileImagePath = profileImagePath
+        )
     }
 }

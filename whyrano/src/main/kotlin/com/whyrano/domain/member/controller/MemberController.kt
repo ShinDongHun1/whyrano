@@ -16,7 +16,7 @@ import javax.validation.Valid
  */
 @RestController
 class MemberController(
-    private val memberService: MemberService
+    private val memberService: MemberService,
 ) {
 
     /**
@@ -24,8 +24,8 @@ class MemberController(
      */
     @PostMapping("/signup")
     fun signUp(
-        @Valid @RequestBody cmr: CreateMemberRequest
-    ) : ResponseEntity<Unit> {
+        @Valid @RequestBody cmr: CreateMemberRequest,
+    ): ResponseEntity<Unit> {
 
         val memberId = memberService.signUp(cmr.toServiceDto())
 
@@ -39,15 +39,13 @@ class MemberController(
 
 
 
-
-
     /**
      * 회원 수정
      */
     @PutMapping("/member")
     fun update(
         @Auth authMember: AuthMember,
-        @RequestBody umr: UpdateMemberRequest
+        @RequestBody umr: UpdateMemberRequest,
     ): ResponseEntity<Unit> {
         //TODO 빈칸으로만 들어있는 경우 null이 되도록 수정
         memberService.update(authMember.id, umr.toServiceDto())
@@ -57,15 +55,13 @@ class MemberController(
 
 
 
-
-
     /**
      * 회원 탈퇴
      */
     @DeleteMapping("/member")
     fun delete(
         @Auth authMember: AuthMember,
-        @Valid @RequestBody passwordDto: PasswordDto
+        @Valid @RequestBody passwordDto: PasswordDto,
     ): ResponseEntity<Unit> {
 
         memberService.delete(authMember.id, passwordDto.password)

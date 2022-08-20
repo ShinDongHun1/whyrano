@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test
 internal class MemberInfoResponseTest {
 
     companion object {
+
         private val objectMapper = ObjectMapper()
         private val JSON_FORMAT = """
             {
@@ -28,6 +29,7 @@ internal class MemberInfoResponseTest {
     }
 
 
+
     @Test
     fun `MemberDto 에서 MemberInfoResponse 변환`() {
 
@@ -38,11 +40,10 @@ internal class MemberInfoResponseTest {
         val from = MemberInfoResponse.from(memberDto)
 
         //then
-        val memberInfoResponse = memberInfoResponse(createdDate = memberDto.createdDate, modifiedDate = memberDto.modifiedDate)
+        val memberInfoResponse =
+            memberInfoResponse(createdDate = memberDto.createdDate, modifiedDate = memberDto.modifiedDate)
         assertThat(from).isEqualTo(memberInfoResponse)
     }
-
-
 
 
 
@@ -56,7 +57,18 @@ internal class MemberInfoResponseTest {
         val writeValueAsString = objectMapper.writeValueAsString(mir)
 
         //then
-        assertThat(writeValueAsString).isEqualTo(JSON_FORMAT.format(mir.id, mir.role, mir.email, mir.nickname, mir.point, mir.profileImagePath, mir.createdDate, mir.modifiedDate)
-                                                            .replace("\t","").replace(" ","").replace("\n", ""))
+        assertThat(writeValueAsString).isEqualTo(
+            JSON_FORMAT.format(
+                mir.id,
+                mir.role,
+                mir.email,
+                mir.nickname,
+                mir.point,
+                mir.profileImagePath,
+                mir.createdDate,
+                mir.modifiedDate
+            )
+                .replace("\t", "").replace(" ", "").replace("\n", "")
+        )
     }
 }

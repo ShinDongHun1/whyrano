@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 class ExceptionController {
 
     companion object {
+
         const val BIND_EXCEPTION_MESSAGE = "요청에 채워지지 않은 필드가 있습니다."
         const val BIND_EXCEPTION_ERROR_CODE = 9000
         val BIND_EXCEPTION_HTTP_STATUS = BAD_REQUEST
@@ -26,9 +27,7 @@ class ExceptionController {
         val UNEXPECTED_EXCEPTION_HTTP_STATUS = INTERNAL_SERVER_ERROR
     }
 
-    private val log = KotlinLogging.logger {  }
-
-
+    private val log = KotlinLogging.logger { }
 
 
 
@@ -41,10 +40,13 @@ class ExceptionController {
 
         return ResponseEntity
             .status(exceptionType.httpStatus())
-            .body(ExceptionResponse(errorCode = exceptionType.errorCode(), message = exceptionType.message()))
+            .body(
+                ExceptionResponse(
+                    errorCode = exceptionType.errorCode(),
+                    message = exceptionType.message()
+                )
+            )
     }
-
-
 
 
 
@@ -55,10 +57,13 @@ class ExceptionController {
 
         return ResponseEntity
             .status(BIND_EXCEPTION_HTTP_STATUS)
-            .body(ExceptionResponse(errorCode = BIND_EXCEPTION_ERROR_CODE, message = BIND_EXCEPTION_MESSAGE))
+            .body(
+                ExceptionResponse(
+                    errorCode = BIND_EXCEPTION_ERROR_CODE,
+                    message = BIND_EXCEPTION_MESSAGE
+                )
+            )
     }
-
-
 
 
 
@@ -69,11 +74,14 @@ class ExceptionController {
 
         return ResponseEntity
             .status(UNEXPECTED_EXCEPTION_HTTP_STATUS)
-            .body(ExceptionResponse(errorCode = UNEXPECTED_EXCEPTION_ERROR_CODE, message = UNEXPECTED_EXCEPTION_MESSAGE))
+            .body(
+                ExceptionResponse(
+                    errorCode = UNEXPECTED_EXCEPTION_ERROR_CODE,
+                    message = UNEXPECTED_EXCEPTION_MESSAGE
+                )
+            )
     }
 }
-
-
 
 
 data class ExceptionResponse(

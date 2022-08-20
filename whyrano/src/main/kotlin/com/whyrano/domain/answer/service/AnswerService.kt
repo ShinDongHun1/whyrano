@@ -28,7 +28,7 @@ class AnswerService(
 
     private val answerRepository: AnswerRepository,
 
-) {
+    ) {
 
     /**
      * 답변 작성
@@ -52,7 +52,7 @@ class AnswerService(
     fun create(
         writerId: Long,
         postId: Long,
-        cad: CreateAnswerDto
+        cad: CreateAnswerDto,
     ): Long {
 
         val answer = cad.toEntity()
@@ -77,10 +77,8 @@ class AnswerService(
         post.plusAnswerCount()
 
         // 답변 저장
-        return answerRepository.save(answer).id!!
+        return answerRepository.save(answer).id !!
     }
-
-
 
 
 
@@ -104,8 +102,6 @@ class AnswerService(
 
 
 
-
-
     /**
      * 답변 삭제
      * (어드민인 경우 다른 어드민 혹은 다른 일반 회원 답변 삭제 가능)
@@ -117,16 +113,19 @@ class AnswerService(
     ) {
 
         // 답변 조회
-        val answer = answerRepository.findWithWriterAndPostById(id = answerId) ?: throw AnswerException(AnswerExceptionType.NOT_FOUND)
+        val answer = answerRepository.findWithWriterAndPostById(id = answerId) ?: throw AnswerException(
+            AnswerExceptionType.NOT_FOUND
+        )
 
         // 회원 조회
-        val member = memberRepository.findByIdOrNull(id = writerId) ?: throw MemberException(MemberExceptionType.NOT_FOUND)
+        val member =
+            memberRepository.findByIdOrNull(id = writerId) ?: throw MemberException(MemberExceptionType.NOT_FOUND)
 
         // 답변 삭제 가능여부 체크
-        if ( ! answer.canDeletedBy(member) ) throw AnswerException(AnswerExceptionType.NO_AUTHORITY_DELETE_ANSWER)
+        if (! answer.canDeletedBy(member)) throw AnswerException(AnswerExceptionType.NO_AUTHORITY_DELETE_ANSWER)
 
         // 질문의 답변 수 1 줄이기
-        answer.post!!.minusAnswerCount()
+        answer.post !!.minusAnswerCount()
 
         answerRepository.delete(answer)
     }

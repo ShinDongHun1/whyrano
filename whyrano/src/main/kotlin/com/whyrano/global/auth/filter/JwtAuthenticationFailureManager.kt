@@ -18,15 +18,12 @@ class JwtAuthenticationFailureManager(
 
     private val objectMapper: ObjectMapper,
 
-) {
+    ) {
 
-    private val log = KotlinLogging.logger {  }
-
-
+    private val log = KotlinLogging.logger { }
 
 
-
-    fun failureAuthentication(response: HttpServletResponse ,ex: Exception) {
+    fun failureAuthentication(response: HttpServletResponse, ex: Exception) {
         when (ex) {
             //예상한 범위 내의 오류
             is AuthException -> {
@@ -38,7 +35,12 @@ class JwtAuthenticationFailureManager(
                     status = exceptionType.httpStatus(),
                     contentType = MediaType.APPLICATION_JSON_VALUE,
                     charset = StandardCharsets.UTF_8,
-                    content = objectMapper.writeValueAsString(ExceptionResponse(errorCode = exceptionType.errorCode(), message = exceptionType.message()))
+                    content = objectMapper.writeValueAsString(
+                        ExceptionResponse(
+                            errorCode = exceptionType.errorCode(),
+                            message = exceptionType.message()
+                        )
+                    )
                 )
             }
 
@@ -54,14 +56,16 @@ class JwtAuthenticationFailureManager(
                     status = HttpStatus.UNAUTHORIZED,
                     contentType = MediaType.APPLICATION_JSON_VALUE,
                     charset = StandardCharsets.UTF_8,
-                    content = objectMapper.writeValueAsString(ExceptionResponse(errorCode = AuthExceptionType.ELSE.errorCode(), message = AuthExceptionType.ELSE.message()))
+                    content = objectMapper.writeValueAsString(
+                        ExceptionResponse(
+                            errorCode = AuthExceptionType.ELSE.errorCode(),
+                            message = AuthExceptionType.ELSE.message()
+                        )
+                    )
                 )
             }
         }
     }
-
-
-
 
 
     private fun setResponse(

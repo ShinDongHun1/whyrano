@@ -18,6 +18,8 @@ internal class AuthMemberTest {
         assertThat(authMember.authorities).containsOnly(SimpleGrantedAuthority(Role.BLACK.authority))
     }
 
+
+
     @Test
     fun `AuthMember에서 UserDetail로 변환했을때, username등이 모두 동일하게 동작하는지 확인`() {
         val authMember = MemberFixture.authMember(role = Role.BLACK)
