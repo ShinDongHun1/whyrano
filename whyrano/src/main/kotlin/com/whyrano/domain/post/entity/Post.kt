@@ -13,6 +13,7 @@ import com.whyrano.domain.post.exception.PostException
 import com.whyrano.domain.post.exception.PostExceptionType
 import com.whyrano.domain.tag.entity.Tag
 import com.whyrano.domain.taggedpost.entity.TaggedPost
+import java.util.concurrent.atomic.AtomicInteger
 import javax.persistence.*
 import javax.persistence.EnumType.STRING
 import javax.persistence.FetchType.LAZY
@@ -37,13 +38,14 @@ class Post(
     @Column(name = "content", nullable = false)
     var content: String, // 내용
 
-    var answerCount: Int = 0, // 답변 수
+    // 동시성 이슈 대비 AtomicInteger 사용
+    var answerCount: AtomicInteger = AtomicInteger(0), // 답변 수
 
-    var viewCount: Int = 0, // 조회수
+    var viewCount: AtomicInteger = AtomicInteger(0), // 조회수
 
-    var likeCount: Int = 0, // 좋아요 개수
+    var likeCount: AtomicInteger = AtomicInteger(0), // 좋아요 개수
 
-    var commentCount: Int = 0, // 댓글 수
+    var commentCount: AtomicInteger = AtomicInteger(0), // 댓글 수
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "writer", nullable = false)
@@ -176,4 +178,21 @@ class Post(
         }
     }
 
+
+
+
+
+    /**
+     * 답변 수 1 늘리기
+     */
+    fun plusAnswerCount() {
+        this.answerCount.incrementAndGet()
+    }
+
+    /**
+     * 답변 수 1 줄이기
+     */
+    fun minusAnswerCount() {
+        this.answerCount.decrementAndGet()
+    }
 }

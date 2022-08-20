@@ -8,6 +8,7 @@ import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
 import com.whyrano.domain.post.fixture.PostFixture
+import java.util.concurrent.atomic.AtomicInteger
 
 
 /**
@@ -33,7 +34,7 @@ object AnswerFixture {
         Answer(
             id = id,
             content = content,
-            likeCount = likeCount,
+            likeCount = AtomicInteger(likeCount),
             writer = writer,
             post = post
         )

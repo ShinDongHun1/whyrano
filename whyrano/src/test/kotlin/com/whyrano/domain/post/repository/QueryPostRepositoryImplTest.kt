@@ -864,11 +864,11 @@ internal class QueryPostRepositoryImplTest {
 
         for (i in 1 until  totalCount) {
             //조회수 오름차순, 즉 0이 제일 작음
-            assertThat(search.content[i-1].viewCount).isLessThanOrEqualTo(search.content[i].viewCount)
+            assertThat(search.content[i-1].viewCount.get()).isLessThanOrEqualTo(search.content[i].viewCount.get())
 
             if (search.content[i-1].viewCount == search.content[i].viewCount) {
                 //댓글수 내림차순, 즉 0이 제일 큼
-                assertThat(search.content[i-1].commentCount).isGreaterThanOrEqualTo(search.content[i].commentCount)
+                assertThat(search.content[i-1].commentCount.get()).isGreaterThanOrEqualTo(search.content[i].commentCount.get())
             }
         }
     }
@@ -908,12 +908,12 @@ internal class QueryPostRepositoryImplTest {
 
         for (i in 1 until  totalCount) {
             //댓글수 내림차순, 즉 0이 제일 큼
-            assertThat(search.content[i-1].commentCount).isGreaterThanOrEqualTo(search.content[i].commentCount)
+            assertThat(search.content[i-1].commentCount.get()).isGreaterThanOrEqualTo(search.content[i].commentCount.get())
 
 
             if (search.content[i-1].commentCount == search.content[i].commentCount) {
                 //조회수 오름차순, 즉 0이 제일 작음
-                assertThat(search.content[i-1].viewCount).isLessThanOrEqualTo(search.content[i].viewCount)
+                assertThat(search.content[i-1].viewCount.get()).isLessThanOrEqualTo(search.content[i].viewCount.get())
             }
         }
     }

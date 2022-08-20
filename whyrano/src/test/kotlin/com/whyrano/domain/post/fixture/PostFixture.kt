@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.data.domain.Sort.Order
 import java.time.LocalDateTime
+import java.util.concurrent.atomic.AtomicInteger
 
 
 /**
@@ -32,6 +33,7 @@ object PostFixture {
     const val UPDATE_TITLE = "example update title"
     const val CONTENT = "example content"
     const val UPDATE_CONTENT = "example update content"
+
     const val ANSWER_COUNT = 0
     const val COMMENT_COUNT = 0
     const val VIEW_COUNT = 0
@@ -51,7 +53,12 @@ object PostFixture {
         writerId: Long = MemberFixture.ID,
         writerRole: Role = Role.BLACK,
     ) =
-        Post(id = id, postType = postType, title = title, content = content, answerCount = answerCount, viewCount = viewCount, commentCount = commentCount,likeCount = likeCount, writer = member(id = writerId, authority = writerRole))
+        Post(id = id, postType = postType,
+            title = title, content = content,
+            answerCount = AtomicInteger(answerCount), viewCount = AtomicInteger(viewCount),
+            commentCount = AtomicInteger(commentCount),likeCount = AtomicInteger(likeCount),
+            writer = member(id = writerId, authority = writerRole)
+        )
 
 
     fun createPostDto(

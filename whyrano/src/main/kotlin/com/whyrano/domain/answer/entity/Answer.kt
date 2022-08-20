@@ -10,6 +10,7 @@ import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.entity.Role
 import com.whyrano.domain.post.entity.Post
 import com.whyrano.domain.post.entity.PostType
+import java.util.concurrent.atomic.AtomicInteger
 import javax.persistence.*
 import javax.persistence.FetchType.*
 import javax.persistence.GenerationType.*
@@ -24,7 +25,7 @@ class Answer(
 
     var content: String, // 내용
 
-    var likeCount: Int = 0, // 좋아요 개수
+    var likeCount: AtomicInteger = AtomicInteger(0), // 좋아요 개수
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "writer_id", nullable = false)

@@ -73,6 +73,9 @@ class AnswerService(
         checkNotNull(answer.writer) { "writer is null!" }
         checkNotNull(answer.post) { "post is null!" }
 
+        // 질문의 답변 수 1 늘리기
+        post.plusAnswerCount()
+
         // 답변 저장
         return answerRepository.save(answer).id!!
     }
@@ -121,6 +124,9 @@ class AnswerService(
 
         // 답변 삭제 가능여부 체크
         if ( ! answer.canDeletedBy(member) ) throw AnswerException(AnswerExceptionType.NO_AUTHORITY_DELETE_ANSWER)
+
+        // 질문의 답변 수 1 줄이기
+        answer.post!!.minusAnswerCount()
 
         answerRepository.delete(answer)
     }
