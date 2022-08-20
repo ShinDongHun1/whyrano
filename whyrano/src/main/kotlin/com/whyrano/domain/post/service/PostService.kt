@@ -226,6 +226,7 @@ class PostService(
     /**
      * 게시글 단일 조회
      *
+     * 댓글, 대댓글, 답변, 답변의 댓글 & 대댓글 작성
      * TODO 구현해야 함
      */
     @Transactional(readOnly = true)

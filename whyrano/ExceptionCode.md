@@ -22,5 +22,9 @@ NOT_FOUND(1202, HttpStatus.NOT_FOUND, "없는 게시글입니다."),
 NO_AUTHORITY_UPDATE_POST(1203, HttpStatus.FORBIDDEN, "게시글을 수정할 권한이 없습니다."),
 NO_AUTHORITY_DELETE_POST(1204, HttpStatus.FORBIDDEN, "게시글을 삭제할 권한이 없습니다."),
 
+CANNOT_WRITE_IN_NOTICE(1300, HttpStatus.BAD_REQUEST, "공지에는 답변을 작성하실 수 없습니다.\n 댓글만 작성 가능합니다.")
+NO_AUTHORITY_WRITE_ANSWER(1301, HttpStatus.FORBIDDEN, "답변을 작성할 권한이 없습니다. (블랙리스트)"),
+
+
 9000, BAD_REQUEST, "요청에 채워지지 않은 필드가 있습니다."
 9999,  INTERNAL_SERVER_ERROR, 예측하지 못한 예외가 발생했습니다
