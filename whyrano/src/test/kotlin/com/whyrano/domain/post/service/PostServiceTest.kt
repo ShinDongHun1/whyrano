@@ -202,8 +202,7 @@ internal class PostServiceTest {
         val savedTags = TagFixture.savedTags(3)
         val post = post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role)
         every { postRepository.findByIdOrNull(postId) } returns post
-        every { taggedPostRepository.findByPost(any()) } returns emptyList()
-        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
         every { tagRepository.saveAll<Tag>(any()) } returns savedTags
         every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = post, tags = savedTags)
 
@@ -249,8 +248,7 @@ internal class PostServiceTest {
         val post = post(id = postId, postType = NOTICE, writerId = adminAuthMember.id, writerRole = adminAuthMember.role)
         val savedTags = TagFixture.savedTags(3)
         every { postRepository.findByIdOrNull(postId) } returns post
-        every { taggedPostRepository.findByPost(any()) } returns emptyList()
-        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
         every { tagRepository.saveAll<Tag>(any()) } returns savedTags
         every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post= post, tags = savedTags)
 
@@ -325,8 +323,7 @@ internal class PostServiceTest {
         every { postRepository.findByIdOrNull(postId) } returns post
         every { memberRepository.findByIdOrNull(anotherAdminId) } returns member(id = anotherAdminId, authority = ADMIN)
         every { tagRepository.saveAll<Tag>(any()) } returns savedTags
-        every { taggedPostRepository.findByPost(any()) } returns emptyList()
-        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
         every { taggedPostRepository.saveAll<TaggedPost>(any()) } returns TaggedPostFixture.savedTaggedPosts(post = post, tags = savedTags)
 
 
@@ -374,8 +371,7 @@ internal class PostServiceTest {
             post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role)
         every { postRepository.findByIdOrNull(postId) } returns post
         every { postRepository.delete(any()) } just runs
-        every { taggedPostRepository.findByPost(post) } returns emptyList()
-        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
 
 
         //when
@@ -397,8 +393,7 @@ internal class PostServiceTest {
         val postId = 10L
         every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = QUESTION, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
-        every { taggedPostRepository.findByPost(any()) } returns emptyList()
-        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
 
 
         //when
@@ -449,8 +444,7 @@ internal class PostServiceTest {
 
         every { postRepository.findByIdOrNull(postId) } returns post
         every { postRepository.delete(any()) } just runs
-        every { taggedPostRepository.findByPost(any()) } returns emptyList()
-        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
+        every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
 
 
 
@@ -517,9 +511,7 @@ internal class PostServiceTest {
         val postId = 10L
         every { postRepository.findByIdOrNull(postId) } returns post(id = postId, postType = NOTICE, writerId = basicAuthMember.id, writerRole = basicAuthMember.role )
         every { postRepository.delete(any()) } just runs
-        every { taggedPostRepository.findByPost(any()) } returns emptyList()
-        every { taggedPostRepository.deleteAllInBatch(any()) } just runs
-
+        every { taggedPostRepository.deleteAllByPostInBatch(any()) } just runs
         val anotherAdminId = 300L
         every { memberRepository.findByIdOrNull(anotherAdminId) } returns member(id = anotherAdminId, authority = ADMIN)
 

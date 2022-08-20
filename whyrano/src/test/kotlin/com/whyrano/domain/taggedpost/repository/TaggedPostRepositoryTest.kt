@@ -81,7 +81,7 @@ class TaggedPostRepositoryTest {
         val saveAll = taggedPostRepository.saveAll(taggedPosts)
 
         //when
-        val savedTaggedPost = taggedPostRepository.findByPost(post)
+        val savedTaggedPost = taggedPostRepository.findAllByPost(post)
 
         //then
         assertThat(savedTaggedPost.size).isEqualTo(tags.size)
@@ -93,7 +93,7 @@ class TaggedPostRepositoryTest {
 
 
     @Test
-    fun `deleteAllInBatch 동작`() {
+    fun `deleteAllInBatch 동작 - 데이터 10000개 넘어가면 오류남`() {
 
         //given
         val member = MemberFixture.member(id = null)
@@ -102,14 +102,14 @@ class TaggedPostRepositoryTest {
         val post = PostFixture.post(id = null)
         post.confirmWriter(member)
 
-        val tags = TagFixture.newTags(size = 5)
+        val tags = TagFixture.newTags(size = 3)
 
         postRepository.save(post)
         tagRepository.saveAll(tags)
         val taggedPosts = TaggedPostFixture.newTaggedPosts(post = post, tags = tags)
         val saveAll = taggedPostRepository.saveAllAndFlush(taggedPosts)
 
-        val savedTaggedPost = taggedPostRepository.findByPost(post)
+        val savedTaggedPost = taggedPostRepository.findAllByPost(post)
 
 
         //when
@@ -117,6 +117,32 @@ class TaggedPostRepositoryTest {
 
 
         //then
-        assertThat(taggedPostRepository.findByPost(post).size).isEqualTo(0)
+        assertThat(taggedPostRepository.findAllByPost(post).size).isEqualTo(0)
+    }
+
+    @Test
+    fun `deleteAllByPostInBatch 동작2`() {
+
+        //given
+        val member = MemberFixture.member(id = null)
+        memberRepository.save(member)
+
+        val post = PostFixture.post(id = null)
+        post.confirmWriter(member)
+
+        val tags = TagFixture.newTags(size = 3)
+
+        postRepository.save(post)
+        tagRepository.saveAll(tags)
+        val taggedPosts = TaggedPostFixture.newTaggedPosts(post = post, tags = tags)
+        val saveAll = taggedPostRepository.saveAllAndFlush(taggedPosts)
+
+
+        //when
+        taggedPostRepository.deleteAllByPostInBatch(post)
+
+
+        //then
+        assertThat(taggedPostRepository.findAllByPost(post).size).isEqualTo(0)
     }
 }
