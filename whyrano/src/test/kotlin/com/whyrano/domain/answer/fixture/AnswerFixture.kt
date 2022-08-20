@@ -2,6 +2,7 @@ package com.whyrano.domain.answer.fixture
 
 import com.whyrano.domain.answer.entity.Answer
 import com.whyrano.domain.answer.service.dto.CreateAnswerDto
+import com.whyrano.domain.answer.service.dto.UpdateAnswerDto
 import com.whyrano.domain.member.entity.Member
 import com.whyrano.domain.member.fixture.MemberFixture
 import com.whyrano.domain.post.entity.Post
@@ -41,4 +42,9 @@ object AnswerFixture {
         content: String = CONTENT,
 
     ) = CreateAnswerDto(content = content)
+
+    fun updateAnswerDto(
+        content: String = CONTENT,
+
+        ) = UpdateAnswerDto(content = content)
 }
