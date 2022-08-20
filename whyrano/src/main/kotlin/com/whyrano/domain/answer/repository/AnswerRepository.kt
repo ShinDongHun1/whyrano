@@ -14,13 +14,10 @@ interface AnswerRepository : JpaRepository<Answer, Long>{
     fun findWithWriterByIdAndWriterId(id: Long, writerId: Long): Answer?
 
 
-
-
-
     /**
      * 답변 삭제 시 사용
      * (삭제는 어드민의 경우 자신의 것이 아니어도 삭제할수 있으므로 writerId로 조회할 수 없었음)
      */
-    @EntityGraph(attributePaths = ["writer"])
-    fun findWithWriterById(id: Long): Answer?
+    @EntityGraph(attributePaths = ["writer", "post"])
+    fun findWithWriterAndPostById(id: Long): Answer?
 }

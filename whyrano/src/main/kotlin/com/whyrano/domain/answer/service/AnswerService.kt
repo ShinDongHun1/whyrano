@@ -114,7 +114,7 @@ class AnswerService(
     ) {
 
         // 답변 조회
-        val answer = answerRepository.findWithWriterById(id = answerId) ?: throw AnswerException(AnswerExceptionType.NOT_FOUND)
+        val answer = answerRepository.findWithWriterAndPostById(id = answerId) ?: throw AnswerException(AnswerExceptionType.NOT_FOUND)
 
         // 회원 조회
         val member = memberRepository.findByIdOrNull(id = writerId) ?: throw MemberException(MemberExceptionType.NOT_FOUND)

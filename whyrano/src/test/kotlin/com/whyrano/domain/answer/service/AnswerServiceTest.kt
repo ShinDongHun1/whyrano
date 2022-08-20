@@ -276,7 +276,7 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterById(id = answer.id!!) } returns answer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
         every { memberRepository.findByIdOrNull(id = writer.id!!) } returns writer
         every { answerRepository.delete(answer) } just runs
 
@@ -300,7 +300,7 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterById(id = answer.id!!) } returns answer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
         every { memberRepository.findByIdOrNull(id = admin.id!!) } returns admin
         every { answerRepository.delete(answer) } just runs
 
@@ -324,7 +324,7 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterById(id = answer.id!!) } returns answer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
         every { memberRepository.findByIdOrNull(id = admin.id!!) } returns admin
         every { answerRepository.delete(answer) } just runs
 
@@ -347,7 +347,7 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterById(id = answer.id!!) } returns answer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
         every { memberRepository.findByIdOrNull(id = writer.id!!) } throws MemberException(MemberExceptionType.NOT_FOUND)
         every { answerRepository.delete(answer) } just runs
 
@@ -376,7 +376,7 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterById(id = answer.id!!) } throws AnswerException(AnswerExceptionType.NOT_FOUND)
+        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } throws AnswerException(AnswerExceptionType.NOT_FOUND)
         every { memberRepository.findByIdOrNull(id = writer.id!!) } returns writer
         every { answerRepository.delete(answer) } just runs
 
@@ -405,7 +405,7 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterById(id = answer.id!!) } returns answer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
         every { memberRepository.findByIdOrNull(id = writer.id!!) } returns writer
         every { answerRepository.delete(answer) } just runs
 
@@ -435,7 +435,7 @@ internal class AnswerServiceTest {
         val post = PostFixture.post(id = 11L, postType = PostType.QUESTION)
         val answer = AnswerFixture.answer(id = 12L, writer = writer, post = post)
 
-        every { answerRepository.findWithWriterById(id = answer.id!!) } returns answer
+        every { answerRepository.findWithWriterAndPostById(id = answer.id!!) } returns answer
         every { memberRepository.findByIdOrNull(id = anotherMember.id!!) } returns anotherMember
         every { answerRepository.delete(answer) } just runs
 
