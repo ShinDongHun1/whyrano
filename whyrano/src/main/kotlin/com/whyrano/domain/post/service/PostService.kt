@@ -201,6 +201,7 @@ class PostService(
      *
      * 즉 page=1 인 경우 page = 0으로 넘어오므로 정삭적으로 작동함
      */
+    @Transactional(readOnly = true)
     fun search(postSearchCond: PostSearchCond, pageable: Pageable): SearchResultDto<SimplePostDto> {
 
         // 검색 수행
@@ -227,6 +228,7 @@ class PostService(
      *
      * TODO 구현해야 함
      */
+    @Transactional(readOnly = true)
     fun findOne(postId: Long) {
 
         TODO("not implementation")
