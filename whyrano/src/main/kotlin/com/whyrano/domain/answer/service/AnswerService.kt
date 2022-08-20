@@ -1,7 +1,10 @@
 package com.whyrano.domain.answer.service
 
+import com.whyrano.domain.answer.exception.AnswerException
+import com.whyrano.domain.answer.exception.AnswerExceptionType
 import com.whyrano.domain.answer.repository.AnswerRepository
 import com.whyrano.domain.answer.service.dto.CreateAnswerDto
+import com.whyrano.domain.answer.service.dto.UpdateAnswerDto
 import com.whyrano.domain.member.exception.MemberException
 import com.whyrano.domain.member.exception.MemberExceptionType
 import com.whyrano.domain.member.repository.MemberRepository
@@ -74,5 +77,52 @@ class AnswerService(
         return answerRepository.save(answer).id!!
     }
 
+
+
+
+
+    /**
+     * 답변 수정
+     * (블랙리스트인 경우 불가능)
+     */
+    fun update(
+        writerId: Long,
+        answerId: Long,
+        uad: UpdateAnswerDto,
+    ) {
+
+        // 답변 조회,
+        val answer = answerRepository.findWithWriterByIdAndWriterId(id = answerId, writerId = writerId)
+            ?: throw AnswerException(AnswerExceptionType.NOT_FOUND)
+
+        // 답변 수정 (권한 없는 경우 예외 발생)
+        answer.update(content = uad.content)
+    }
+
+
+
+
+
+    /**
+     * 답변 삭제
+     * (어드민인 경우 다른 어드민 혹은 다른 일반 회원 답변 삭제 가능)
+     * (블랙리스트인경우 불가능)
+     */
+    fun delete(
+        writerId: Long,
+        answerId: Long,
+    ) {
+
+        // 답변 조회
+        val answer = answerRepository.findWithWriterById(id = answerId) ?: throw AnswerException(AnswerExceptionType.NOT_FOUND)
+
+        // 회원 조회
+        val member = memberRepository.findByIdOrNull(id = writerId) ?: throw MemberException(MemberExceptionType.NOT_FOUND)
+
+        // 답변 삭제 가능여부 체크
+        if ( ! answer.canDeletedBy(member) ) throw AnswerException(AnswerExceptionType.NO_AUTHORITY_DELETE_ANSWER)
+
+        answerRepository.delete(answer)
+    }
 
 }

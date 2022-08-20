@@ -53,4 +53,56 @@ class Answer(
         // 공지가 아닌 경우 post 세팅
         this.post = post
     }
+
+
+
+
+
+    /**
+     * 수정
+     */
+    fun update(content: String) {
+
+        // 수정 권한 확인
+        if (! isUpdatable()) throw AnswerException(AnswerExceptionType.NO_AUTHORITY_UPDATE_ANSWER)
+
+        // 수정
+        this.content = content
+    }
+
+
+
+
+
+    /**
+     * 수정 가능성 확인
+     * 작성자가 블랙리스트만 아니면 됨
+     */
+    private fun isUpdatable() =
+        writer!!.role != Role.BLACK
+
+
+
+
+
+    /**
+     * 해당 회원에 의해 삭제 가능한지 확인
+     *
+     * 해당 회원이 어드민이면 가능, 아니면 글쓴이 본인이거나.
+     *
+     * 단 본인이라도 블랙리스트인 경우에는 불가능
+     */
+    fun canDeletedBy(member: Member): Boolean {
+
+        return when(member.role) {
+            // 어드민인 경우 가능
+            Role.ADMIN -> true
+
+            // 블랙리스트인경우 불가능
+            Role.BLACK -> false
+
+            // 이외 경우 자기 자신이 쓴 답변인 경우 가능
+            else -> writer!!.id!! == member.id
+        }
+    }
 }
